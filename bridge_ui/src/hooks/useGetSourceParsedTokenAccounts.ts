@@ -8,6 +8,7 @@ import {
   CHAIN_ID_SOLANA,
   CHAIN_ID_TERRA,
   CHAIN_ID_OASIS,
+  CHAIN_ID_KLAYTN_BAOBAD,
   isEVMChain,
   WSOL_ADDRESS,
   WSOL_DECIMALS,
@@ -747,6 +748,40 @@ function useGetAvailableTokens(nft: boolean = false) {
             setEthNativeAccount(undefined);
             setEthNativeAccountLoading(false);
             setEthNativeAccountError("Unable to retrieve your BNB balance.");
+          }
+        }
+      );
+    }
+
+    return () => {
+      cancelled = true;
+    };
+  }, [lookupChain, provider, signerAddress, nft, ethNativeAccount]);
+
+  //Klaytn Smart Chain native asset load
+  useEffect(() => {
+    let cancelled = false;
+    if (
+      signerAddress &&
+      lookupChain === CHAIN_ID_KLAYTN_BAOBAD &&
+      !ethNativeAccount &&
+      !nft
+    ) {
+      setEthNativeAccountLoading(true);
+      createNativeBscParsedTokenAccount(provider, signerAddress).then(
+        (result) => {
+          console.log("create native account returned with value", result);
+          if (!cancelled) {
+            setEthNativeAccount(result);
+            setEthNativeAccountLoading(false);
+            setEthNativeAccountError("");
+          }
+        },
+        (error) => {
+          if (!cancelled) {
+            setEthNativeAccount(undefined);
+            setEthNativeAccountLoading(false);
+            setEthNativeAccountError("Unable to retrieve your KLAY balance.");
           }
         }
       );
