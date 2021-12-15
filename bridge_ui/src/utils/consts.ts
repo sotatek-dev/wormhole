@@ -7,6 +7,7 @@ import {
   CHAIN_ID_POLYGON,
   CHAIN_ID_SOLANA,
   CHAIN_ID_TERRA,
+  CHAIN_ID_KLAYTN_BAOBAD,
 } from "@certusone/wormhole-sdk";
 import { clusterApiUrl } from "@solana/web3.js";
 import { getAddress } from "ethers/lib/utils";
@@ -14,6 +15,7 @@ import avaxIcon from "../icons/avax.svg";
 import bscIcon from "../icons/bsc.svg";
 import ethIcon from "../icons/eth.svg";
 import oasisIcon from "../icons/oasis-network-rose-logo.svg";
+import klaytnIcon from "../icons/Klaytn.svg";
 import polygonIcon from "../icons/polygon.svg";
 import solanaIcon from "../icons/solana.svg";
 import terraIcon from "../icons/terra.svg";
@@ -101,6 +103,11 @@ export const CHAINS =
           name: "Terra",
           logo: terraIcon,
         },
+        {
+          id: CHAIN_ID_KLAYTN_BAOBAD,
+          name: "Klaytn Baobab",
+          logo: klaytnIcon,
+        },
       ]
     : [
         {
@@ -122,6 +129,11 @@ export const CHAINS =
           id: CHAIN_ID_TERRA,
           name: "Terra",
           logo: terraIcon,
+        },
+        {
+          id: CHAIN_ID_KLAYTN_BAOBAD,
+          name: "Klaytn Baobab",
+          logo: klaytnIcon,
         },
       ];
 export const BETA_CHAINS: ChainId[] =
@@ -208,6 +220,8 @@ export const getEvmChainId = (chainId: ChainId) =>
     ? POLYGON_NETWORK_CHAIN_ID
     : chainId === CHAIN_ID_AVAX
     ? AVAX_NETWORK_CHAIN_ID
+    : chainId === CHAIN_ID_KLAYTN_BAOBAD
+    ? CHAIN_ID_KLAYTN_BAOBAD
     : undefined;
 export const SOLANA_HOST = process.env.REACT_APP_SOLANA_API_URL
   ? process.env.REACT_APP_SOLANA_API_URL
