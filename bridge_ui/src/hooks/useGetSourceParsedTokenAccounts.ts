@@ -67,6 +67,8 @@ import {
   WAVAX_DECIMALS,
   WBNB_ADDRESS,
   WBNB_DECIMALS,
+  WKLAY_ADDRESS,
+  WKLAY_DECIMALS,
   WETH_ADDRESS,
   WETH_DECIMALS,
   WMATIC_ADDRESS,
@@ -266,6 +268,29 @@ const createNativeBscParsedTokenAccount = (
           balanceInEth.toString(), //This is the actual display field, which has full precision.
           "BNB", //A white lie for display purposes
           "Binance Coin", //A white lie for display purposes
+          bnbIcon,
+          true //isNativeAsset
+        );
+      });
+};
+
+const createNativeKlaytnParsedTokenAccount = (
+  provider: Provider,
+  signerAddress: string | undefined
+) => {
+  return !(provider && signerAddress)
+    ? Promise.reject()
+    : provider.getBalance(signerAddress).then((balanceInWei) => {
+        const balanceInEth = ethers.utils.formatEther(balanceInWei);
+        return createParsedTokenAccount(
+          signerAddress, //public key
+          WKLAY_ADDRESS,
+          balanceInWei.toString(), //amount, in wei
+          WKLAY_DECIMALS,
+          parseFloat(balanceInEth), //This loses precision, but is a limitation of the current datamodel. This field is essentially deprecated
+          balanceInEth.toString(), //This is the actual display field, which has full precision.
+          "KLAY", //A white lie for display purposes
+          "Klaytn Coin", //A white lie for display purposes
           bnbIcon,
           true //isNativeAsset
         );
@@ -741,7 +766,7 @@ function useGetAvailableTokens(nft: boolean = false) {
       !nft
     ) {
       setEthNativeAccountLoading(true);
-      createNativeBscParsedTokenAccount(provider, signerAddress).then(
+      createNativeKlaytnParsedTokenAccount(provider, signerAddress).then(
         (result) => {
           console.log("create native account returned with value", result);
           if (!cancelled) {

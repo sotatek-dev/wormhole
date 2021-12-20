@@ -145,7 +145,8 @@ export const CHAINS_WITH_NFT_SUPPORT = CHAINS.filter(
     id === CHAIN_ID_ETH ||
     id === CHAIN_ID_ETHEREUM_ROPSTEN ||
     id === CHAIN_ID_POLYGON ||
-    id === CHAIN_ID_SOLANA
+    id === CHAIN_ID_SOLANA ||
+    id === CHAIN_ID_KLAYTN_BAOBAD
 );
 export type ChainsById = { [key in ChainId]: ChainInfo };
 export const CHAINS_BY_ID: ChainsById = CHAINS.reduce((obj, chain) => {
@@ -373,6 +374,30 @@ export const ROPSTEN_ETH_TOKEN_BRIDGE_ADDRESS = getAddress(
     : "0x0290FB167208Af455bB137780163b7B7a9a10C16"
 );
 
+
+// TODO: REPLACE ADDRESS WHEN BE READY
+export const KLAYTN_BRIDGE_ADDRESS = getAddress(
+  CLUSTER === "mainnet"
+    ? "0x98f3c9e6E3fAce36bAAd05FE09d375Ef1464288B"
+    : CLUSTER === "testnet"
+    ? "0x210c5F5e2AF958B4defFe715Dc621b7a3BA888c5"
+    : "0xC89Ce4735882C9F0f0FE26686c53074E09B0D550"
+);
+export const KLAYTN_NFT_BRIDGE_ADDRESS = getAddress(
+  CLUSTER === "mainnet"
+    ? "0x6FFd7EdE62328b3Af38FCD61461Bbfc52F5651fE"
+    : CLUSTER === "testnet"
+    ? "0x2b048Da40f69c8dc386a56705915f8E966fe1eba"
+    : "0x26b4afb60d6c903165150c6f0aa14f8016be4aec"
+);
+export const KLAYTN_TOKEN_BRIDGE_ADDRESS = getAddress(
+  CLUSTER === "mainnet"
+    ? "0x3ee18B2214AFF97000D974cf647E7C347E8fa585"
+    : CLUSTER === "testnet"
+    ? "0xF174F9A837536C449321df1Ca093Bb96948D5386"
+    : "0x0290FB167208Af455bB137780163b7B7a9a10C16"
+);
+
 export const SOL_CUSTODY_ADDRESS =
   "GugU1tP7doLeTw9hQP51xRJyS8Da1fWxuiy2rVrnMD2m";
 export const SOL_NFT_CUSTODY_ADDRESS =
@@ -407,6 +432,8 @@ export const getBridgeAddressForChain = (chainId: ChainId) =>
     ? ROPSTEN_ETH_BRIDGE_ADDRESS
     : chainId === CHAIN_ID_AVAX
     ? AVAX_BRIDGE_ADDRESS
+    : chainId === CHAIN_ID_KLAYTN_BAOBAD
+    ? KLAYTN_BRIDGE_ADDRESS
     : "";
 export const getNFTBridgeAddressForChain = (chainId: ChainId) =>
   chainId === CHAIN_ID_SOLANA
@@ -421,6 +448,8 @@ export const getNFTBridgeAddressForChain = (chainId: ChainId) =>
     ? ROPSTEN_ETH_NFT_BRIDGE_ADDRESS
     : chainId === CHAIN_ID_AVAX
     ? AVAX_NFT_BRIDGE_ADDRESS
+    : chainId === CHAIN_ID_KLAYTN_BAOBAD
+    ? KLAYTN_NFT_BRIDGE_ADDRESS
     : "";
 export const getTokenBridgeAddressForChain = (chainId: ChainId) =>
   chainId === CHAIN_ID_SOLANA
@@ -437,6 +466,8 @@ export const getTokenBridgeAddressForChain = (chainId: ChainId) =>
     ? ROPSTEN_ETH_TOKEN_BRIDGE_ADDRESS
     : chainId === CHAIN_ID_AVAX
     ? AVAX_TOKEN_BRIDGE_ADDRESS
+    : chainId === CHAIN_ID_KLAYTN_BAOBAD
+    ? KLAYTN_TOKEN_BRIDGE_ADDRESS
     : "";
 
 export const COVALENT_API_KEY = process.env.REACT_APP_COVALENT_API_KEY
@@ -463,6 +494,8 @@ export const COVALENT_GET_TOKENS_URL = (
       ? COVALENT_POLYGON
       : chainId === CHAIN_ID_AVAX
       ? COVALENT_AVAX
+      : chainId === CHAIN_ID_KLAYTN_BAOBAD
+      ? CHAIN_ID_KLAYTN_BAOBAD
       : "";
   // https://www.covalenthq.com/docs/api/#get-/v1/{chain_id}/address/{address}/balances_v2/
   return `https://api.covalenthq.com/v1/${chainNum}/address/${walletAddress}/balances_v2/?key=${COVALENT_API_KEY}${
@@ -487,6 +520,15 @@ export const WBNB_ADDRESS =
     ? "0xae13d989dac2f0debff460ac112a837c89baa7cd"
     : "0xDDb64fE46a91D46ee29420539FC25FD07c5FEa3E";
 export const WBNB_DECIMALS = 18;
+
+// TODO: REPLACE WORMHOLE KLAYTN ADDRESS WHEN BE READY
+export const WKLAY_ADDRESS =
+    CLUSTER === "mainnet"
+      ? "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c"
+      : CLUSTER === "testnet"
+      ? "0xae13d989dac2f0debff460ac112a837c89baa7cd"
+      : "0xDDb64fE46a91D46ee29420539FC25FD07c5FEa3E";
+export const WKLAY_DECIMALS = 18;
 
 export const WMATIC_ADDRESS =
   CLUSTER === "mainnet"
