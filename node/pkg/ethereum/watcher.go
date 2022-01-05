@@ -260,6 +260,7 @@ func (e *Watcher) Run(ctx context.Context) error {
 				e.pendingMu.Lock()
 
 				blockNumberU := ev.Number.Uint64()
+				logger.Info("Pending")
 				for hash, pLock := range e.pending {
 
 					// Transaction was dropped and never picked up again

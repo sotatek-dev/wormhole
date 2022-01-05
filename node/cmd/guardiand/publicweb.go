@@ -53,22 +53,27 @@ func publicwebServiceRunnable(
 	tlsProd bool,
 	tlsCacheDir string,
 ) (supervisor.Runnable, error) {
+	logger.Info("Tmp -------28213123----------- Start Webservice")
 	return func(ctx context.Context) error {
+		logger.Info("Start Webservice 00000000000000000000000000000")
 		conn, err := grpc.DialContext(
 			ctx,
-			fmt.Sprintf("unix:///%s", upstreamAddr),
+			fmt.Sprintf("unix://%s", upstreamAddr),
 			grpc.WithBlock(),
 			grpc.WithInsecure())
+		logger.Info("SConn: " + fmt.Sprint(conn))
 		if err != nil {
+			logger.Info("Dial eror: " + err.Error() + "$$$$$$$$$$$$$$$$$$$$$$$")
 			return fmt.Errorf("failed to dial upstream: %s", err)
 		}
-
+		logger.Info("22222222222222222222222222222222222222xxxxxxxxxxx")
 		gwmux := runtime.NewServeMux()
 		err = publicrpcv1.RegisterPublicRPCServiceHandler(ctx, gwmux, conn)
 		if err != nil {
+			logger.Info("Dial eror: " + err.Error() + "$$$$$$$$$$$$$$$$$$$$$$$")
 			panic(err)
 		}
-
+		logger.Info("33333333333333333333333qqqqqqqqqqqqqqqqqqq")
 		mux := http.NewServeMux()
 		grpcWebServer := grpcweb.WrapServer(grpcServer)
 		mux.Handle("/", allowCORSWrapper(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
@@ -82,7 +87,8 @@ func publicwebServiceRunnable(
 		srv := &http.Server{
 			Handler: mux,
 		}
-
+		
+		logger.Info("111111111111111111")
 		// TLS setup
 		if tlsHostname != "" {
 			logger.Info("provisioning Let's Encrypt certificate", zap.String("hostname", tlsHostname))
@@ -111,6 +117,7 @@ func publicwebServiceRunnable(
 
 		// If listenAddr is prefixed by "sd:", look for a matching systemd socket.
 		if strings.HasPrefix(listenAddr, "sd:") {
+			logger.Info("22222222222222222")
 			listeners, err := getSDListeners()
 			if err != nil {
 				return fmt.Errorf("failed to get systemd listeners: %w", err)
@@ -132,6 +139,7 @@ func publicwebServiceRunnable(
 				return fmt.Errorf("no valid systemd listeners, got: %s", strings.Join(all, ","))
 			}
 		} else {
+			logger.Info("333333333333333333333")
 			listener, err = net.Listen("tcp", listenAddr)
 			if err != nil {
 				return fmt.Errorf("failed to listen: %v", err)
@@ -141,12 +149,13 @@ func publicwebServiceRunnable(
 		supervisor.Signal(ctx, supervisor.SignalHealthy)
 		errC := make(chan error)
 		go func() {
-			logger.Info("publicweb server listening", zap.String("addr", srv.Addr))
+			logger.Info("publicweb server listening", zap.String("addr", listener.Addr().String()))
 			if tlsHostname != "" {
 				errC <- srv.ServeTLS(listener, "", "")
 			} else {
 				errC <- srv.Serve(listener)
 			}
+			logger.Info("Enddddddddddd")
 		}()
 		select {
 		case <-ctx.Done():
@@ -156,6 +165,7 @@ func publicwebServiceRunnable(
 			}
 			return ctx.Err()
 		case err := <-errC:
+			logger.Info("Error: " + err.Error())
 			return err
 		}
 	}, nil

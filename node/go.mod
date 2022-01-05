@@ -52,6 +52,11 @@ require (
 )
 
 require (
+	github.com/btcsuite/btcutil v1.0.3-0.20201208143702-a53e38424cce
+	github.com/google/uuid v1.2.0
+)
+
+require (
 	cloud.google.com/go v0.82.0 // indirect
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.4 // indirect
 	github.com/99designs/keyring v1.1.3 // indirect
@@ -64,7 +69,6 @@ require (
 	github.com/bgentry/speakeasy v0.1.0 // indirect
 	github.com/blendle/zapdriver v1.3.1 // indirect
 	github.com/btcsuite/btcd v0.21.0-beta // indirect
-	github.com/btcsuite/btcutil v1.0.3-0.20201208143702-a53e38424cce // indirect
 	github.com/cespare/xxhash v1.1.0 // indirect
 	github.com/cespare/xxhash/v2 v2.1.1 // indirect
 	github.com/cheekybits/genny v1.0.0 // indirect
@@ -100,7 +104,6 @@ require (
 	github.com/google/flatbuffers v1.12.0 // indirect
 	github.com/google/go-cmp v0.5.6 // indirect
 	github.com/google/gopacket v1.1.19 // indirect
-	github.com/google/uuid v1.2.0 // indirect
 	github.com/googleapis/gax-go/v2 v2.0.5 // indirect
 	github.com/gorilla/schema v1.2.0 // indirect
 	github.com/gsterjov/go-libsecret v0.0.0-20161001094733-a6f4afe4910c // indirect

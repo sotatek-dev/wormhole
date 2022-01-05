@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/certusone/wormhole/node/pkg/db"
 	"github.com/certusone/wormhole/node/pkg/notify/discord"
-	"github.com/gagliardetto/solana-go/rpc"
 	"log"
 	"net/http"
 	_ "net/http/pprof"
@@ -13,7 +12,6 @@ import (
 	"path"
 	"strings"
 
-	solana_types "github.com/gagliardetto/solana-go"
 	"github.com/gorilla/mux"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
@@ -25,7 +23,6 @@ import (
 	gossipv1 "github.com/certusone/wormhole/node/pkg/proto/gossip/v1"
 	"github.com/certusone/wormhole/node/pkg/readiness"
 	"github.com/certusone/wormhole/node/pkg/reporter"
-	solana "github.com/certusone/wormhole/node/pkg/solana"
 	"github.com/certusone/wormhole/node/pkg/supervisor"
 	"github.com/certusone/wormhole/node/pkg/vaa"
 	eth_common "github.com/ethereum/go-ethereum/common"
@@ -34,8 +31,6 @@ import (
 	"github.com/libp2p/go-libp2p-core/peer"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
-
-	"github.com/certusone/wormhole/node/pkg/terra"
 
 	ipfslog "github.com/ipfs/go-log/v2"
 )
@@ -101,9 +96,14 @@ var (
 	bigTableInstanceName       *string
 	bigTableTableName          *string
 	bigTableKeyPath            *string
+
+
 )
 
 func init() {
+
+
+
 	p2pNetworkID = NodeCmd.Flags().String("network", "/wormhole/dev", "P2P network identifier")
 	p2pPort = NodeCmd.Flags().Uint("port", 8999, "P2P UDP listener port")
 	p2pBootstrap = NodeCmd.Flags().String("bootstrap", "", "P2P bootstrap peers (comma-separated)")
@@ -317,59 +317,65 @@ func runNode(cmd *cobra.Command, args []string) {
 	if *ethContract == "" {
 		logger.Fatal("Please specify --ethContract")
 	}
-	if *bscRPC == "" {
-		logger.Fatal("Please specify --bscRPC")
+	//if *bscRPC == "" {
+	//	logger.Fatal("Please specify --bscRPC")
+	//}
+	//if *bscContract == "" {
+	//	logger.Fatal("Please specify --bscContract")
+	//}
+	//if *polygonRPC == "" {
+	//	logger.Fatal("Please specify --polygonRPC")
+	//}
+	//if *polygonContract == "" {
+	//	logger.Fatal("Please specify --polygonContract")
+	//}
+	//if *avalancheRPC == "" {
+	//	logger.Fatal("Please specify --avalancheRPC")
+	//}
+	//if *testnetMode {
+	//	if *ethRopstenRPC == "" {
+	//		logger.Fatal("Please specify --ethRopstenRPC")
+	//	}
+	//	if *ethRopstenContract == "" {
+	//		logger.Fatal("Please specify --ethRopstenContract")
+	//	}
+	//} else {
+	//	if *ethRopstenRPC != "" {
+	//		logger.Fatal("Please do not specify --ethRopstenRPC in non-testnet mode")
+	//	}
+	//	if *ethRopstenContract != "" {
+	//		logger.Fatal("Please do not specify --ethRopstenContract in non-testnet mode")
+	//	}
+	//}
+	if *ethRopstenRPC == "" {
+		logger.Fatal("Please specify --ethRopstenRPC")
 	}
-	if *bscContract == "" {
-		logger.Fatal("Please specify --bscContract")
+	if *ethRopstenContract == "" {
+		logger.Fatal("Please specify --ethRopstenContract")
 	}
-	if *polygonRPC == "" {
-		logger.Fatal("Please specify --polygonRPC")
-	}
-	if *polygonContract == "" {
-		logger.Fatal("Please specify --polygonContract")
-	}
-	if *avalancheRPC == "" {
-		logger.Fatal("Please specify --avalancheRPC")
-	}
-	if *testnetMode {
-		if *ethRopstenRPC == "" {
-			logger.Fatal("Please specify --ethRopstenRPC")
-		}
-		if *ethRopstenContract == "" {
-			logger.Fatal("Please specify --ethRopstenContract")
-		}
-	} else {
-		if *ethRopstenRPC != "" {
-			logger.Fatal("Please do not specify --ethRopstenRPC in non-testnet mode")
-		}
-		if *ethRopstenContract != "" {
-			logger.Fatal("Please do not specify --ethRopstenContract in non-testnet mode")
-		}
-	}
-	if *nodeName == "" {
-		logger.Fatal("Please specify --nodeName")
-	}
-
-	if *solanaContract == "" {
-		logger.Fatal("Please specify --solanaContract")
-	}
-	if *solanaWsRPC == "" {
-		logger.Fatal("Please specify --solanaWsUrl")
-	}
-	if *solanaRPC == "" {
-		logger.Fatal("Please specify --solanaUrl")
-	}
-
-	if *terraWS == "" {
-		logger.Fatal("Please specify --terraWS")
-	}
-	if *terraLCD == "" {
-		logger.Fatal("Please specify --terraLCD")
-	}
-	if *terraContract == "" {
-		logger.Fatal("Please specify --terraContract")
-	}
+	//if *nodeName == "" {
+	//	logger.Fatal("Please specify --nodeName")
+	//}
+	//
+	//if *solanaContract == "" {
+	//	logger.Fatal("Please specify --solanaContract")
+	//}
+	//if *solanaWsRPC == "" {
+	//	logger.Fatal("Please specify --solanaWsUrl")
+	//}
+	//if *solanaRPC == "" {
+	//	logger.Fatal("Please specify --solanaUrl")
+	//}
+	//
+	//if *terraWS == "" {
+	//	logger.Fatal("Please specify --terraWS")
+	//}
+	//if *terraLCD == "" {
+	//	logger.Fatal("Please specify --terraLCD")
+	//}
+	//if *terraContract == "" {
+	//	logger.Fatal("Please specify --terraContract")
+	//}
 
 	if *bigTablePersistenceEnabled {
 		if *bigTableGCPProject == "" {
@@ -410,11 +416,11 @@ func runNode(cmd *cobra.Command, args []string) {
 	}
 
 	ethContractAddr := eth_common.HexToAddress(*ethContract)
-	bscContractAddr := eth_common.HexToAddress(*bscContract)
-	polygonContractAddr := eth_common.HexToAddress(*polygonContract)
+	//bscContractAddr := eth_common.HexToAddress(*bscContract)
+	//polygonContractAddr := eth_common.HexToAddress(*polygonContract)
 	ethRopstenContractAddr := eth_common.HexToAddress(*ethRopstenContract)
-	avalancheContractAddr := eth_common.HexToAddress(*avalancheContract)
-	solAddress, err := solana_types.PublicKeyFromBase58(*solanaContract)
+	//avalancheContractAddr := eth_common.HexToAddress(*avalancheContract)
+	//solAddress, err := solana_types.PublicKeyFromBase58(*solanaContract)
 	if err != nil {
 		logger.Fatal("invalid Solana contract address", zap.Error(err))
 	}
@@ -505,24 +511,26 @@ func runNode(cmd *cobra.Command, args []string) {
 
 	// provides methods for reporting progress toward message attestation, and channels for receiving attestation lifecyclye events.
 	attestationEvents := reporter.EventListener(logger)
-
+	log.Println("Run webservice 222222222222222")
 	publicrpcService, publicrpcServer, err := publicrpcServiceRunnable(logger, *publicRPC, db, gst)
 
 	if err != nil {
 		log.Fatal("failed to create publicrpc service socket", zap.Error(err))
 	}
-
+	log.Println("Run webservice 333333333333333")
 	// local admin service socket
 	adminService, err := adminServiceRunnable(logger, *adminSocketPath, injectC, db, gst)
 	if err != nil {
 		logger.Fatal("failed to create admin service socket", zap.Error(err))
 	}
-
+	log.Println("awwwwwwwwww222222222222222222222")
 	publicwebService, err := publicwebServiceRunnable(logger, *publicWeb, *adminSocketPath, publicrpcServer,
 		*tlsHostname, *tlsProdEnv, path.Join(*dataDir, "autocert"))
 	if err != nil {
 		log.Fatal("failed to create publicrpc service socket", zap.Error(err))
 	}
+	log.Println(publicwebService)
+	log.Println("23^^^^^^^^^^^^^^^^^^")
 
 	// Run supervisor.
 	supervisor.New(rootCtx, logger, func(ctx context.Context) error {
@@ -531,48 +539,53 @@ func runNode(cmd *cobra.Command, args []string) {
 			return err
 		}
 
-		if err := supervisor.Run(ctx, "ethwatch",
-			ethereum.NewEthWatcher(*ethRPC, ethContractAddr, "eth", common.ReadinessEthSyncing, vaa.ChainIDEthereum, lockC, setC).Run); err != nil {
+		if err := supervisor.Run(ctx, "ethGorwatch",
+			ethereum.NewEthWatcher(*ethRPC, ethContractAddr, "goerli", common.ReadinessEthSyncing, 6, lockC, setC).Run); err != nil {
 			return err
 		}
 
-		if err := supervisor.Run(ctx, "bscwatch",
-			ethereum.NewEthWatcher(*bscRPC, bscContractAddr, "bsc", common.ReadinessBSCSyncing, vaa.ChainIDBSC, lockC, nil).Run); err != nil {
+		if err := supervisor.Run(ctx, "ethRopswatch",
+			ethereum.NewEthWatcher(*ethRopstenRPC, ethRopstenContractAddr, "ethropsten", common.ReadinessEthRopstenSyncing, 9, lockC, setC).Run); err != nil {
 			return err
 		}
 
-		if err := supervisor.Run(ctx, "polygonwatch",
-			ethereum.NewEthWatcher(*polygonRPC, polygonContractAddr, "polygon", common.ReadinessPolygonSyncing, vaa.ChainIDPolygon, lockC, nil).Run); err != nil {
-			return err
-		}
-		if err := supervisor.Run(ctx, "avalanchewatch",
-			ethereum.NewEthWatcher(*avalancheRPC, avalancheContractAddr, "avalanche", common.ReadinessAvalancheSyncing, vaa.ChainIDAvalanche, lockC, nil).Run); err != nil {
-			return err
-		}
+		//if err := supervisor.Run(ctx, "bscwatch",
+		//	ethereum.NewEthWatcher(*bscRPC, bscContractAddr, "bsc", common.ReadinessBSCSyncing, vaa.ChainIDBSC, lockC, nil).Run); err != nil {
+		//	return err
+		//}
+		//
+		//if err := supervisor.Run(ctx, "polygonwatch",
+		//	ethereum.NewEthWatcher(*polygonRPC, polygonContractAddr, "polygon", common.ReadinessPolygonSyncing, vaa.ChainIDPolygon, lockC, nil).Run); err != nil {
+		//	return err
+		//}
+		//if err := supervisor.Run(ctx, "avalanchewatch",
+		//	ethereum.NewEthWatcher(*avalancheRPC, avalancheContractAddr, "avalanche", common.ReadinessAvalancheSyncing, vaa.ChainIDAvalanche, lockC, nil).Run); err != nil {
+		//	return err
+		//}
 
-		if *testnetMode {
-			if err := supervisor.Run(ctx, "ethropstenwatch",
-				ethereum.NewEthWatcher(*ethRopstenRPC, ethRopstenContractAddr, "ethropsten", common.ReadinessEthRopstenSyncing, vaa.ChainIDEthereumRopsten, lockC, setC).Run); err != nil {
-				return err
-			}
-		}
+		//if *testnetMode {
+		//	if err := supervisor.Run(ctx, "ethropstenwatch",
+		//		ethereum.NewEthWatcher(*ethRopstenRPC, ethRopstenContractAddr, "ethropsten", common.ReadinessEthRopstenSyncing, vaa.ChainIDEthereumRopsten, lockC, setC).Run); err != nil {
+		//		return err
+		//	}
+		//}
 
 		// Start Terra watcher only if configured
-		logger.Info("Starting Terra watcher")
-		if err := supervisor.Run(ctx, "terrawatch",
-			terra.NewWatcher(*terraWS, *terraLCD, *terraContract, lockC, setC).Run); err != nil {
-			return err
-		}
-
-		if err := supervisor.Run(ctx, "solwatch-confirmed",
-			solana.NewSolanaWatcher(*solanaWsRPC, *solanaRPC, solAddress, lockC, rpc.CommitmentConfirmed).Run); err != nil {
-			return err
-		}
-
-		if err := supervisor.Run(ctx, "solwatch-finalized",
-			solana.NewSolanaWatcher(*solanaWsRPC, *solanaRPC, solAddress, lockC, rpc.CommitmentFinalized).Run); err != nil {
-			return err
-		}
+		//logger.Info("Starting Terra watcher")
+		//if err := supervisor.Run(ctx, "terrawatch",
+		//	terra.NewWatcher(*terraWS, *terraLCD, *terraContract, lockC, setC).Run); err != nil {
+		//	return err
+		//}
+		//
+		//if err := supervisor.Run(ctx, "solwatch-confirmed",
+		//	solana.NewSolanaWatcher(*solanaWsRPC, *solanaRPC, solAddress, lockC, rpc.CommitmentConfirmed).Run); err != nil {
+		//	return err
+		//}
+		//
+		//if err := supervisor.Run(ctx, "solwatch-finalized",
+		//	solana.NewSolanaWatcher(*solanaWsRPC, *solanaRPC, solAddress, lockC, rpc.CommitmentFinalized).Run); err != nil {
+		//	return err
+		//}
 
 		p := processor.NewProcessor(ctx,
 			db,
@@ -605,6 +618,7 @@ func runNode(cmd *cobra.Command, args []string) {
 			}
 		}
 		if *publicWeb != "" {
+			log.Println("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
 			if err := supervisor.Run(ctx, "publicweb", publicwebService); err != nil {
 				return err
 			}

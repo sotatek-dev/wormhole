@@ -503,8 +503,8 @@ export const WETH_ADDRESS =
   CLUSTER === "mainnet"
     ? "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"
     : CLUSTER === "testnet"
-    ? "0xb4fbf271143f4fbf7b91a5ded31805e42b2208d6"
-    : "0xDDb64fE46a91D46ee29420539FC25FD07c5FEa3E";
+    ? "0x87312013763f1dc2148af9f562d9b550c5acb9e3"
+    : "0x87312013763f1dc2148af9f562d9b550c5acb9e3";
 export const WETH_DECIMALS = 18;
 
 export const WBNB_ADDRESS =
@@ -536,8 +536,8 @@ export const ROPSTEN_WETH_ADDRESS =
   CLUSTER === "mainnet"
     ? "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"
     : CLUSTER === "testnet"
-    ? "0xc778417e063141139fce010982780140aa0cd5ab"
-    : "0xDDb64fE46a91D46ee29420539FC25FD07c5FEa3E";
+    ? "0x9eece66b7f999f59439bc56266e194962bbb4fb6"
+    : "0x9eece66b7f999f59439bc56266e194962bbb4fb6";
 export const ROPSTEN_WETH_DECIMALS = 18;
 
 export const WAVAX_ADDRESS =
