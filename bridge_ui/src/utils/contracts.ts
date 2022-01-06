@@ -1,7 +1,7 @@
 export const CONTRACT_BRIDGE_ADDRESS = {
     ETH: {
         MAINNET: '0x98f3c9e6E3fAce36bAAd05FE09d375Ef1464288B',
-        TESTNET: '0x706abc4E45D419950511e474C7B9Ed348A4a716c',
+        TESTNET: '0x88a2fc1eadcf7c2f641bb63e48a7a7656ac33362',
         DEVNET: '0xC89Ce4735882C9F0f0FE26686c53074E09B0D550',
     },
     ETH_NFT: {
@@ -11,7 +11,7 @@ export const CONTRACT_BRIDGE_ADDRESS = {
     },
     ETH_TOKEN: {
         MAINNET: '0x3ee18B2214AFF97000D974cf647E7C347E8fa585',
-        TESTNET: '0xF890982f9310df57d00f659cf4fd87e65adEd8d7',
+        TESTNET: '0x00923252050116b75d0810828a73d8a29a3d8c3d',
         DEVNET: '0x0290FB167208Af455bB137780163b7B7a9a10C16',
     },
     BSC: {
@@ -61,7 +61,7 @@ export const CONTRACT_BRIDGE_ADDRESS = {
     },
     ROPSTEN_ETH: {
       MAINNET: '0x98f3c9e6E3fAce36bAAd05FE09d375Ef1464288B',
-      TESTNET: '0x210c5F5e2AF958B4defFe715Dc621b7a3BA888c5',
+      TESTNET: '0x68c2d3d6bea7cf9131a55c48132544a84780fd63',
       DEVNET: '0xC89Ce4735882C9F0f0FE26686c53074E09B0D550',
     },
     ROPSTEN_ETH_NFT: {
@@ -71,7 +71,7 @@ export const CONTRACT_BRIDGE_ADDRESS = {
     },
     ROPSTEN_ETH_TOKEN: {
       MAINNET: '0x3ee18B2214AFF97000D974cf647E7C347E8fa585',
-      TESTNET: '0xF174F9A837536C449321df1Ca093Bb96948D5386',
+      TESTNET: '0x1F9cb0E863553256Fe349Bcf0f5Fe823342e7e32',
       DEVNET: '0x0290FB167208Af455bB137780163b7B7a9a10C16',
     },
     KLAYTN: {
@@ -100,6 +100,6 @@ export const RPC_BACKEND = {
     "https://wormhole-v2-mainnet-api.staking.fund",
     "https://wormhole-v2-mainnet.01node.com",
   ],
-  TESTNET: ["https://wormhole-v2-testnet-api.certus.one"],
+  TESTNET: ["http://172.16.1.217:7071"],
   DEVNET: ["http://localhost:7071"],
 }
