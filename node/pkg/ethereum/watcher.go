@@ -253,14 +253,14 @@ func (e *Watcher) Run(ctx context.Context) error {
 				currentEthHeight.WithLabelValues(e.networkName).Set(float64(ev.Number.Int64()))
 				readiness.SetReady(e.readiness)
 				p2p.DefaultRegistry.SetNetworkStats(e.chainID, &gossipv1.Heartbeat_Network{
-					Height:        ev.Number.Int64(),
+					Height:          ev.Number.Int64(),
 					ContractAddress: e.contract.Hex(),
 				})
 
 				e.pendingMu.Lock()
 
 				blockNumberU := ev.Number.Uint64()
-				logger.Info("Pendinggggg",zap.Any("lenght",len(e.pending)))
+				logger.Info("Pendinggggg", zap.Any("lenght", len(e.pending)))
 				for hash, pLock := range e.pending {
 
 					// Transaction was dropped and never picked up again
@@ -273,7 +273,7 @@ func (e *Watcher) Run(ctx context.Context) error {
 
 					// Transaction is now ready
 					if pLock.height+uint64(pLock.message.ConsistencyLevel) <= ev.Number.Uint64() {
-						logger.Debug("observation confirmed", zap.Stringer("tx", pLock.message.TxHash),
+						logger.Info("observation confirmed", zap.Stringer("tx", pLock.message.TxHash),
 							zap.Stringer("block", ev.Number), zap.String("eth_network", e.networkName))
 						delete(e.pending, hash)
 						e.msgChan <- pLock.message

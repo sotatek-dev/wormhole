@@ -97,12 +97,13 @@ var (
 	bigTableTableName          *string
 	bigTableKeyPath            *string
 
-
+	klaytnRPC      *string
+	klaytnContract *string
 )
 
 func init() {
-
-
+	klaytnRPC = NodeCmd.Flags().String("klaytnRPC", "", "Klaytn RPC URL")
+	klaytnContract = NodeCmd.Flags().String("klaytnContract", "", "Klaytn contract address")
 
 	p2pNetworkID = NodeCmd.Flags().String("network", "/wormhole/dev", "P2P network identifier")
 	p2pPort = NodeCmd.Flags().Uint("port", 8999, "P2P UDP listener port")
@@ -416,6 +417,7 @@ func runNode(cmd *cobra.Command, args []string) {
 	}
 
 	ethContractAddr := eth_common.HexToAddress(*ethContract)
+	klaytnContractAddr := eth_common.HexToAddress(*klaytnContract)
 	//bscContractAddr := eth_common.HexToAddress(*bscContract)
 	//polygonContractAddr := eth_common.HexToAddress(*polygonContract)
 	ethRopstenContractAddr := eth_common.HexToAddress(*ethRopstenContract)
@@ -540,12 +542,17 @@ func runNode(cmd *cobra.Command, args []string) {
 		}
 
 		if err := supervisor.Run(ctx, "ethGorwatch",
-			ethereum.NewEthWatcher(*ethRPC, ethContractAddr, "goerli", common.ReadinessEthSyncing, 6, lockC, setC).Run); err != nil {
+			ethereum.NewEthWatcher(*ethRPC, ethContractAddr, "goerli", common.ReadinessEthSyncing, vaa.ChainIDEthereum, lockC, setC).Run); err != nil {
 			return err
 		}
 
 		if err := supervisor.Run(ctx, "ethRopswatch",
-			ethereum.NewEthWatcher(*ethRopstenRPC, ethRopstenContractAddr, "ethropsten", common.ReadinessEthRopstenSyncing, 9, lockC, setC).Run); err != nil {
+			ethereum.NewEthWatcher(*ethRopstenRPC, ethRopstenContractAddr, "ethropsten", common.ReadinessEthRopstenSyncing, vaa.ChainIDEthereumRopsten, lockC, setC).Run); err != nil {
+			return err
+		}
+
+		if err := supervisor.Run(ctx, "klaytn",
+			ethereum.NewEthWatcher(*klaytnRPC, klaytnContractAddr, "klaytn", common.ReadinessKlaytnSyncing, vaa.ChainIDKlaytn, lockC, setC).Run); err != nil {
 			return err
 		}
 

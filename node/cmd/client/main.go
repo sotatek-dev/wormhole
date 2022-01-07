@@ -1,19 +1,19 @@
 package main
 
 import (
-"context"
-"encoding/hex"
-"fmt"
-publicrpcv1 "github.com/certusone/wormhole/node/pkg/proto/publicrpc/v1"
-"github.com/certusone/wormhole/node/pkg/vaa"
-"github.com/davecgh/go-spew/spew"
-"google.golang.org/grpc"
-"log"
+	"context"
+	"encoding/hex"
+	"fmt"
+	publicrpcv1 "github.com/certusone/wormhole/node/pkg/proto/publicrpc/v1"
+	"github.com/certusone/wormhole/node/pkg/vaa"
+	"github.com/davecgh/go-spew/spew"
+	"google.golang.org/grpc"
+	"log"
 )
 
 func main() {
 
-	cc, err := grpc.Dial("localhost:8001", grpc.WithInsecure())
+	cc, err := grpc.Dial("localhost:7070", grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("Error while dial: %v", err)
 	}
@@ -24,8 +24,8 @@ func main() {
 	msg := publicrpcv1.GetSignedVAARequest{
 		MessageId: &publicrpcv1.MessageID{
 			EmitterChain:   publicrpcv1.ChainID(6),
-			EmitterAddress: "00000000000000000000000000923252050116b75d0810828a73d8a29a3d8c3d",
-			Sequence:       2,
+			EmitterAddress: "000000000000000000000000d734fe34d7904804a64a7f8a91e21bbcdf6603e3",
+			Sequence:       1,
 		},
 	}
 
@@ -47,4 +47,3 @@ func main() {
 	fmt.Println(str)
 
 }
-

@@ -204,6 +204,7 @@ export const POLYGON_NETWORK_CHAIN_ID =
   CLUSTER === "mainnet" ? 137 : CLUSTER === "testnet" ? 80001 : 1381;
 export const AVAX_NETWORK_CHAIN_ID =
   CLUSTER === "mainnet" ? 43114 : CLUSTER === "testnet" ? 43113 : 1381;
+  export const KLAYTN_NETWORK_CHAIN_ID = CLUSTER === 'mainnet' ? 1001 : CLUSTER === 'testnet' ? 221 : 221;
 export const getEvmChainId = (chainId: ChainId) =>
   chainId === CHAIN_ID_ETH
     ? ETH_NETWORK_CHAIN_ID
@@ -216,7 +217,7 @@ export const getEvmChainId = (chainId: ChainId) =>
     : chainId === CHAIN_ID_AVAX
     ? AVAX_NETWORK_CHAIN_ID
     : chainId === CHAIN_ID_KLAYTN_BAOBAD
-    ? CHAIN_ID_KLAYTN_BAOBAD
+    ? KLAYTN_NETWORK_CHAIN_ID
     : undefined;
 export const SOLANA_HOST = process.env.REACT_APP_SOLANA_API_URL
   ? process.env.REACT_APP_SOLANA_API_URL
@@ -374,7 +375,7 @@ export const KLAYTN_BRIDGE_ADDRESS = getAddress(
   CLUSTER === "mainnet"
     ? "0x98f3c9e6E3fAce36bAAd05FE09d375Ef1464288B"
     : CLUSTER === "testnet"
-    ? "0x210c5F5e2AF958B4defFe715Dc621b7a3BA888c5"
+    ? "0x1EfFCf8fC0b39f52e9aCCc4b4cb15233d3c10904"
     : "0xC89Ce4735882C9F0f0FE26686c53074E09B0D550"
 );
 export const KLAYTN_NFT_BRIDGE_ADDRESS = getAddress(
@@ -388,7 +389,7 @@ export const KLAYTN_TOKEN_BRIDGE_ADDRESS = getAddress(
   CLUSTER === "mainnet"
     ? "0x3ee18B2214AFF97000D974cf647E7C347E8fa585"
     : CLUSTER === "testnet"
-    ? "0xF174F9A837536C449321df1Ca093Bb96948D5386"
+    ? "0xB7A48F8afd0db4c627D9e36922726bD0bf6fbcD4"
     : "0x0290FB167208Af455bB137780163b7B7a9a10C16"
 );
 
@@ -520,8 +521,8 @@ export const WKLAY_ADDRESS =
     CLUSTER === "mainnet"
       ? "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c"
       : CLUSTER === "testnet"
-      ? "0xae13d989dac2f0debff460ac112a837c89baa7cd"
-      : "0xDDb64fE46a91D46ee29420539FC25FD07c5FEa3E";
+      ? "0xb10A7Fe1B6131E7d6a1630977Ae79E858a5b361B"
+      : "0xb10A7Fe1B6131E7d6a1630977Ae79E858a5b361B";
 export const WKLAY_DECIMALS = 18;
 
 export const WMATIC_ADDRESS =
