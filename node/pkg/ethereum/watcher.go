@@ -248,7 +248,7 @@ func (e *Watcher) Run(ctx context.Context) error {
 				return
 			case ev := <-headSink:
 				start := time.Now()
-				logger.Info("processing new header", zap.Stringer("block", ev.Number),
+				logger.Debug("processing new header", zap.Stringer("block", ev.Number),
 					zap.String("eth_network", e.networkName))
 				currentEthHeight.WithLabelValues(e.networkName).Set(float64(ev.Number.Int64()))
 				readiness.SetReady(e.readiness)
@@ -313,7 +313,7 @@ func (e *Watcher) fetchAndUpdateGuardianSet(
 	}
 
 	queryLatency.WithLabelValues(e.networkName, "get_guardian_set").Observe(time.Since(msm).Seconds())
-	logger.Info("Guardian Index", zap.Any("index", idx), zap.Any("guardians ", gs))
+	//logger.Info("Guardian Index", zap.Any("index", idx), zap.Any("guardians ", gs))
 	if e.currentGuardianSet != nil && *(e.currentGuardianSet) == idx {
 
 		return nil
