@@ -67,6 +67,7 @@ func (p *Processor) handleObservation(ctx context.Context, m *gossipv1.SignedObs
 	// the public key that was used to sign the payload.
 	pk, err := crypto.Ecrecover(m.Hash, m.Signature)
 	if err != nil {
+		p.logger.Info("11111111111111111111111")
 		p.logger.Warn("failed to verify signature on observation",
 			zap.String("digest", hash),
 			zap.String("signature", hex.EncodeToString(m.Signature)),
@@ -75,12 +76,13 @@ func (p *Processor) handleObservation(ctx context.Context, m *gossipv1.SignedObs
 		observationsFailedTotal.WithLabelValues("invalid_signature").Inc()
 		return
 	}
-
+	p.logger.Info("2222222222222222")
 	// Verify that m.Addr matches the public key that signed m.Hash.
 	their_addr := common.BytesToAddress(m.Addr)
 	signer_pk := common.BytesToAddress(crypto.Keccak256(pk[1:])[12:])
 
 	if their_addr != signer_pk {
+		p.logger.Info("3333333333333333333333")
 		p.logger.Info("invalid observation - address does not match pubkey",
 			zap.String("digest", hash),
 			zap.String("signature", hex.EncodeToString(m.Signature)),
@@ -108,14 +110,17 @@ func (p *Processor) handleObservation(ctx context.Context, m *gossipv1.SignedObs
 	//
 	var gs *node_common.GuardianSet
 	if p.state.vaaSignatures[hash] != nil && p.state.vaaSignatures[hash].gs != nil {
+		p.logger.Info("4444444444444444")
 		gs = p.state.vaaSignatures[hash].gs
 	} else {
+		p.logger.Info("5555555555555555555555555")
 		gs = p.gs
 	}
 
 	// We haven't yet observed the trusted guardian set on Ethereum, and therefore, it's impossible to verify it.
 	// May as well not have received it/been offline - drop it and wait for the guardian set.
 	if gs == nil {
+		p.logger.Info("66666666666666666666")
 		p.logger.Warn("dropping observations since we haven't initialized our guardian set yet",
 			zap.String("digest", hash),
 			zap.String("their_addr", their_addr.Hex()),
@@ -128,6 +133,7 @@ func (p *Processor) handleObservation(ctx context.Context, m *gossipv1.SignedObs
 	// who have the outdated guardian set, we'll just wait for the message to be retransmitted eventually.
 	_, ok := gs.KeyIndex(their_addr)
 	if !ok {
+		p.logger.Info("7777777777777777777777")
 		p.logger.Debug("received observation by unknown guardian - is our guardian set outdated?",
 			zap.String("digest", hash),
 			zap.String("their_addr", their_addr.Hex()),
@@ -147,6 +153,7 @@ func (p *Processor) handleObservation(ctx context.Context, m *gossipv1.SignedObs
 
 	// []byte isn't hashable in a map. Paying a small extra cost for encoding for easier debugging.
 	if p.state.vaaSignatures[hash] == nil {
+		p.logger.Info("888888888888888888888")
 		// We haven't yet seen this event ourselves, and therefore do not know what the VAA looks like.
 		// However, we have established that a valid guardian has signed it, and therefore we can
 		// already start aggregating signatures for it.
@@ -190,6 +197,7 @@ func (p *Processor) handleObservation(ctx context.Context, m *gossipv1.SignedObs
 	if p.state.vaaSignatures[hash].ourVAA != nil {
 		// We have seen it on chain!
 		// Deep copy the VAA and add signatures
+		p.logger.Info("9999999999999999999999")
 		v := p.state.vaaSignatures[hash].ourVAA
 		signed := &vaa.VAA{
 			Version:          v.Version,
@@ -237,6 +245,7 @@ func (p *Processor) handleObservation(ctx context.Context, m *gossipv1.SignedObs
 			p.broadcastSignedVAA(signed)
 			p.attestationEvents.ReportVAAQuorum(signed)
 			p.state.vaaSignatures[hash].submitted = true
+			p.logger.Info("xxxxxxxxxxxxxxxxxxxxxxxx")
 		} else {
 			p.logger.Info("quorum not met or already submitted, doing nothing",
 				zap.String("digest", hash))

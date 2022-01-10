@@ -121,9 +121,11 @@ func runInjectGovernanceVAA(cmd *cobra.Command, args []string) {
 	if err != nil {
 		log.Fatalf("failed to submit governance VAA: %v", err)
 	}
-
+	fmt.Println(resp)
 	for _, digest := range resp.Digests {
 		log.Printf("VAA successfully injected with digest %s", hexutils.BytesToHex(digest))
+		log.Println(hex.EncodeToString(digest))
+		log.Println(digest)
 	}
 }
 

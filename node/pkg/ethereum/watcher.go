@@ -282,7 +282,7 @@ func (e *Watcher) Run(ctx context.Context) error {
 				}
 
 				e.pendingMu.Unlock()
-				logger.Info("processed new header", zap.Stringer("block", ev.Number),
+				logger.Debug("processed new header", zap.Stringer("block", ev.Number),
 					zap.Duration("took", time.Since(start)), zap.String("eth_network", e.networkName))
 			}
 		}
@@ -313,8 +313,9 @@ func (e *Watcher) fetchAndUpdateGuardianSet(
 	}
 
 	queryLatency.WithLabelValues(e.networkName, "get_guardian_set").Observe(time.Since(msm).Seconds())
-
+	logger.Info("Guardian Index", zap.Any("index", idx), zap.Any("guardians ", gs))
 	if e.currentGuardianSet != nil && *(e.currentGuardianSet) == idx {
+
 		return nil
 	}
 
@@ -339,6 +340,7 @@ func fetchCurrentGuardianSet(ctx context.Context, caller *abi.AbiCaller) (uint32
 	opts := &bind.CallOpts{Context: ctx}
 
 	currentIndex, err := caller.GetCurrentGuardianSetIndex(opts)
+
 	if err != nil {
 		return 0, nil, fmt.Errorf("error requesting current guardian set index: %w", err)
 	}
