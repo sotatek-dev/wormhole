@@ -42,3 +42,7 @@ solana-client = "=1.9.4"
 solana-sdk = "=1.9.4"
 spl-token = { version = "=3.2.0", features = ["no-entrypoint"] }
 spl-token-metadata = { path = "../../token_bridge/token-metadata" }
+
+# For mac m1
+[package.metadata.wasm-pack.profile.release]
+wasm-opt = false
