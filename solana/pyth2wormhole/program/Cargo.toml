@@ -29,3 +29,7 @@ wasm-bindgen = { version = "0.2.74", features = ["serde-serialize"], optional = 
 serde = { version = "1", optional = true}
 serde_derive = { version = "1", optional = true}
 serde_json = { version = "1", optional = true}
+
+# For mac m1
+[package.metadata.wasm-pack.profile.release]
+wasm-opt = false
