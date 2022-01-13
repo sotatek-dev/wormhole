@@ -10,6 +10,7 @@ import {
   CHAIN_ID_OASIS,
   CHAIN_ID_AURORA,
   CHAIN_ID_FANTOM,
+  CHAIN_ID_KLAYTN_3RDSIGHT,
   CHAIN_ID_KLAYTN_BAOBAD,
 } from "./consts";
 import { humanAddress, canonicalAddress, isNativeDenom } from "../terra";
@@ -27,6 +28,7 @@ export const isEVMChain = (chainId: ChainId) => {
     chainId === CHAIN_ID_OASIS ||
     chainId === CHAIN_ID_AURORA ||
     chainId === CHAIN_ID_FANTOM ||
+    chainId === CHAIN_ID_KLAYTN_3RDSIGHT ||
     chainId === CHAIN_ID_KLAYTN_BAOBAD
   );
 };

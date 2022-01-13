@@ -8,6 +8,7 @@ import {
   CHAIN_ID_SOLANA,
   CHAIN_ID_TERRA,
   CHAIN_ID_OASIS,
+  CHAIN_ID_KLAYTN_3RDSIGHT,
   CHAIN_ID_KLAYTN_BAOBAD,
   isEVMChain,
   WSOL_ADDRESS,
@@ -76,6 +77,8 @@ import {
   WMATIC_DECIMALS,
   WROSE_ADDRESS,
   WROSE_DECIMALS,
+  WKLAY_3RDSIGHT_ADDRESS,
+  WKLAY_3RDSIGHT_DECIMALS
 } from "../utils/consts";
 import {
   ExtractedMintInfo,
@@ -272,6 +275,29 @@ const createNativeBscParsedTokenAccount = (
           balanceInEth.toString(), //This is the actual display field, which has full precision.
           "BNB", //A white lie for display purposes
           "Binance Coin", //A white lie for display purposes
+          bnbIcon,
+          true //isNativeAsset
+        );
+      });
+};
+
+const createNativeKlaytn3rdsightParsedTokenAccount = (
+  provider: Provider,
+  signerAddress: string | undefined
+) => {
+  return !(provider && signerAddress)
+    ? Promise.reject()
+    : provider.getBalance(signerAddress).then((balanceInWei) => {
+        const balanceInEth = ethers.utils.formatEther(balanceInWei);
+        return createParsedTokenAccount(
+          signerAddress, //public key
+          WKLAY_3RDSIGHT_ADDRESS,
+          balanceInWei.toString(), //amount, in wei
+          WKLAY_3RDSIGHT_DECIMALS,
+          parseFloat(balanceInEth), //This loses precision, but is a limitation of the current datamodel. This field is essentially deprecated
+          balanceInEth.toString(), //This is the actual display field, which has full precision.
+          "KLAY", //A white lie for display purposes
+          "Klaytn Coin", //A white lie for display purposes
           bnbIcon,
           true //isNativeAsset
         );
@@ -782,6 +808,40 @@ function useGetAvailableTokens(nft: boolean = false) {
       cancelled = true;
     };
   }, [lookupChain, provider, signerAddress, nft, ethNativeAccount]);
+
+    //Klaytn 3rdsight Smart Chain native asset load
+    useEffect(() => {
+      let cancelled = false;
+      if (
+        signerAddress &&
+        lookupChain === CHAIN_ID_KLAYTN_3RDSIGHT &&
+        !ethNativeAccount &&
+        !nft
+      ) {
+        setEthNativeAccountLoading(true);
+        createNativeKlaytn3rdsightParsedTokenAccount(provider, signerAddress).then(
+          (result) => {
+            console.log("create native account returned with value", result);
+            if (!cancelled) {
+              setEthNativeAccount(result);
+              setEthNativeAccountLoading(false);
+              setEthNativeAccountError("");
+            }
+          },
+          (error) => {
+            if (!cancelled) {
+              setEthNativeAccount(undefined);
+              setEthNativeAccountLoading(false);
+              setEthNativeAccountError("Unable to retrieve your KLAY balance.");
+            }
+          }
+        );
+      }
+  
+      return () => {
+        cancelled = true;
+      };
+    }, [lookupChain, provider, signerAddress, nft, ethNativeAccount]);
 
   //Klaytn Smart Chain native asset load
   useEffect(() => {

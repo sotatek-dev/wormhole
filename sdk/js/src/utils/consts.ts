@@ -10,7 +10,8 @@ export const CHAIN_ID_ALGORAND: ChainId = 8;
 export const CHAIN_ID_AURORA: ChainId = 9;
 export const CHAIN_ID_FANTOM: ChainId = 10;
 export const CHAIN_ID_KLAYTN_BAOBAD: ChainId = 1001;
-export const CHAIN_ID_ETHEREUM_ROPSTEN: ChainId = 9;
+export const CHAIN_ID_KLAYTN_3RDSIGHT: ChainId = 7;
+export const CHAIN_ID_ETHEREUM_ROPSTEN: ChainId = 4097;
 
 export const WSOL_ADDRESS = "So11111111111111111111111111111111111111112";
 export const WSOL_DECIMALS = 9;
