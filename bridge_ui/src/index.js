@@ -8,6 +8,7 @@ import App from "./App";
 import BackgroundImage from "./components/BackgroundImage";
 import { BetaContextProvider } from "./contexts/BetaContext";
 import { EthereumProviderProvider } from "./contexts/EthereumProviderContext";
+import { KaikasProviderProvider } from "./contexts/KaikasProviderContext";
 import { SolanaWalletProvider } from "./contexts/SolanaWalletContext.tsx";
 import { TerraWalletProvider } from "./contexts/TerraWalletContext.tsx";
 import ErrorBoundary from "./ErrorBoundary";
@@ -25,10 +26,12 @@ ReactDOM.render(
               <SolanaWalletProvider>
                 <EthereumProviderProvider>
                   <TerraWalletProvider>
-                    <HashRouter>
-                      <BackgroundImage />
-                      <App />
-                    </HashRouter>
+                    <KaikasProviderProvider>
+                      <HashRouter>
+                        <BackgroundImage />
+                        <App />
+                      </HashRouter>
+                    </KaikasProviderProvider>
                   </TerraWalletProvider>
                 </EthereumProviderProvider>
               </SolanaWalletProvider>
