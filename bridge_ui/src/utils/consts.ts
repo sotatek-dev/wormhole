@@ -14,7 +14,7 @@ import {
 import { clusterApiUrl } from "@solana/web3.js";
 import { getAddress } from "ethers/lib/utils";
 import avaxIcon from "../icons/avax.svg";
-import {CONTRACT_BRIDGE_ADDRESS, RPC_BACKEND} from './contracts';
+import { CONTRACT_BRIDGE_ADDRESS, RPC_BACKEND } from "./contracts";
 import bscIcon from "../icons/bsc.svg";
 import ethIcon from "../icons/eth.svg";
 import oasisIcon from "../icons/oasis-network-rose-logo.svg";
@@ -270,7 +270,7 @@ export const ETH_NFT_BRIDGE_ADDRESS = getAddress(
     ? CONTRACT_BRIDGE_ADDRESS.ETH_NFT.MAINNET
     : CLUSTER === "testnet"
     ? CONTRACT_BRIDGE_ADDRESS.ETH_NFT.TESTNET
-    :CONTRACT_BRIDGE_ADDRESS.ETH_NFT.DEVNET
+    : CONTRACT_BRIDGE_ADDRESS.ETH_NFT.DEVNET
 );
 export const ETH_TOKEN_BRIDGE_ADDRESS = getAddress(
   CLUSTER === "mainnet"
@@ -403,7 +403,6 @@ export const ROPSTEN_ETH_TOKEN_BRIDGE_ADDRESS = getAddress(
     : CONTRACT_BRIDGE_ADDRESS.ROPSTEN_ETH_TOKEN.DEVNET
 );
 
-
 // TODO: REPLACE ADDRESS WHEN BE READY
 export const KLAYTN_BRIDGE_ADDRESS = getAddress(
   CLUSTER === "mainnet"
@@ -433,21 +432,21 @@ export const KLAYTN_3RDSIGHT_BRIDGE_ADDRESS = getAddress(
     : CLUSTER === "testnet"
     ? CONTRACT_BRIDGE_ADDRESS.KLAYTN_3RDSIGHT.TESTNET
     : CONTRACT_BRIDGE_ADDRESS.KLAYTN_3RDSIGHT.DEVNET
-)
+);
 export const KLAYTN_3RDSIGHT_NFT_BRIDGE_ADDRESS = getAddress(
   CLUSTER === "mainnet"
     ? CONTRACT_BRIDGE_ADDRESS.KLAYTN_3RDSIGHT_NFT.MAINNET
     : CLUSTER === "testnet"
     ? CONTRACT_BRIDGE_ADDRESS.KLAYTN_3RDSIGHT_NFT.TESTNET
     : CONTRACT_BRIDGE_ADDRESS.KLAYTN_3RDSIGHT_NFT.DEVNET
-)
+);
 export const KLAYTN_3RDSIGHT_TOKEN_BRIDGE_ADDRESS = getAddress(
   CLUSTER === "mainnet"
     ? CONTRACT_BRIDGE_ADDRESS.KLAYTN_3RDSIGHT_TOKEN.MAINNET
     : CLUSTER === "testnet"
     ? CONTRACT_BRIDGE_ADDRESS.KLAYTN_3RDSIGHT_TOKEN.TESTNET
     : CONTRACT_BRIDGE_ADDRESS.KLAYTN_3RDSIGHT_TOKEN.DEVNET
-)
+);
 
 export const SOL_CUSTODY_ADDRESS =
   "GugU1tP7doLeTw9hQP51xRJyS8Da1fWxuiy2rVrnMD2m";
@@ -580,22 +579,22 @@ export const WBNB_ADDRESS =
     ? "0xae13d989dac2f0debff460ac112a837c89baa7cd"
     : "0xDDb64fE46a91D46ee29420539FC25FD07c5FEa3E";
 export const WBNB_DECIMALS = 18;
-//TODO: REPLACE WORMHOLE KLAYTN 3RDSIGHT 
+//TODO: REPLACE WORMHOLE KLAYTN 3RDSIGHT
 export const WKLAY_3RDSIGHT_ADDRESS =
-    CLUSTER === "mainnet"
-      ? "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c"
-      : CLUSTER === "testnet"
-      ? "0xb10A7Fe1B6131E7d6a1630977Ae79E858a5b361B"
-      : "0xDDb64fE46a91D46ee29420539FC25FD07c5FEa3E";
+  CLUSTER === "mainnet"
+    ? "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c"
+    : CLUSTER === "testnet"
+    ? "0xb10A7Fe1B6131E7d6a1630977Ae79E858a5b361B"
+    : "0xDDb64fE46a91D46ee29420539FC25FD07c5FEa3E";
 export const WKLAY_3RDSIGHT_DECIMALS = 18;
 
 // TODO: REPLACE WORMHOLE KLAYTN ADDRESS WHEN BE READY
 export const WKLAY_ADDRESS =
-    CLUSTER === "mainnet"
-      ? "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c"
-      : CLUSTER === "testnet"
-      ? "0xb10A7Fe1B6131E7d6a1630977Ae79E858a5b361B"
-      : "0xDDb64fE46a91D46ee29420539FC25FD07c5FEa3E";
+  CLUSTER === "mainnet"
+    ? "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c"
+    : CLUSTER === "testnet"
+    ? "0xb10A7Fe1B6131E7d6a1630977Ae79E858a5b361B"
+    : "0xDDb64fE46a91D46ee29420539FC25FD07c5FEa3E";
 export const WKLAY_DECIMALS = 18;
 
 export const WMATIC_ADDRESS =
