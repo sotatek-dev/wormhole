@@ -75,7 +75,7 @@ import {
   WMATIC_ADDRESS,
   WMATIC_DECIMALS,
   WKLAY_3RDSIGHT_ADDRESS,
-  WKLAY_3RDSIGHT_DECIMALS
+  WKLAY_3RDSIGHT_DECIMALS,
 } from "../utils/consts";
 import {
   ExtractedMintInfo,
@@ -782,39 +782,42 @@ function useGetAvailableTokens(nft: boolean = false) {
     };
   }, [lookupChain, provider, signerAddress, nft, ethNativeAccount]);
 
-    //Klaytn 3rdsight Smart Chain native asset load
-    useEffect(() => {
-      let cancelled = false;
-      if (
-        signerAddress &&
-        lookupChain === CHAIN_ID_KLAYTN_3RDSIGHT &&
-        !ethNativeAccount &&
-        !nft
-      ) {
-        setEthNativeAccountLoading(true);
-        createNativeKlaytn3rdsightParsedTokenAccount(provider, signerAddress).then(
-          (result) => {
-            console.log("create native account returned with value", result);
-            if (!cancelled) {
-              setEthNativeAccount(result);
-              setEthNativeAccountLoading(false);
-              setEthNativeAccountError("");
-            }
-          },
-          (error) => {
-            if (!cancelled) {
-              setEthNativeAccount(undefined);
-              setEthNativeAccountLoading(false);
-              setEthNativeAccountError("Unable to retrieve your KLAY balance.");
-            }
+  //Klaytn 3rdsight Smart Chain native asset load
+  useEffect(() => {
+    let cancelled = false;
+    if (
+      signerAddress &&
+      lookupChain === CHAIN_ID_KLAYTN_3RDSIGHT &&
+      !ethNativeAccount &&
+      !nft
+    ) {
+      setEthNativeAccountLoading(true);
+      createNativeKlaytn3rdsightParsedTokenAccount(
+        provider,
+        signerAddress
+      ).then(
+        (result) => {
+          console.log("create native account returned with value", result);
+          if (!cancelled) {
+            setEthNativeAccount(result);
+            setEthNativeAccountLoading(false);
+            setEthNativeAccountError("");
           }
-        );
-      }
-  
-      return () => {
-        cancelled = true;
-      };
-    }, [lookupChain, provider, signerAddress, nft, ethNativeAccount]);
+        },
+        (error) => {
+          if (!cancelled) {
+            setEthNativeAccount(undefined);
+            setEthNativeAccountLoading(false);
+            setEthNativeAccountError("Unable to retrieve your KLAY balance.");
+          }
+        }
+      );
+    }
+
+    return () => {
+      cancelled = true;
+    };
+  }, [lookupChain, provider, signerAddress, nft, ethNativeAccount]);
 
   //Klaytn Smart Chain native asset load
   useEffect(() => {
