@@ -2,12 +2,14 @@ import {
   ChainId,
   CHAIN_ID_SOLANA,
   CHAIN_ID_TERRA,
+  CHAIN_ID_KLAYTN_BAOBAB,
   isEVMChain,
 } from "@certusone/wormhole-sdk";
 import { hexlify, hexStripZeros } from "@ethersproject/bytes";
 import { useConnectedWallet } from "@terra-money/wallet-provider";
 import { useCallback, useMemo } from "react";
 import { useEthereumProvider } from "../contexts/EthereumProviderContext";
+import { useKaikasProvider } from "../contexts/KaikasProviderContext";
 import { useSolanaWallet } from "../contexts/SolanaWalletContext";
 import { CLUSTER, getEvmChainId } from "../utils/consts";
 
@@ -37,11 +39,13 @@ function useIsWalletReady(
   const solPK = solanaWallet?.publicKey;
   const terraWallet = useConnectedWallet();
   const hasTerraWallet = !!terraWallet;
+
   const {
     provider,
     signerAddress,
     chainId: evmChainId,
   } = useEthereumProvider();
+  const kaikasWallet = useKaikasProvider();
   const hasEthInfo = !!provider && !!signerAddress;
   const correctEvmNetwork = getEvmChainId(chainId);
   const hasCorrectEvmNetwork = evmChainId === correctEvmNetwork;
@@ -79,6 +83,14 @@ function useIsWalletReady(
         undefined,
         forceNetworkSwitch,
         solPK.toString()
+      );
+    }
+    if (chainId === CHAIN_ID_KLAYTN_BAOBAB) {
+      return createWalletStatus(
+        true,
+        undefined,
+        forceNetworkSwitch,
+        kaikasWallet.signerAddress
       );
     }
     if (isEVMChain(chainId) && hasEthInfo && signerAddress) {
@@ -120,6 +132,7 @@ function useIsWalletReady(
     provider,
     signerAddress,
     terraWallet,
+    kaikasWallet.signerAddress,
   ]);
 }
 
