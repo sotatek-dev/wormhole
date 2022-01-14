@@ -11,3 +11,4 @@ venv
 bigtable-admin.json
 bigtable-writer.json
 spydk/*
+bridge_ui/package-lock.json
