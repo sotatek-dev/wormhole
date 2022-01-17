@@ -1,3 +1,4 @@
+import { useKaikasProvider } from "./../contexts/KaikasProviderContext";
 import {
   ChainId,
   CHAIN_ID_AVAX,
@@ -8,7 +9,7 @@ import {
   CHAIN_ID_SOLANA,
   CHAIN_ID_TERRA,
   CHAIN_ID_KLAYTN_3RDSIGHT,
-  CHAIN_ID_KLAYTN_BAOBAD,
+  CHAIN_ID_KLAYTN_BAOBAB,
   isEVMChain,
   WSOL_ADDRESS,
   WSOL_DECIMALS,
@@ -75,7 +76,7 @@ import {
   WMATIC_ADDRESS,
   WMATIC_DECIMALS,
   WKLAY_3RDSIGHT_ADDRESS,
-  WKLAY_3RDSIGHT_DECIMALS
+  WKLAY_3RDSIGHT_DECIMALS,
 } from "../utils/consts";
 import {
   ExtractedMintInfo,
@@ -538,6 +539,8 @@ function useGetAvailableTokens(nft: boolean = false) {
   const solanaWallet = useSolanaWallet();
   const solPK = solanaWallet?.publicKey;
   const { provider, signerAddress } = useEthereumProvider();
+  const { provider: providerKaikas, signerAddress: signerAddressKaikas } =
+    useKaikasProvider();
 
   const [covalent, setCovalent] = useState<any>(undefined);
   const [covalentLoading, setCovalentLoading] = useState(false);
@@ -782,51 +785,20 @@ function useGetAvailableTokens(nft: boolean = false) {
     };
   }, [lookupChain, provider, signerAddress, nft, ethNativeAccount]);
 
-    //Klaytn 3rdsight Smart Chain native asset load
-    useEffect(() => {
-      let cancelled = false;
-      if (
-        signerAddress &&
-        lookupChain === CHAIN_ID_KLAYTN_3RDSIGHT &&
-        !ethNativeAccount &&
-        !nft
-      ) {
-        setEthNativeAccountLoading(true);
-        createNativeKlaytn3rdsightParsedTokenAccount(provider, signerAddress).then(
-          (result) => {
-            console.log("create native account returned with value", result);
-            if (!cancelled) {
-              setEthNativeAccount(result);
-              setEthNativeAccountLoading(false);
-              setEthNativeAccountError("");
-            }
-          },
-          (error) => {
-            if (!cancelled) {
-              setEthNativeAccount(undefined);
-              setEthNativeAccountLoading(false);
-              setEthNativeAccountError("Unable to retrieve your KLAY balance.");
-            }
-          }
-        );
-      }
-  
-      return () => {
-        cancelled = true;
-      };
-    }, [lookupChain, provider, signerAddress, nft, ethNativeAccount]);
-
-  //Klaytn Smart Chain native asset load
+  //Klaytn 3rdsight Smart Chain native asset load
   useEffect(() => {
     let cancelled = false;
     if (
       signerAddress &&
-      lookupChain === CHAIN_ID_KLAYTN_BAOBAD &&
+      lookupChain === CHAIN_ID_KLAYTN_3RDSIGHT &&
       !ethNativeAccount &&
       !nft
     ) {
       setEthNativeAccountLoading(true);
-      createNativeKlaytnParsedTokenAccount(provider, signerAddress).then(
+      createNativeKlaytn3rdsightParsedTokenAccount(
+        provider,
+        signerAddress
+      ).then(
         (result) => {
           console.log("create native account returned with value", result);
           if (!cancelled) {
@@ -849,6 +821,43 @@ function useGetAvailableTokens(nft: boolean = false) {
       cancelled = true;
     };
   }, [lookupChain, provider, signerAddress, nft, ethNativeAccount]);
+
+  //Klaytn Smart Chain native asset load
+  useEffect(() => {
+    let cancelled = false;
+    if (
+      signerAddressKaikas &&
+      lookupChain === CHAIN_ID_KLAYTN_BAOBAB &&
+      !ethNativeAccount &&
+      !nft
+    ) {
+      setEthNativeAccountLoading(true);
+      createNativeKlaytnParsedTokenAccount(
+        providerKaikas,
+        signerAddressKaikas
+      ).then(
+        (result) => {
+          console.log("create native account returned with value", result);
+          if (!cancelled) {
+            setEthNativeAccount(result);
+            setEthNativeAccountLoading(false);
+            setEthNativeAccountError("");
+          }
+        },
+        (error) => {
+          if (!cancelled) {
+            setEthNativeAccount(undefined);
+            setEthNativeAccountLoading(false);
+            setEthNativeAccountError("Unable to retrieve your KLAY balance.");
+          }
+        }
+      );
+    }
+
+    return () => {
+      cancelled = true;
+    };
+  }, [lookupChain, providerKaikas, signerAddressKaikas, nft, ethNativeAccount]);
 
   //Polygon native asset load
   useEffect(() => {
@@ -1021,6 +1030,17 @@ function useGetAvailableTokens(nft: boolean = false) {
         resetAccounts: resetSourceAccounts,
       }
     : isEVMChain(lookupChain)
+    ? {
+        tokenAccounts: ethAccounts,
+        covalent: {
+          data: covalent,
+          isFetching: covalentLoading,
+          error: covalentError,
+          receivedAt: null, //TODO
+        },
+        resetAccounts: resetSourceAccounts,
+      }
+    : lookupChain === CHAIN_ID_KLAYTN_BAOBAB
     ? {
         tokenAccounts: ethAccounts,
         covalent: {

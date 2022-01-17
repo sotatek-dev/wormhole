@@ -81,6 +81,7 @@ export default function EvmTokenPicker(
       const selectedTokenIdMatch =
         selectedTokenAccount &&
         selectedTokenAccount.tokenId === tokenAccount.tokenId;
+
       return !!(
         tokenAccount.isNativeAsset || //The native asset amount isn't taken from covalent, so can be trusted.
         (selectedMintMatch && selectedTokenIdMatch)
