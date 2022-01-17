@@ -39,7 +39,6 @@ function KeyAndBalance({ chainId }: { chainId: ChainId }) {
       </>
     );
   }
-  debugger;
   return null;
 }
 
