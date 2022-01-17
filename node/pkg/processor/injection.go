@@ -24,6 +24,7 @@ var (
 // handleInjection processes a pre-populated VAA injected locally.
 func (p *Processor) handleInjection(ctx context.Context, v *vaa.VAA) {
 	// Generate digest of the unsigned VAA.
+
 	digest, err := v.SigningMsg()
 	if err != nil {
 		panic(err)
@@ -44,5 +45,7 @@ func (p *Processor) handleInjection(ctx context.Context, v *vaa.VAA) {
 		zap.String("signature", hex.EncodeToString(s)))
 
 	vaaInjectionsTotal.Inc()
+	p.logger.Info("hmmmmmmmmmmmmmmmmmmmmmmmmm")
 	p.broadcastSignature(v, s, nil)
+	p.logger.Info("12312321300000000000000000000000000")
 }

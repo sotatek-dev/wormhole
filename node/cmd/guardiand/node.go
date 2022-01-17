@@ -244,6 +244,7 @@ func runNode(cmd *cobra.Command, args []string) {
 	readiness.RegisterComponent(common.ReadinessBSCSyncing)
 	readiness.RegisterComponent(common.ReadinessPolygonSyncing)
 	readiness.RegisterComponent(common.ReadinessAvalancheSyncing)
+	readiness.RegisterComponent(common.ReadinessKlaytnSyncing)
 	if *testnetMode {
 		readiness.RegisterComponent(common.ReadinessEthRopstenSyncing)
 	}
@@ -420,7 +421,7 @@ func runNode(cmd *cobra.Command, args []string) {
 	klaytnContractAddr := eth_common.HexToAddress(*klaytnContract)
 	//bscContractAddr := eth_common.HexToAddress(*bscContract)
 	//polygonContractAddr := eth_common.HexToAddress(*polygonContract)
-	ethRopstenContractAddr := eth_common.HexToAddress(*ethRopstenContract)
+	//ethRopstenContractAddr := eth_common.HexToAddress(*ethRopstenContract)
 	//avalancheContractAddr := eth_common.HexToAddress(*avalancheContract)
 	//solAddress, err := solana_types.PublicKeyFromBase58(*solanaContract)
 	if err != nil {
@@ -545,11 +546,11 @@ func runNode(cmd *cobra.Command, args []string) {
 			ethereum.NewEthWatcher(*ethRPC, ethContractAddr, "goerli", common.ReadinessEthSyncing, vaa.ChainIDEthereum, lockC, setC).Run); err != nil {
 			return err
 		}
-
-		if err := supervisor.Run(ctx, "ethRopswatch",
-			ethereum.NewEthWatcher(*ethRopstenRPC, ethRopstenContractAddr, "ethropsten", common.ReadinessEthRopstenSyncing, vaa.ChainIDEthereumRopsten, lockC, setC).Run); err != nil {
-			return err
-		}
+		//
+		//if err := supervisor.Run(ctx, "ethRopswatch",
+		//	ethereum.NewEthWatcher(*ethRopstenRPC, ethRopstenContractAddr, "ethropsten", common.ReadinessEthRopstenSyncing, vaa.ChainIDEthereumRopsten, lockC, setC).Run); err != nil {
+		//	return err
+		//}
 
 		if err := supervisor.Run(ctx, "klaytn",
 			ethereum.NewEthWatcher(*klaytnRPC, klaytnContractAddr, "klaytn", common.ReadinessKlaytnSyncing, vaa.ChainIDKlaytn, lockC, setC).Run); err != nil {

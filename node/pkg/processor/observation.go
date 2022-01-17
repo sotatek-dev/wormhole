@@ -109,11 +109,12 @@ func (p *Processor) handleObservation(ctx context.Context, m *gossipv1.SignedObs
 	// During an update, vaaState.signatures can contain signatures from *both* guardian sets.
 	//
 	var gs *node_common.GuardianSet
+	p.logger.Info("Node guardian: ", zap.Any("gs", p.gs))
 	if p.state.vaaSignatures[hash] != nil && p.state.vaaSignatures[hash].gs != nil {
-		p.logger.Info("4444444444444444")
+
 		gs = p.state.vaaSignatures[hash].gs
+		p.logger.Info("Guardian mess not nil", zap.Any("gs", gs))
 	} else {
-		p.logger.Info("5555555555555555555555555")
 		gs = p.gs
 	}
 

@@ -157,7 +157,7 @@ func (p *Processor) Run(ctx context.Context) error {
 		case <-ctx.Done():
 			return ctx.Err()
 		case p.gs = <-p.setC:
-			p.logger.Info("guardian set updated",
+			p.logger.Info("guardian set updatedxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
 				zap.Strings("set", p.gs.KeysAsHexStrings()),
 				zap.Uint32("index", p.gs.Index))
 			p.gst.Set(p.gs)

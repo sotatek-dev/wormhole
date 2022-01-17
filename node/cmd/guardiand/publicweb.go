@@ -53,9 +53,9 @@ func publicwebServiceRunnable(
 	tlsProd bool,
 	tlsCacheDir string,
 ) (supervisor.Runnable, error) {
-	logger.Info("Tmp -------28213123----------- Start Webservice")
+
 	return func(ctx context.Context) error {
-		logger.Info("Start Webservice 00000000000000000000000000000")
+
 		conn, err := grpc.DialContext(
 			ctx,
 			fmt.Sprintf("unix://%s", upstreamAddr),
@@ -87,7 +87,7 @@ func publicwebServiceRunnable(
 		srv := &http.Server{
 			Handler: mux,
 		}
-		
+
 		logger.Info("111111111111111111")
 		// TLS setup
 		if tlsHostname != "" {

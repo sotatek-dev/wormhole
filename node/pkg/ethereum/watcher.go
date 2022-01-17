@@ -124,6 +124,7 @@ func (e *Watcher) Run(ctx context.Context) error {
 	timeout, cancel := context.WithTimeout(ctx, 15*time.Second)
 	defer cancel()
 	c, err := ethclient.DialContext(timeout, e.url)
+
 	if err != nil {
 		ethConnectionErrors.WithLabelValues(e.networkName, "dial_error").Inc()
 		p2p.DefaultRegistry.AddErrorCount(e.chainID, 1)
@@ -235,7 +236,6 @@ func (e *Watcher) Run(ctx context.Context) error {
 		p2p.DefaultRegistry.AddErrorCount(e.chainID, 1)
 		return fmt.Errorf("failed to subscribe to header events: %w", err)
 	}
-
 	go func() {
 		for {
 			select {
@@ -248,7 +248,7 @@ func (e *Watcher) Run(ctx context.Context) error {
 				return
 			case ev := <-headSink:
 				start := time.Now()
-				logger.Debug("processing new header", zap.Stringer("block", ev.Number),
+				logger.Info("processing new header", zap.Stringer("block", ev.Number),
 					zap.String("eth_network", e.networkName))
 				currentEthHeight.WithLabelValues(e.networkName).Set(float64(ev.Number.Int64()))
 				readiness.SetReady(e.readiness)
@@ -259,26 +259,26 @@ func (e *Watcher) Run(ctx context.Context) error {
 
 				e.pendingMu.Lock()
 
-				blockNumberU := ev.Number.Uint64()
+				//blockNumberU := ev.Number.Uint64()
 				logger.Info("Pendinggggg", zap.Any("lenght", len(e.pending)))
 				for hash, pLock := range e.pending {
 
 					// Transaction was dropped and never picked up again
-					if pLock.height+4*uint64(pLock.message.ConsistencyLevel) <= blockNumberU {
-						logger.Debug("observation timed out", zap.Stringer("tx", pLock.message.TxHash),
-							zap.Stringer("block", ev.Number), zap.String("eth_network", e.networkName))
-						delete(e.pending, hash)
-						continue
-					}
+					//if pLock.height+4*uint64(pLock.message.ConsistencyLevel) <= blockNumberU {
+					//	logger.Debug("observation timed out", zap.Stringer("tx", pLock.message.TxHash),
+					//		zap.Stringer("block", ev.Number), zap.String("eth_network", e.networkName))
+					//	delete(e.pending, hash)
+					//	continue
+					//}
 
 					// Transaction is now ready
-					if pLock.height+uint64(pLock.message.ConsistencyLevel) <= ev.Number.Uint64() {
-						logger.Info("observation confirmed", zap.Stringer("tx", pLock.message.TxHash),
-							zap.Stringer("block", ev.Number), zap.String("eth_network", e.networkName))
-						delete(e.pending, hash)
-						e.msgChan <- pLock.message
-						ethMessagesConfirmed.WithLabelValues(e.networkName).Inc()
-					}
+					//if pLock.height+uint64(pLock.message.ConsistencyLevel) <= ev.Number.Uint64() {
+					logger.Info("observation confirmed", zap.Stringer("tx", pLock.message.TxHash),
+						zap.Stringer("block", ev.Number), zap.String("eth_network", e.networkName))
+					delete(e.pending, hash)
+					e.msgChan <- pLock.message
+					ethMessagesConfirmed.WithLabelValues(e.networkName).Inc()
+					//}
 				}
 
 				e.pendingMu.Unlock()

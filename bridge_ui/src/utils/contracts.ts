@@ -6,7 +6,7 @@ export const CONTRACT_BRIDGE_ADDRESS = {
   },
   ETH_NFT: {
       MAINNET: '0x6FFd7EdE62328b3Af38FCD61461Bbfc52F5651fE',
-      TESTNET: '0xD8E4C2DbDd2e2bd8F1336EA691dBFF6952B1a6eB',
+      TESTNET: '0x38A0DaAA56Bd04955A5704D15caA5f5aC69b807C',
       DEVNET: '0x26b4afb60d6c903165150c6f0aa14f8016be4aec',
   },
   ETH_TOKEN: {
@@ -66,7 +66,7 @@ export const CONTRACT_BRIDGE_ADDRESS = {
   },
   ROPSTEN_ETH_NFT: {
     MAINNET: '0x6FFd7EdE62328b3Af38FCD61461Bbfc52F5651fE',
-    TESTNET: '0x2b048Da40f69c8dc386a56705915f8E966fe1eba',
+    TESTNET: '0xbCDF7d04e8664ef4cc66CCa0835D93E57A846866',
     DEVNET: '0x26b4afb60d6c903165150c6f0aa14f8016be4aec',
   },
   ROPSTEN_ETH_TOKEN: {
@@ -76,7 +76,7 @@ export const CONTRACT_BRIDGE_ADDRESS = {
   },
   KLAYTN: {
     MAINNET: '',
-    TESTNET: '0x1EfFCf8fC0b39f52e9aCCc4b4cb15233d3c10904',
+    TESTNET: '0x62D933f6Bd94450f79d9533871B9D3304a185D93',
     DEVNET: '',
   },
   KLAYTN_NFT: {
@@ -86,7 +86,7 @@ export const CONTRACT_BRIDGE_ADDRESS = {
   },
   KLAYTN_TOKEN: {
     MAINNET: '',
-    TESTNET: '0xB7A48F8afd0db4c627D9e36922726bD0bf6fbcD4',
+    TESTNET: '0x961A34921C14E9E99d07B672e8328B7161E3d725',
     DEVNET: '',
   },
 }
@@ -100,6 +100,6 @@ MAINNET: [
   "https://wormhole-v2-mainnet-api.staking.fund",
   "https://wormhole-v2-mainnet.01node.com",
 ],
-TESTNET: ["http://localhost:7071"],
+TESTNET: ["http://172.16.1.217:7071"],
 DEVNET: ["http://localhost:7071"],
 }

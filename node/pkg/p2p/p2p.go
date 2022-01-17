@@ -315,6 +315,7 @@ func Run(obsvC chan *gossipv1.SignedObservation, sendC chan []byte, signedInC ch
 			case *gossipv1.GossipMessage_SignedHeartbeat:
 				s := m.SignedHeartbeat
 				gs := gst.Get()
+				logger.Info("gst++++++++", zap.Any("guardiand set state", gst.Get()))
 				if gs == nil {
 					// No valid guardian set yet - dropping heartbeat
 					logger.Info("skipping heartbeat - no guardian set",
@@ -322,9 +323,10 @@ func Run(obsvC chan *gossipv1.SignedObservation, sendC chan []byte, signedInC ch
 						zap.String("from", envelope.GetFrom().String()))
 					break
 				}
+				logger.Info("gst size", zap.Any("size guardian state", len(gs.Keys)))
 				if heartbeat, err := processSignedHeartbeat(envelope.GetFrom(), s, gs, gst, disableHeartbeatVerify); err != nil {
 					p2pMessagesReceived.WithLabelValues("invalid_heartbeat").Inc()
-					logger.Info("invalid signed heartbeat received",
+					logger.Debug("invalid signed heartbeat received",
 						zap.Error(err),
 						zap.Any("payload", msg.Message),
 						zap.Any("value", s),
@@ -332,7 +334,7 @@ func Run(obsvC chan *gossipv1.SignedObservation, sendC chan []byte, signedInC ch
 						zap.String("from", envelope.GetFrom().String()))
 				} else {
 					p2pMessagesReceived.WithLabelValues("valid_heartbeat").Inc()
-					logger.Info("valid signed heartbeat received",
+					logger.Debug("valid signed heartbeat received",
 						zap.Any("value", heartbeat),
 						zap.String("from", envelope.GetFrom().String()))
 				}

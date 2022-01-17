@@ -24,10 +24,11 @@ var (
 
 func (p *Processor) broadcastSignature(v *vaa.VAA, signature []byte, txhash []byte) {
 	digest, err := v.SigningMsg()
+	p.logger.Info("ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss")
 	if err != nil {
 		panic(err)
 	}
-
+	p.logger.Info("Broadcast Signature 000000000000000000000000000")
 	obsv := gossipv1.SignedObservation{
 		Addr:      crypto.PubkeyToAddress(p.gk.PublicKey).Bytes(),
 		Hash:      digest.Bytes(),
