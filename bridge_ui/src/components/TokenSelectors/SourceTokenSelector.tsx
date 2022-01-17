@@ -2,6 +2,7 @@
 import {
   CHAIN_ID_SOLANA,
   CHAIN_ID_TERRA,
+  CHAIN_ID_KLAYTN_BAOBAB,
   isEVMChain,
 } from "@certusone/wormhole-sdk";
 import { TextField, Typography } from "@material-ui/core";
@@ -113,6 +114,16 @@ export const TokenSelector = (props: TokenSelectorProps) => {
       onChange={handleOnChange}
       resetAccounts={maps?.resetAccounts}
       tokenAccounts={maps?.tokenAccounts}
+    />
+  ) : lookupChain === CHAIN_ID_KLAYTN_BAOBAB ? (
+    <EvmTokenPicker
+      value={sourceParsedTokenAccount || null}
+      disabled={disabled}
+      onChange={handleOnChange}
+      tokenAccounts={maps?.tokenAccounts}
+      resetAccounts={maps?.resetAccounts}
+      chainId={lookupChain}
+      nft={nft}
     />
   ) : (
     <TextField

@@ -1,3 +1,4 @@
+import { useKaikasProvider } from "./../contexts/KaikasProviderContext";
 import {
   ChainId,
   CHAIN_ID_AVAX,
@@ -564,6 +565,8 @@ function useGetAvailableTokens(nft: boolean = false) {
   const solanaWallet = useSolanaWallet();
   const solPK = solanaWallet?.publicKey;
   const { provider, signerAddress } = useEthereumProvider();
+  const { provider: providerKaikas, signerAddress: signerAddressKaikas } =
+    useKaikasProvider();
 
   const [covalent, setCovalent] = useState<any>(undefined);
   const [covalentLoading, setCovalentLoading] = useState(false);
@@ -849,13 +852,16 @@ function useGetAvailableTokens(nft: boolean = false) {
   useEffect(() => {
     let cancelled = false;
     if (
-      signerAddress &&
+      signerAddressKaikas &&
       lookupChain === CHAIN_ID_KLAYTN_BAOBAB &&
       !ethNativeAccount &&
       !nft
     ) {
       setEthNativeAccountLoading(true);
-      createNativeKlaytnParsedTokenAccount(provider, signerAddress).then(
+      createNativeKlaytnParsedTokenAccount(
+        providerKaikas,
+        signerAddressKaikas
+      ).then(
         (result) => {
           console.log("create native account returned with value", result);
           if (!cancelled) {
@@ -877,7 +883,7 @@ function useGetAvailableTokens(nft: boolean = false) {
     return () => {
       cancelled = true;
     };
-  }, [lookupChain, provider, signerAddress, nft, ethNativeAccount]);
+  }, [lookupChain, providerKaikas, signerAddressKaikas, nft, ethNativeAccount]);
 
   //Polygon native asset load
   useEffect(() => {
@@ -1083,6 +1089,17 @@ function useGetAvailableTokens(nft: boolean = false) {
         resetAccounts: resetSourceAccounts,
       }
     : isEVMChain(lookupChain)
+    ? {
+        tokenAccounts: ethAccounts,
+        covalent: {
+          data: covalent,
+          isFetching: covalentLoading,
+          error: covalentError,
+          receivedAt: null, //TODO
+        },
+        resetAccounts: resetSourceAccounts,
+      }
+    : lookupChain === CHAIN_ID_KLAYTN_BAOBAB
     ? {
         tokenAccounts: ethAccounts,
         covalent: {
