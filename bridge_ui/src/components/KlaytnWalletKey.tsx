@@ -5,6 +5,7 @@ import ToggleConnectedButton from "./ToggleConnectedButton";
 const KaikasWalletKey = () => {
   const { connect, disconnect, signerAddress, providerError } =
     useKaikasProvider();
+
   return (
     <>
       <ToggleConnectedButton
