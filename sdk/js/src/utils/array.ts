@@ -11,7 +11,7 @@ import {
   CHAIN_ID_AURORA,
   CHAIN_ID_FANTOM,
   CHAIN_ID_KLAYTN_3RDSIGHT,
-  CHAIN_ID_KLAYTN_BAOBAD,
+  CHAIN_ID_KLAYTN_BAOBAB,
 } from "./consts";
 import { humanAddress, canonicalAddress, isNativeDenom } from "../terra";
 import { PublicKey } from "@solana/web3.js";
@@ -29,7 +29,7 @@ export const isEVMChain = (chainId: ChainId) => {
     chainId === CHAIN_ID_AURORA ||
     chainId === CHAIN_ID_FANTOM ||
     chainId === CHAIN_ID_KLAYTN_3RDSIGHT ||
-    chainId === CHAIN_ID_KLAYTN_BAOBAD
+    chainId === CHAIN_ID_KLAYTN_BAOBAB
   );
 };
 
