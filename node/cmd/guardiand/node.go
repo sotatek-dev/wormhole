@@ -522,7 +522,7 @@ func runNode(cmd *cobra.Command, args []string) {
 	}
 	log.Println("Run webservice 333333333333333")
 	// local admin service socket
-	adminService, err := adminServiceRunnable(logger, *adminSocketPath, injectC, db, gst)
+	adminService, err := adminServiceRunnable(logger, *adminSocketPath, injectC, signedInC, db, gst)
 	if err != nil {
 		logger.Fatal("failed to create admin service socket", zap.Error(err))
 	}
@@ -542,10 +542,11 @@ func runNode(cmd *cobra.Command, args []string) {
 			return err
 		}
 
-		if err := supervisor.Run(ctx, "ethGorwatch",
-			ethereum.NewEthWatcher(*ethRPC, ethContractAddr, "goerli", common.ReadinessEthSyncing, vaa.ChainIDEthereum, lockC, setC).Run); err != nil {
+		if err := supervisor.Run(ctx, "ethwatch",
+			ethereum.NewEthWatcher(*ethRPC, ethContractAddr, "eth", common.ReadinessEthSyncing, vaa.ChainIDEthereum, lockC, setC, 1).Run); err != nil {
 			return err
 		}
+
 		//
 		//if err := supervisor.Run(ctx, "ethRopswatch",
 		//	ethereum.NewEthWatcher(*ethRopstenRPC, ethRopstenContractAddr, "ethropsten", common.ReadinessEthRopstenSyncing, vaa.ChainIDEthereumRopsten, lockC, setC).Run); err != nil {
@@ -553,7 +554,7 @@ func runNode(cmd *cobra.Command, args []string) {
 		//}
 
 		if err := supervisor.Run(ctx, "klaytn",
-			ethereum.NewEthWatcher(*klaytnRPC, klaytnContractAddr, "klaytn", common.ReadinessKlaytnSyncing, vaa.ChainIDKlaytn, lockC, setC).Run); err != nil {
+			ethereum.NewEthWatcher(*klaytnRPC, klaytnContractAddr, "klaytn", common.ReadinessKlaytnSyncing, vaa.ChainIDKlaytn, lockC, setC, 1).Run); err != nil {
 			return err
 		}
 

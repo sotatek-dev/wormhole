@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/certusone/wormhole/node/pkg/p2p"
 	gossipv1 "github.com/certusone/wormhole/node/pkg/proto/gossip/v1"
+	"github.com/ethereum/go-ethereum/rpc"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"math/big"
 	"sync"
@@ -37,6 +38,11 @@ var (
 			Name: "wormhole_eth_messages_observed_total",
 			Help: "Total number of Eth messages observed (pre-confirmation)",
 		}, []string{"eth_network"})
+	ethMessagesOrphaned = promauto.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: "wormhole_eth_messages_orphaned_total",
+			Help: "Total number of Eth messages dropped (orphaned)",
+		}, []string{"eth_network", "reason"})
 	ethMessagesConfirmed = promauto.NewCounterVec(
 		prometheus.CounterOpts{
 			Name: "wormhole_eth_messages_confirmed_total",
@@ -81,11 +87,21 @@ type (
 		// the governance mechanism lives there),
 		setChan chan *common.GuardianSet
 
-		pending   map[eth_common.Hash]*pendingMessage
+		pending   map[pendingKey]*pendingMessage
 		pendingMu sync.Mutex
 
 		// 0 is a valid guardian set, so we need a nil value here
 		currentGuardianSet *uint32
+
+		// Minimum number of confirmations to accept, regardless of what the contract specifies.
+		minConfirmations uint64
+	}
+
+	pendingKey struct {
+		TxHash         eth_common.Hash
+		BlockHash      eth_common.Hash
+		EmitterAddress vaa.Address
+		Sequence       uint64
 	}
 
 	pendingMessage struct {
@@ -101,16 +117,18 @@ func NewEthWatcher(
 	readiness readiness.Component,
 	chainID vaa.ChainID,
 	messageEvents chan *common.MessagePublication,
-	setEvents chan *common.GuardianSet) *Watcher {
+	setEvents chan *common.GuardianSet,
+	minConfirmations uint64) *Watcher {
 	return &Watcher{
-		url:         url,
-		contract:    contract,
-		networkName: networkName,
-		readiness:   readiness,
-		chainID:     chainID,
-		msgChan:     messageEvents,
-		setChan:     setEvents,
-		pending:     map[eth_common.Hash]*pendingMessage{}}
+		url:              url,
+		contract:         contract,
+		networkName:      networkName,
+		readiness:        readiness,
+		minConfirmations: minConfirmations,
+		chainID:          chainID,
+		msgChan:          messageEvents,
+		setChan:          setEvents,
+		pending:          map[pendingKey]*pendingMessage{}}
 }
 
 func (e *Watcher) Run(ctx context.Context) error {
@@ -124,7 +142,6 @@ func (e *Watcher) Run(ctx context.Context) error {
 	timeout, cancel := context.WithTimeout(ctx, 15*time.Second)
 	defer cancel()
 	c, err := ethclient.DialContext(timeout, e.url)
-
 	if err != nil {
 		ethConnectionErrors.WithLabelValues(e.networkName, "dial_error").Inc()
 		p2p.DefaultRegistry.AddErrorCount(e.chainID, 1)
@@ -190,7 +207,7 @@ func (e *Watcher) Run(ctx context.Context) error {
 			case ev := <-messageC:
 				// Request timestamp for block
 				msm := time.Now()
-				timeout, cancel = context.WithTimeout(ctx, 15*time.Second)
+				timeout, cancel := context.WithTimeout(ctx, 15*time.Second)
 				b, err := c.BlockByNumber(timeout, big.NewInt(int64(ev.Raw.BlockNumber)))
 				cancel()
 				queryLatency.WithLabelValues(e.networkName, "block_by_number").Observe(time.Since(msm).Seconds())
@@ -202,7 +219,7 @@ func (e *Watcher) Run(ctx context.Context) error {
 					return
 				}
 
-				messsage := &common.MessagePublication{
+				message := &common.MessagePublication{
 					TxHash:           ev.Raw.TxHash,
 					Timestamp:        time.Unix(int64(b.Time()), 0),
 					Nonce:            ev.Nonce,
@@ -218,9 +235,16 @@ func (e *Watcher) Run(ctx context.Context) error {
 
 				ethMessagesObserved.WithLabelValues(e.networkName).Inc()
 
+				key := pendingKey{
+					TxHash:         message.TxHash,
+					BlockHash:      ev.Raw.BlockHash,
+					EmitterAddress: message.EmitterAddress,
+					Sequence:       message.Sequence,
+				}
+
 				e.pendingMu.Lock()
-				e.pending[ev.Raw.TxHash] = &pendingMessage{
-					message: messsage,
+				e.pending[key] = &pendingMessage{
+					message: message,
 					height:  ev.Raw.BlockNumber,
 				}
 				e.pendingMu.Unlock()
@@ -236,6 +260,7 @@ func (e *Watcher) Run(ctx context.Context) error {
 		p2p.DefaultRegistry.AddErrorCount(e.chainID, 1)
 		return fmt.Errorf("failed to subscribe to header events: %w", err)
 	}
+
 	go func() {
 		for {
 			select {
@@ -248,7 +273,10 @@ func (e *Watcher) Run(ctx context.Context) error {
 				return
 			case ev := <-headSink:
 				start := time.Now()
-				logger.Info("processing new header", zap.Stringer("block", ev.Number),
+				currentHash := ev.Hash()
+				logger.Info("processing new header",
+					zap.Stringer("current_block", ev.Number),
+					zap.Stringer("current_blockhash", currentHash),
 					zap.String("eth_network", e.networkName))
 				currentEthHeight.WithLabelValues(e.networkName).Set(float64(ev.Number.Int64()))
 				readiness.SetReady(e.readiness)
@@ -259,31 +287,110 @@ func (e *Watcher) Run(ctx context.Context) error {
 
 				e.pendingMu.Lock()
 
-				//blockNumberU := ev.Number.Uint64()
-				logger.Info("Pendinggggg", zap.Any("lenght", len(e.pending)))
-				for hash, pLock := range e.pending {
+				blockNumberU := ev.Number.Uint64()
+
+				for key, pLock := range e.pending {
+					expectedConfirmations := uint64(pLock.message.ConsistencyLevel)
+					if expectedConfirmations < e.minConfirmations {
+						expectedConfirmations = e.minConfirmations
+					}
 
 					// Transaction was dropped and never picked up again
-					//if pLock.height+4*uint64(pLock.message.ConsistencyLevel) <= blockNumberU {
-					//	logger.Debug("observation timed out", zap.Stringer("tx", pLock.message.TxHash),
-					//		zap.Stringer("block", ev.Number), zap.String("eth_network", e.networkName))
-					//	delete(e.pending, hash)
-					//	continue
-					//}
+					if pLock.height+4*uint64(expectedConfirmations) <= blockNumberU {
+						logger.Info("observation timed out",
+							zap.Stringer("tx", pLock.message.TxHash),
+							zap.Stringer("blockhash", key.BlockHash),
+							zap.Stringer("emitter_address", key.EmitterAddress),
+							zap.Uint64("sequence", key.Sequence),
+							zap.Stringer("current_block", ev.Number),
+							zap.Stringer("current_blockhash", currentHash),
+							zap.String("eth_network", e.networkName),
+						)
+						ethMessagesOrphaned.WithLabelValues(e.networkName, "timeout").Inc()
+						delete(e.pending, key)
+						continue
+					}
 
 					// Transaction is now ready
-					//if pLock.height+uint64(pLock.message.ConsistencyLevel) <= ev.Number.Uint64() {
-					logger.Info("observation confirmed", zap.Stringer("tx", pLock.message.TxHash),
-						zap.Stringer("block", ev.Number), zap.String("eth_network", e.networkName))
-					delete(e.pending, hash)
-					e.msgChan <- pLock.message
-					ethMessagesConfirmed.WithLabelValues(e.networkName).Inc()
-					//}
+					if pLock.height+uint64(expectedConfirmations) <= blockNumberU {
+						timeout, cancel := context.WithTimeout(ctx, 5*time.Second)
+						tx, err := c.TransactionReceipt(timeout, pLock.message.TxHash)
+						cancel()
+
+						// If the node returns an error after waiting expectedConfirmation blocks,
+						// it means the chain reorged and the transaction was orphaned. The
+						// TransactionReceipt call is using the same websocket connection than the
+						// head notifications, so it's guaranteed to be atomic.
+						//
+						// Check multiple possible error cases - the node seems to return a
+						// "not found" error most of the time, but it could conceivably also
+						// return a nil tx or rpc.ErrNoResult.
+						if tx == nil || err == rpc.ErrNoResult || (err != nil && err.Error() == "not found") {
+							logger.Warn("tx was orphaned",
+								zap.Stringer("tx", pLock.message.TxHash),
+								zap.Stringer("blockhash", key.BlockHash),
+								zap.Stringer("emitter_address", key.EmitterAddress),
+								zap.Uint64("sequence", key.Sequence),
+								zap.Stringer("current_block", ev.Number),
+								zap.Stringer("current_blockhash", currentHash),
+								zap.String("eth_network", e.networkName),
+								zap.Error(err))
+							delete(e.pending, key)
+							ethMessagesOrphaned.WithLabelValues(e.networkName, "not_found").Inc()
+							continue
+						}
+
+						// Any error other than "not found" is likely transient - we retry next block.
+						if err != nil {
+							logger.Warn("transaction could not be fetched",
+								zap.Stringer("tx", pLock.message.TxHash),
+								zap.Stringer("blockhash", key.BlockHash),
+								zap.Stringer("emitter_address", key.EmitterAddress),
+								zap.Uint64("sequence", key.Sequence),
+								zap.Stringer("current_block", ev.Number),
+								zap.Stringer("current_blockhash", currentHash),
+								zap.String("eth_network", e.networkName),
+								zap.Error(err))
+							continue
+						}
+
+						// It's possible for a transaction to be orphaned and then included in a different block
+						// but with the same tx hash. Drop the observation (it will be re-observed and needs to
+						// wait for the full confirmation time again).
+						if tx.BlockHash != key.BlockHash {
+							logger.Info("tx got dropped and mined in a different block; the message should have been reobserved",
+								zap.Stringer("tx", pLock.message.TxHash),
+								zap.Stringer("blockhash", key.BlockHash),
+								zap.Stringer("emitter_address", key.EmitterAddress),
+								zap.Uint64("sequence", key.Sequence),
+								zap.Stringer("current_block", ev.Number),
+								zap.Stringer("current_blockhash", currentHash),
+								zap.String("eth_network", e.networkName))
+							delete(e.pending, key)
+							ethMessagesOrphaned.WithLabelValues(e.networkName, "blockhash_mismatch").Inc()
+							continue
+						}
+
+						logger.Info("observation confirmed",
+							zap.Stringer("tx", pLock.message.TxHash),
+							zap.Stringer("blockhash", key.BlockHash),
+							zap.Stringer("emitter_address", key.EmitterAddress),
+							zap.Uint64("sequence", key.Sequence),
+							zap.Stringer("current_block", ev.Number),
+							zap.Stringer("current_blockhash", currentHash),
+							zap.String("eth_network", e.networkName))
+						delete(e.pending, key)
+						e.msgChan <- pLock.message
+						ethMessagesConfirmed.WithLabelValues(e.networkName).Inc()
+					}
 				}
 
 				e.pendingMu.Unlock()
-				logger.Debug("processed new header", zap.Stringer("block", ev.Number),
-					zap.Duration("took", time.Since(start)), zap.String("eth_network", e.networkName))
+				logger.Info("processed new header",
+					zap.Stringer("current_block", ev.Number),
+					zap.Stringer("current_blockhash", currentHash),
+					zap.Duration("took", time.Since(start)),
+					zap.String("eth_network", e.networkName))
 			}
 		}
 	}()
@@ -313,9 +420,8 @@ func (e *Watcher) fetchAndUpdateGuardianSet(
 	}
 
 	queryLatency.WithLabelValues(e.networkName, "get_guardian_set").Observe(time.Since(msm).Seconds())
-	//logger.Info("Guardian Index", zap.Any("index", idx), zap.Any("guardians ", gs))
-	if e.currentGuardianSet != nil && *(e.currentGuardianSet) == idx {
 
+	if e.currentGuardianSet != nil && *(e.currentGuardianSet) == idx {
 		return nil
 	}
 
@@ -340,7 +446,6 @@ func fetchCurrentGuardianSet(ctx context.Context, caller *abi.AbiCaller) (uint32
 	opts := &bind.CallOpts{Context: ctx}
 
 	currentIndex, err := caller.GetCurrentGuardianSetIndex(opts)
-
 	if err != nil {
 		return 0, nil, fmt.Errorf("error requesting current guardian set index: %w", err)
 	}

@@ -11,6 +11,7 @@ import (
 	"google.golang.org/api/option"
 
 	"cloud.google.com/go/bigtable"
+	"cloud.google.com/go/pubsub"
 )
 
 type BigTableConnectionConfig struct {
@@ -18,6 +19,7 @@ type BigTableConnectionConfig struct {
 	GcpInstanceName string
 	GcpKeyFilePath  string
 	TableName       string
+	TopicName       string
 }
 
 type bigTableWriter struct {
@@ -26,7 +28,7 @@ type bigTableWriter struct {
 }
 
 // rowKey returns a string with the input vales delimited by colons.
-func makeRowKey(emitterChain vaa.ChainID, emitterAddress vaa.Address, sequence uint64) string {
+func MakeRowKey(emitterChain vaa.ChainID, emitterAddress vaa.Address, sequence uint64) string {
 	// left-pad the sequence with zeros to 16 characters, because bigtable keys are stored lexicographically
 	return fmt.Sprintf("%d:%s:%016d", emitterChain, emitterAddress, sequence)
 }
@@ -53,6 +55,11 @@ func BigTableWriter(events *AttestationEventReporter, connectionConfig *BigTable
 		}
 		tbl := client.Open(e.connectionConfig.TableName)
 
+		pubsubClient, err := pubsub.NewClient(ctx, e.connectionConfig.GcpProjectID)
+		if err != nil {
+			return fmt.Errorf("failed to create PubSub client: %w", err)
+		}
+		pubsubTopic := pubsubClient.Topic(e.connectionConfig.TopicName)
 		// call to subscribe to event channels
 		sub := e.events.Subscribe()
 		logger.Info("subscribed to AttestationEvents")
@@ -85,7 +92,7 @@ func BigTableWriter(events *AttestationEventReporter, connectionConfig *BigTable
 						bigtable.ColumnFilter("EmitterAddress"))
 					conditionalMutation := bigtable.NewCondMutation(filter, nil, mutation)
 
-					rowKey := makeRowKey(msg.VAA.EmitterChain, msg.VAA.EmitterAddress, msg.VAA.Sequence)
+					rowKey := MakeRowKey(msg.VAA.EmitterChain, msg.VAA.EmitterAddress, msg.VAA.Sequence)
 					err := tbl.Apply(ctx, rowKey, conditionalMutation)
 					if err != nil {
 						logger.Warn("Failed to write message publication to BigTable",
@@ -112,7 +119,7 @@ func BigTableWriter(events *AttestationEventReporter, connectionConfig *BigTable
 						bigtable.ColumnFilter("SignedVAA"))
 					conditionalMutation := bigtable.NewCondMutation(filter, nil, mutation)
 
-					rowKey := makeRowKey(msg.EmitterChain, msg.EmitterAddress, msg.Sequence)
+					rowKey := MakeRowKey(msg.EmitterChain, msg.EmitterAddress, msg.Sequence)
 					err := tbl.Apply(ctx, rowKey, conditionalMutation)
 					if err != nil {
 						logger.Warn("Failed to write persistence info to BigTable",
@@ -121,6 +128,9 @@ func BigTableWriter(events *AttestationEventReporter, connectionConfig *BigTable
 							zap.Error(err))
 						errC <- err
 					}
+					pubsubTopic.Publish(ctx, &pubsub.Message{
+						Data: []byte(b),
+					})
 				}
 			}
 		}()
@@ -131,6 +141,9 @@ func BigTableWriter(events *AttestationEventReporter, connectionConfig *BigTable
 			if err = client.Close(); err != nil {
 				logger.Error("Could not close BigTable client", zap.Error(err))
 			}
+			if pubsubErr := pubsubClient.Close(); pubsubErr != nil {
+				logger.Error("Could not close PubSub client", zap.Error(pubsubErr))
+			}
 			return ctx.Err()
 		case err := <-errC:
 			logger.Error("bigtablewriter encountered an error", zap.Error(err))
@@ -140,6 +153,9 @@ func BigTableWriter(events *AttestationEventReporter, connectionConfig *BigTable
 			// try to close the connection before returning
 			if closeErr := client.Close(); closeErr != nil {
 				logger.Error("Could not close BigTable client", zap.Error(closeErr))
+			}
+			if pubsubErr := pubsubClient.Close(); pubsubErr != nil {
+				logger.Error("Could not close PubSub client", zap.Error(pubsubErr))
 			}
 
 			return err

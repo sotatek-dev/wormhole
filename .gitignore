@@ -10,4 +10,4 @@ venv
 .env
 bigtable-admin.json
 bigtable-writer.json
-spydk/*
+.DS_Store

@@ -24,6 +24,7 @@ import (
 
 var (
 	clientSocketPath *string
+	shouldBackfill   *bool
 )
 
 func init() {
@@ -34,6 +35,9 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
+
+	shouldBackfill = AdminClientFindMissingMessagesCmd.Flags().Bool(
+		"backfill", false, "backfill missing VAAs from public RPC")
 
 	AdminClientInjectGuardianSetUpdateCmd.Flags().AddFlagSet(pf)
 	AdminClientFindMissingMessagesCmd.Flags().AddFlagSet(pf)
@@ -136,7 +140,7 @@ func runFindMissingMessages(cmd *cobra.Command, args []string) {
 	}
 	emitterAddress := args[1]
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
 	defer cancel()
 
 	conn, err, c := getAdminClient(ctx, *clientSocketPath)
@@ -148,6 +152,8 @@ func runFindMissingMessages(cmd *cobra.Command, args []string) {
 	msg := nodev1.FindMissingMessagesRequest{
 		EmitterChain:   uint32(chainID),
 		EmitterAddress: emitterAddress,
+		RpcBackfill:    *shouldBackfill,
+		BackfillNodes:  publicRPCEndpoints,
 	}
 	resp, err := c.FindMissingMessages(ctx, &msg)
 	if err != nil {

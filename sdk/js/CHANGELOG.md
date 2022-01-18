@@ -1,5 +1,37 @@
 # Changelog
 
+## 0.1.6
+
+### Added
+
+added parseSequencesFromLog\*
+
+Terra NFT token bridge
+
+getIsTransferCompleted on NFT bridge
+
+export for wasm, createPostVaaInstructionSolana, createVerifySignaturesInstructionsSolana, postVaaSolana, postVaaSolanaWithRetry, and getSignedVAAWithRetry
+
+re-export top level objects ethers_contracts, solana, terra, rpc, utils, bridge, token_bridge, nft_bridge
+
+## 0.1.5
+
+### Added
+
+added postVaaSolanaWithRetry, which will retry transactions which failed during processing
+
+added createVerifySignaturesInstructions, createPostVaaInstruction, which allows users to construct the postVaa process for themselves at the instruction level
+
+added chunks and sendAndConfirmTransactionsWithRetry as utility functions
+
+added integration tests for postVaaSolanaWithRetry
+
+initial Oasis support
+
+### Changed
+
+deprecated postVaaSolana
+
 ## 0.1.4
 
 initial AVAX testnet support

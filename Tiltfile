@@ -86,6 +86,14 @@ local_resource(
     trigger_mode = trigger_mode,
 )
 
+local_resource(
+    name = "teal-gen",
+    deps = ["staging/algorand/teal"],
+    cmd = "tilt docker build -- --target teal-export -f Dockerfile.teal -o type=local,dest=. .",
+    env = {"DOCKER_BUILDKIT": "1"},
+    trigger_mode = trigger_mode,
+)
+
 # wasm
 
 local_resource(
@@ -131,6 +139,8 @@ def build_node_yaml():
                     "wormhole",
                     "--bigTableTableName",
                     "v2Events",
+                    "--bigTableTopicName",
+                    "new-vaa-devnet",
                     "--bigTableKeyPath",
                     "/tmp/mounted-keys/bigtable-key.json",
                     "--bigTableGCPProject",
@@ -299,6 +309,7 @@ docker_build(
 
 k8s_resource(
     "algorand",
+    resource_deps = ["teal-gen"],
     port_forwards = [
         port_forward(4001, name = "Algorand RPC [:4001]", host = webHost),
         port_forward(4002, name = "Algorand KMD [:4002]", host = webHost),
@@ -338,6 +349,11 @@ if explorer:
         trigger_mode = trigger_mode,
     )
 
+    k8s_resource("pubsub-emulator",
+        port_forwards = [port_forward(8085, name = "PubSub listeners [:8085]")],
+        labels = ["explorer"],
+    )
+
     docker_build(
         ref = "cloud-functions",
         context = "./event_database/cloud_functions",
@@ -348,7 +364,7 @@ if explorer:
     )
     k8s_resource(
         "cloud-functions",
-        resource_deps = ["proto-gen", "bigtable-emulator"],
+        resource_deps = ["proto-gen", "bigtable-emulator", "pubsub-emulator"],
         port_forwards = [port_forward(8090, name = "Cloud Functions [:8090]")],
         labels = ["explorer"],
         trigger_mode = trigger_mode,
