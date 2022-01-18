@@ -274,7 +274,7 @@ func (e *Watcher) Run(ctx context.Context) error {
 			case ev := <-headSink:
 				start := time.Now()
 				currentHash := ev.Hash()
-				logger.Info("processing new header",
+				logger.Debug("processing new header",
 					zap.Stringer("current_block", ev.Number),
 					zap.Stringer("current_blockhash", currentHash),
 					zap.String("eth_network", e.networkName))
@@ -288,7 +288,7 @@ func (e *Watcher) Run(ctx context.Context) error {
 				e.pendingMu.Lock()
 
 				blockNumberU := ev.Number.Uint64()
-
+				logger.Info("ggg", zap.Any("size", len(e.pending)))
 				for key, pLock := range e.pending {
 					expectedConfirmations := uint64(pLock.message.ConsistencyLevel)
 					if expectedConfirmations < e.minConfirmations {
