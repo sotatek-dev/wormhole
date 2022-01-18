@@ -8,7 +8,7 @@ import {
   CHAIN_ID_SOLANA,
   CHAIN_ID_TERRA,
   CHAIN_ID_OASIS,
-  CHAIN_ID_KLAYTN_BAOBAD,
+  CHAIN_ID_KLAYTN_BAOBAB,
   isEVMChain,
   WSOL_ADDRESS,
   WSOL_DECIMALS,
@@ -847,7 +847,7 @@ function useGetAvailableTokens(nft: boolean = false) {
     let cancelled = false;
     if (
       signerAddress &&
-      lookupChain === CHAIN_ID_KLAYTN_BAOBAD &&
+      lookupChain === CHAIN_ID_KLAYTN_BAOBAB &&
       !ethNativeAccount &&
       !nft
     ) {

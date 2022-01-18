@@ -9,7 +9,7 @@ import {
   CHAIN_ID_TERRA,
   CHAIN_ID_OASIS,
   isEVMChain,
-  CHAIN_ID_KLAYTN_BAOBAD,
+  CHAIN_ID_KLAYTN_BAOBAB,
 } from "@certusone/wormhole-sdk";
 import { clusterApiUrl } from "@solana/web3.js";
 import { getAddress } from "ethers/lib/utils";
@@ -116,8 +116,9 @@ export const CHAINS: ChainInfo[] =
           name: "Terra",
           logo: terraIcon,
         },
+        
         {
-          id: CHAIN_ID_KLAYTN_BAOBAD,
+          id: CHAIN_ID_KLAYTN_BAOBAB,
           name: "Klaytn Baobab",
           logo: klaytnIcon,
         },
@@ -144,7 +145,7 @@ export const CHAINS: ChainInfo[] =
           logo: terraIcon,
         },
         {
-          id: CHAIN_ID_KLAYTN_BAOBAD,
+          id: CHAIN_ID_KLAYTN_BAOBAB,
           name: "Klaytn Baobab",
           logo: klaytnIcon,
         },
@@ -159,7 +160,7 @@ export const CHAINS_WITH_NFT_SUPPORT = CHAINS.filter(
     id === CHAIN_ID_POLYGON ||
     id === CHAIN_ID_OASIS ||
     id === CHAIN_ID_SOLANA ||
-    id === CHAIN_ID_KLAYTN_BAOBAD
+    id === CHAIN_ID_KLAYTN_BAOBAB
 );
 export type ChainsById = { [key in ChainId]: ChainInfo };
 export const CHAINS_BY_ID: ChainsById = CHAINS.reduce((obj, chain) => {
@@ -228,7 +229,7 @@ export const getEvmChainId = (chainId: ChainId) =>
     ? AVAX_NETWORK_CHAIN_ID
     : chainId === CHAIN_ID_OASIS
     ? OASIS_NETWORK_CHAIN_ID
-    : chainId === CHAIN_ID_KLAYTN_BAOBAD
+    : chainId === CHAIN_ID_KLAYTN_BAOBAB
     ? KLAYTN_NETWORK_CHAIN_ID
     : undefined;
 export const SOLANA_HOST = process.env.REACT_APP_SOLANA_API_URL
@@ -484,7 +485,7 @@ export const getBridgeAddressForChain = (chainId: ChainId) =>
     ? AVAX_BRIDGE_ADDRESS
     : chainId === CHAIN_ID_OASIS
     ? OASIS_BRIDGE_ADDRESS
-    : chainId === CHAIN_ID_KLAYTN_BAOBAD
+    : chainId === CHAIN_ID_KLAYTN_BAOBAB
     ? KLAYTN_BRIDGE_ADDRESS
     : "";
 export const getNFTBridgeAddressForChain = (chainId: ChainId) =>
@@ -502,7 +503,7 @@ export const getNFTBridgeAddressForChain = (chainId: ChainId) =>
     ? AVAX_NFT_BRIDGE_ADDRESS
     : chainId === CHAIN_ID_OASIS
     ? OASIS_NFT_BRIDGE_ADDRESS
-    : chainId === CHAIN_ID_KLAYTN_BAOBAD
+    : chainId === CHAIN_ID_KLAYTN_BAOBAB
     ? KLAYTN_NFT_BRIDGE_ADDRESS
     : "";
 export const getTokenBridgeAddressForChain = (chainId: ChainId) =>
@@ -522,7 +523,7 @@ export const getTokenBridgeAddressForChain = (chainId: ChainId) =>
     ? AVAX_TOKEN_BRIDGE_ADDRESS
     : chainId === CHAIN_ID_OASIS
     ? OASIS_TOKEN_BRIDGE_ADDRESS
-    : chainId === CHAIN_ID_KLAYTN_BAOBAD
+    : chainId === CHAIN_ID_KLAYTN_BAOBAB
     ? KLAYTN_TOKEN_BRIDGE_ADDRESS
     : "";
 
@@ -553,8 +554,8 @@ export const COVALENT_GET_TOKENS_URL = (
       ? COVALENT_AVAX
       : chainId === CHAIN_ID_OASIS
       ? COVALENT_OASIS
-      : chainId === CHAIN_ID_KLAYTN_BAOBAD
-      ? CHAIN_ID_KLAYTN_BAOBAD
+      : chainId === CHAIN_ID_KLAYTN_BAOBAB
+      ? CHAIN_ID_KLAYTN_BAOBAB
       : "";
   // https://www.covalenthq.com/docs/api/#get-/v1/{chain_id}/address/{address}/balances_v2/
   return `https://api.covalenthq.com/v1/${chainNum}/address/${walletAddress}/balances_v2/?key=${COVALENT_API_KEY}${
