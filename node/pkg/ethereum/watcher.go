@@ -2,10 +2,10 @@ package ethereum
 
 import (
 	"context"
+	"encoding/hex"
 	"fmt"
 	"github.com/certusone/wormhole/node/pkg/p2p"
 	gossipv1 "github.com/certusone/wormhole/node/pkg/proto/gossip/v1"
-	"github.com/ethereum/go-ethereum/rpc"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"math/big"
 	"sync"
@@ -207,6 +207,7 @@ func (e *Watcher) Run(ctx context.Context) error {
 			case ev := <-messageC:
 				// Request timestamp for block
 				msm := time.Now()
+
 				timeout, cancel := context.WithTimeout(ctx, 15*time.Second)
 				b, err := c.BlockByNumber(timeout, big.NewInt(int64(ev.Raw.BlockNumber)))
 				cancel()
@@ -310,79 +311,81 @@ func (e *Watcher) Run(ctx context.Context) error {
 						delete(e.pending, key)
 						continue
 					}
-
+					qwe := hex.EncodeToString(pLock.message.Payload)
+					logger.Info("Payload 2222222222", zap.Any("p", qwe))
+					logger.Info("3333333333333333x22132131", zap.Any("w2131", pLock.message.Payload))
 					// Transaction is now ready
-					if pLock.height+uint64(expectedConfirmations) <= blockNumberU {
-						timeout, cancel := context.WithTimeout(ctx, 5*time.Second)
-						tx, err := c.TransactionReceipt(timeout, pLock.message.TxHash)
-						cancel()
-
-						// If the node returns an error after waiting expectedConfirmation blocks,
-						// it means the chain reorged and the transaction was orphaned. The
-						// TransactionReceipt call is using the same websocket connection than the
-						// head notifications, so it's guaranteed to be atomic.
-						//
-						// Check multiple possible error cases - the node seems to return a
-						// "not found" error most of the time, but it could conceivably also
-						// return a nil tx or rpc.ErrNoResult.
-						if tx == nil || err == rpc.ErrNoResult || (err != nil && err.Error() == "not found") {
-							logger.Warn("tx was orphaned",
-								zap.Stringer("tx", pLock.message.TxHash),
-								zap.Stringer("blockhash", key.BlockHash),
-								zap.Stringer("emitter_address", key.EmitterAddress),
-								zap.Uint64("sequence", key.Sequence),
-								zap.Stringer("current_block", ev.Number),
-								zap.Stringer("current_blockhash", currentHash),
-								zap.String("eth_network", e.networkName),
-								zap.Error(err))
-							delete(e.pending, key)
-							ethMessagesOrphaned.WithLabelValues(e.networkName, "not_found").Inc()
-							continue
-						}
-
-						// Any error other than "not found" is likely transient - we retry next block.
-						if err != nil {
-							logger.Warn("transaction could not be fetched",
-								zap.Stringer("tx", pLock.message.TxHash),
-								zap.Stringer("blockhash", key.BlockHash),
-								zap.Stringer("emitter_address", key.EmitterAddress),
-								zap.Uint64("sequence", key.Sequence),
-								zap.Stringer("current_block", ev.Number),
-								zap.Stringer("current_blockhash", currentHash),
-								zap.String("eth_network", e.networkName),
-								zap.Error(err))
-							continue
-						}
-
-						// It's possible for a transaction to be orphaned and then included in a different block
-						// but with the same tx hash. Drop the observation (it will be re-observed and needs to
-						// wait for the full confirmation time again).
-						if tx.BlockHash != key.BlockHash {
-							logger.Info("tx got dropped and mined in a different block; the message should have been reobserved",
-								zap.Stringer("tx", pLock.message.TxHash),
-								zap.Stringer("blockhash", key.BlockHash),
-								zap.Stringer("emitter_address", key.EmitterAddress),
-								zap.Uint64("sequence", key.Sequence),
-								zap.Stringer("current_block", ev.Number),
-								zap.Stringer("current_blockhash", currentHash),
-								zap.String("eth_network", e.networkName))
-							delete(e.pending, key)
-							ethMessagesOrphaned.WithLabelValues(e.networkName, "blockhash_mismatch").Inc()
-							continue
-						}
-
-						logger.Info("observation confirmed",
-							zap.Stringer("tx", pLock.message.TxHash),
-							zap.Stringer("blockhash", key.BlockHash),
-							zap.Stringer("emitter_address", key.EmitterAddress),
-							zap.Uint64("sequence", key.Sequence),
-							zap.Stringer("current_block", ev.Number),
-							zap.Stringer("current_blockhash", currentHash),
-							zap.String("eth_network", e.networkName))
-						delete(e.pending, key)
-						e.msgChan <- pLock.message
-						ethMessagesConfirmed.WithLabelValues(e.networkName).Inc()
-					}
+					//if pLock.height+uint64(expectedConfirmations) <= blockNumberU {
+					//	timeout, cancel := context.WithTimeout(ctx, 5*time.Second)
+					//	tx, err := c.TransactionReceipt(timeout, pLock.message.TxHash)
+					//	cancel()
+					//
+					//	// If the node returns an error after waiting expectedConfirmation blocks,
+					//	// it means the chain reorged and the transaction was orphaned. The
+					//	// TransactionReceipt call is using the same websocket connection than the
+					//	// head notifications, so it's guaranteed to be atomic.
+					//	//
+					//	// Check multiple possible error cases - the node seems to return a
+					//	// "not found" error most of the time, but it could conceivably also
+					//	// return a nil tx or rpc.ErrNoResult.
+					//	if tx == nil || err == rpc.ErrNoResult || (err != nil && err.Error() == "not found") {
+					//		logger.Warn("tx was orphaned",
+					//			zap.Stringer("tx", pLock.message.TxHash),
+					//			zap.Stringer("blockhash", key.BlockHash),
+					//			zap.Stringer("emitter_address", key.EmitterAddress),
+					//			zap.Uint64("sequence", key.Sequence),
+					//			zap.Stringer("current_block", ev.Number),
+					//			zap.Stringer("current_blockhash", currentHash),
+					//			zap.String("eth_network", e.networkName),
+					//			zap.Error(err))
+					//		delete(e.pending, key)
+					//		ethMessagesOrphaned.WithLabelValues(e.networkName, "not_found").Inc()
+					//		continue
+					//	}
+					//
+					//	// Any error other than "not found" is likely transient - we retry next block.
+					//	if err != nil {
+					//		logger.Warn("transaction could not be fetched",
+					//			zap.Stringer("tx", pLock.message.TxHash),
+					//			zap.Stringer("blockhash", key.BlockHash),
+					//			zap.Stringer("emitter_address", key.EmitterAddress),
+					//			zap.Uint64("sequence", key.Sequence),
+					//			zap.Stringer("current_block", ev.Number),
+					//			zap.Stringer("current_blockhash", currentHash),
+					//			zap.String("eth_network", e.networkName),
+					//			zap.Error(err))
+					//		continue
+					//	}
+					//
+					//	// It's possible for a transaction to be orphaned and then included in a different block
+					//	// but with the same tx hash. Drop the observation (it will be re-observed and needs to
+					//	// wait for the full confirmation time again).
+					//	if tx.BlockHash != key.BlockHash {
+					//		logger.Info("tx got dropped and mined in a different block; the message should have been reobserved",
+					//			zap.Stringer("tx", pLock.message.TxHash),
+					//			zap.Stringer("blockhash", key.BlockHash),
+					//			zap.Stringer("emitter_address", key.EmitterAddress),
+					//			zap.Uint64("sequence", key.Sequence),
+					//			zap.Stringer("current_block", ev.Number),
+					//			zap.Stringer("current_blockhash", currentHash),
+					//			zap.String("eth_network", e.networkName))
+					//		delete(e.pending, key)
+					//		ethMessagesOrphaned.WithLabelValues(e.networkName, "blockhash_mismatch").Inc()
+					//		continue
+					//	}
+					//
+					//	logger.Info("observation confirmed",
+					//		zap.Stringer("tx", pLock.message.TxHash),
+					//		zap.Stringer("blockhash", key.BlockHash),
+					//		zap.Stringer("emitter_address", key.EmitterAddress),
+					//		zap.Uint64("sequence", key.Sequence),
+					//		zap.Stringer("current_block", ev.Number),
+					//		zap.Stringer("current_blockhash", currentHash),
+					//		zap.String("eth_network", e.networkName))
+					delete(e.pending, key)
+					e.msgChan <- pLock.message
+					ethMessagesConfirmed.WithLabelValues(e.networkName).Inc()
+					//}
 				}
 
 				e.pendingMu.Unlock()

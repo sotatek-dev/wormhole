@@ -79,6 +79,8 @@ func (p *Processor) handleMessage(ctx context.Context, k *common.MessagePublicat
 		ConsistencyLevel: k.ConsistencyLevel,
 	}
 
+	p.logger.Info("VAA for Thao .....................", zap.Any("VAA", v))
+
 	// Ignore incoming observations when our database already has a quorum VAA for it.
 	// This can occur when we're receiving late observations due to node catchup, and
 	// processing those won't do us any good.

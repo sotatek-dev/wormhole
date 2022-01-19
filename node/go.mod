@@ -39,7 +39,7 @@ require (
 	github.com/stretchr/testify v1.7.0
 	github.com/tendermint/tendermint v0.33.7
 	github.com/terra-project/terra.go v1.0.1-0.20210129055710-7a586e5e027a
-	github.com/tidwall/gjson v1.8.1
+	github.com/tidwall/gjson v1.13.0
 	go.uber.org/zap v1.16.0
 	golang.org/x/crypto v0.0.0-20210513164829-c07d793c2f9a
 	golang.org/x/sys v0.0.0-20210917161153-d61c044b1678
@@ -225,8 +225,8 @@ require (
 	github.com/tendermint/go-amino v0.15.1 // indirect
 	github.com/tendermint/tm-db v0.5.1 // indirect
 	github.com/teris-io/shortid v0.0.0-20201117134242-e59966efd125 // indirect
-	github.com/tidwall/match v1.0.3 // indirect
-	github.com/tidwall/pretty v1.1.0 // indirect
+	github.com/tidwall/match v1.1.1 // indirect
+	github.com/tidwall/pretty v1.2.0 // indirect
 	github.com/tklauser/go-sysconf v0.3.5 // indirect
 	github.com/tklauser/numcpus v0.2.2 // indirect
 	github.com/tyler-smith/go-bip39 v1.0.1-0.20181017060643-dbb3b84ba2ef // indirect
