@@ -29,11 +29,13 @@ import {
   isValidEthereumAddress,
 } from "../../utils/ethereum";
 import TokenPicker, { BasicAccountRender } from "./TokenPicker";
-
+import {CHAIN_ID_KLAYTN_BAOBAB} from '@certusone/wormhole-sdk';
+import { useKaikasProvider } from "../../contexts/KaikasProviderContext";
 const isWormholev1 = (provider: any, address: string, chainId: ChainId) => {
   if (chainId !== CHAIN_ID_ETH) {
     return Promise.resolve(false);
   }
+  
   const connection = WormholeAbi__factory.connect(
     WORMHOLE_V1_ETH_ADDRESS,
     provider
@@ -64,6 +66,7 @@ export default function EvmTokenPicker(
     nft,
   } = props;
   const { provider, signerAddress } = useEthereumProvider();
+  const { provider: providerKaikas } = useKaikasProvider();
   const { isReady } = useIsWalletReady(chainId);
   const selectedTokenAccount: NFTParsedTokenAccount | undefined = useSelector(
     nft
@@ -143,7 +146,12 @@ export default function EvmTokenPicker(
       }
       let v1 = false;
       try {
-        v1 = await isWormholev1(provider, account.publicKey, chainId);
+        if (chainId === CHAIN_ID_KLAYTN_BAOBAB) {
+          v1 = await isWormholev1(providerKaikas, account.publicKey, chainId);
+        } else {
+          v1 = await isWormholev1(provider, account.publicKey, chainId);
+        }
+        
       } catch (e) {
         //For now, just swallow this one.
       }
@@ -156,7 +164,7 @@ export default function EvmTokenPicker(
       onChange(account);
       return Promise.resolve();
     },
-    [chainId, onChange, provider, isMigrationEligible]
+    [chainId, onChange, provider, isMigrationEligible, providerKaikas]
   );
 
   const RenderComp = useCallback(
