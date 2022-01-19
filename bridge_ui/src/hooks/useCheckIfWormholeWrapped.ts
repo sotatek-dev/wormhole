@@ -8,6 +8,7 @@ import {
   isEVMChain,
   uint8ArrayToHex,
   WormholeWrappedInfo,
+  CHAIN_ID_KLAYTN_BAOBAB,
 } from "@certusone/wormhole-sdk";
 import {
   getOriginalAssetEth as getOriginalAssetEthNFT,
@@ -17,7 +18,9 @@ import { Connection } from "@solana/web3.js";
 import { LCDClient } from "@terra-money/terra.js";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { getOriginalAssetKlaytn } from "../blockchain/klaytn/getOriginalAssetKlaytn";
 import { useEthereumProvider } from "../contexts/EthereumProviderContext";
+import { useKaikasProvider } from "../contexts/KaikasProviderContext";
 import { setSourceWormholeWrappedInfo as setNFTSourceWormholeWrappedInfo } from "../store/nftSlice";
 import {
   selectNFTIsRecovery,
@@ -71,6 +74,7 @@ function useCheckIfWormholeWrapped(nft?: boolean) {
     ? setNFTSourceWormholeWrappedInfo
     : setTransferSourceWormholeWrappedInfo;
   const { provider } = useEthereumProvider();
+  const { provider: providerKaikas } = useKaikasProvider(); 
   const isRecovery = useSelector(
     nft ? selectNFTIsRecovery : selectTransferIsRecovery
   );
@@ -80,8 +84,16 @@ function useCheckIfWormholeWrapped(nft?: boolean) {
     }
     // TODO: loading state, error state
     let cancelled = false;
+    
     (async () => {
-      if (isEVMChain(sourceChain) && provider && sourceAsset) {
+      if (sourceChain === CHAIN_ID_KLAYTN_BAOBAB && providerKaikas && sourceAsset) {
+        const wrappedAddress = await getOriginalAssetKlaytn(sourceAsset, sourceChain);
+        const wrappedInfo = await makeStateSafe(wrappedAddress as any);
+        if (!cancelled) {
+          dispatch(setSourceWormholeWrappedInfo(wrappedInfo));
+        }
+      }
+      if (isEVMChain(sourceChain) && sourceChain !== CHAIN_ID_KLAYTN_BAOBAB && provider && sourceAsset) {
         const wrappedInfo = makeStateSafe(
           await (nft
             ? getOriginalAssetEthNFT(
@@ -147,6 +159,7 @@ function useCheckIfWormholeWrapped(nft?: boolean) {
     nft,
     setSourceWormholeWrappedInfo,
     tokenId,
+    providerKaikas
   ]);
 }
 

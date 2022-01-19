@@ -11,6 +11,13 @@ import SolanaWalletKey from "./SolanaWalletKey";
 import TerraWalletKey from "./TerraWalletKey";
 
 function KeyAndBalance({ chainId }: { chainId: ChainId }) {
+  if (chainId === CHAIN_ID_KLAYTN_BAOBAB) {
+    return (
+      <>
+        <KaikasWalletKey />
+      </>
+    );
+  }
   if (isEVMChain(chainId)) {
     return (
       <>
@@ -29,13 +36,6 @@ function KeyAndBalance({ chainId }: { chainId: ChainId }) {
     return (
       <>
         <TerraWalletKey />
-      </>
-    );
-  }
-  if (chainId === CHAIN_ID_KLAYTN_BAOBAB) {
-    return (
-      <>
-        <KaikasWalletKey />
       </>
     );
   }

@@ -90,6 +90,7 @@ import bnbIcon from "../icons/bnb.svg";
 import ethIcon from "../icons/eth.svg";
 import polygonIcon from "../icons/polygon.svg";
 import oasisIcon from "../icons/oasis-network-rose-logo.svg";
+import Caver from 'caver-js';
 
 export function createParsedTokenAccount(
   publicKey: string,
@@ -308,9 +309,10 @@ const createNativeKlaytnParsedTokenAccount = (
   provider: Provider,
   signerAddress: string | undefined
 ) => {
+  const caver = new Caver(window.klaytn)
   return !(provider && signerAddress)
     ? Promise.reject()
-    : provider.getBalance(signerAddress).then((balanceInWei) => {
+    : caver.klay.getBalance(signerAddress).then((balanceInWei) => {
         const balanceInEth = ethers.utils.formatEther(balanceInWei);
         return createParsedTokenAccount(
           signerAddress, //public key
@@ -801,43 +803,6 @@ function useGetAvailableTokens(nft: boolean = false) {
             setEthNativeAccount(undefined);
             setEthNativeAccountLoading(false);
             setEthNativeAccountError("Unable to retrieve your BNB balance.");
-          }
-        }
-      );
-    }
-
-    return () => {
-      cancelled = true;
-    };
-  }, [lookupChain, provider, signerAddress, nft, ethNativeAccount]);
-
-  //Klaytn 3rdsight Smart Chain native asset load
-  useEffect(() => {
-    let cancelled = false;
-    if (
-      signerAddress &&
-      lookupChain === CHAIN_ID_KLAYTN_3RDSIGHT &&
-      !ethNativeAccount &&
-      !nft
-    ) {
-      setEthNativeAccountLoading(true);
-      createNativeKlaytn3rdsightParsedTokenAccount(
-        provider,
-        signerAddress
-      ).then(
-        (result) => {
-          console.log("create native account returned with value", result);
-          if (!cancelled) {
-            setEthNativeAccount(result);
-            setEthNativeAccountLoading(false);
-            setEthNativeAccountError("");
-          }
-        },
-        (error) => {
-          if (!cancelled) {
-            setEthNativeAccount(undefined);
-            setEthNativeAccountLoading(false);
-            setEthNativeAccountError("Unable to retrieve your KLAY balance.");
           }
         }
       );
