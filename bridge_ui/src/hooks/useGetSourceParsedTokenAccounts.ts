@@ -91,6 +91,7 @@ import bnbIcon from "../icons/bnb.svg";
 import ethIcon from "../icons/eth.svg";
 import polygonIcon from "../icons/polygon.svg";
 import oasisIcon from "../icons/oasis-network-rose-logo.svg";
+import Caver from 'caver-js';
 
 export function createParsedTokenAccount(
   publicKey: string,
@@ -309,9 +310,10 @@ const createNativeKlaytnParsedTokenAccount = (
   provider: Provider,
   signerAddress: string | undefined
 ) => {
+  const caver = new Caver(window.klaytn)
   return !(provider && signerAddress)
     ? Promise.reject()
-    : provider.getBalance(signerAddress).then((balanceInWei) => {
+    : caver.klay.getBalance(signerAddress).then((balanceInWei) => {
         const balanceInEth = ethers.utils.formatEther(balanceInWei);
         return createParsedTokenAccount(
           signerAddress, //public key

@@ -1,4 +1,3 @@
-import Caver from "caver-js";
 import {
   createContext,
   ReactChildren,
@@ -54,8 +53,7 @@ export const KaikasProviderProvider = ({
     if (klaytn) {
       try {
         await klaytn.enable();
-        const caver = new Caver(window.klaytn);
-        setProvider(caver.klay);
+        setProvider(window.klaytn);
         setSignerAddress(klaytn.selectedAddress);
         setChainId(klaytn.networkVersion);
         klaytn.on("networkChanged", () => setChainId(klaytn.networkVersion));
