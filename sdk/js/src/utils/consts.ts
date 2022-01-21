@@ -5,7 +5,6 @@ export const CHAIN_ID_TERRA: ChainId = 3;
 export const CHAIN_ID_BSC: ChainId = 4;
 export const CHAIN_ID_POLYGON: ChainId = 5;
 export const CHAIN_ID_AVAX: ChainId = 10001;
-export const CHAIN_ID_KLAYTN_3RDSIGHT: ChainId = 7;
 export const CHAIN_ID_KLAYTN_BAOBAB: ChainId = 8;
 export const CHAIN_ID_ETHEREUM_ROPSTEN: ChainId = 4097;
 

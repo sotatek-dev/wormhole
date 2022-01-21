@@ -7,7 +7,6 @@ import {
   CHAIN_ID_POLYGON,
   CHAIN_ID_SOLANA,
   CHAIN_ID_TERRA,
-  CHAIN_ID_KLAYTN_3RDSIGHT,
   CHAIN_ID_KLAYTN_BAOBAB,
 } from "@certusone/wormhole-sdk";
 import { clusterApiUrl } from "@solana/web3.js";
@@ -106,11 +105,6 @@ export const CHAINS =
           logo: terraIcon,
         },
         {
-          id: CHAIN_ID_KLAYTN_3RDSIGHT,
-          name: "Klaytn 3rdsight",
-          logo: klaytnIcon,
-        },
-        {
           id: CHAIN_ID_KLAYTN_BAOBAB,
           name: "Klaytn Baobab",
           logo: klaytnIcon,
@@ -138,11 +132,6 @@ export const CHAINS =
           logo: terraIcon,
         },
         {
-          id: CHAIN_ID_KLAYTN_3RDSIGHT,
-          name: "Klaytn 3rdsight",
-          logo: klaytnIcon,
-        },
-        {
           id: CHAIN_ID_KLAYTN_BAOBAB,
           name: "Klaytn Baobab",
           logo: klaytnIcon,
@@ -158,7 +147,6 @@ export const CHAINS_WITH_NFT_SUPPORT = CHAINS.filter(
     id === CHAIN_ID_ETHEREUM_ROPSTEN ||
     id === CHAIN_ID_POLYGON ||
     id === CHAIN_ID_SOLANA ||
-    id === CHAIN_ID_KLAYTN_3RDSIGHT ||
     id === CHAIN_ID_KLAYTN_BAOBAB
 );
 export type ChainsById = { [key in ChainId]: ChainInfo };
@@ -218,8 +206,6 @@ export const AVAX_NETWORK_CHAIN_ID =
   CLUSTER === "mainnet" ? 43114 : CLUSTER === "testnet" ? 43113 : 1381;
 export const KLAYTN_NETWORK_CHAIN_ID =
   CLUSTER === "mainnet" ? 8217 : CLUSTER === "testnet" ? 1001 : 1001;
-export const _3RDSIGHT_NETWORK_CHAIN_ID =
-  CLUSTER === "mainnet" ? 1001 : CLUSTER === "testnet" ? 221 : 221;
 export const getEvmChainId = (chainId: ChainId) =>
   chainId === CHAIN_ID_ETH
     ? ETH_NETWORK_CHAIN_ID
@@ -231,8 +217,6 @@ export const getEvmChainId = (chainId: ChainId) =>
     ? POLYGON_NETWORK_CHAIN_ID
     : chainId === CHAIN_ID_AVAX
     ? AVAX_NETWORK_CHAIN_ID
-    : chainId === CHAIN_ID_KLAYTN_3RDSIGHT
-    ? _3RDSIGHT_NETWORK_CHAIN_ID
     : chainId === CHAIN_ID_KLAYTN_BAOBAB
     ? KLAYTN_NETWORK_CHAIN_ID
     : undefined;
@@ -409,28 +393,6 @@ export const KLAYTN_TOKEN_BRIDGE_ADDRESS = getAddress(
     : CONTRACT_BRIDGE_ADDRESS.KLAYTN_TOKEN.DEVNET
 );
 
-export const KLAYTN_3RDSIGHT_BRIDGE_ADDRESS = getAddress(
-  CLUSTER === "mainnet"
-    ? CONTRACT_BRIDGE_ADDRESS.KLAYTN_3RDSIGHT.MAINNET
-    : CLUSTER === "testnet"
-    ? CONTRACT_BRIDGE_ADDRESS.KLAYTN_3RDSIGHT.TESTNET
-    : CONTRACT_BRIDGE_ADDRESS.KLAYTN_3RDSIGHT.DEVNET
-);
-export const KLAYTN_3RDSIGHT_NFT_BRIDGE_ADDRESS = getAddress(
-  CLUSTER === "mainnet"
-    ? CONTRACT_BRIDGE_ADDRESS.KLAYTN_3RDSIGHT_NFT.MAINNET
-    : CLUSTER === "testnet"
-    ? CONTRACT_BRIDGE_ADDRESS.KLAYTN_3RDSIGHT_NFT.TESTNET
-    : CONTRACT_BRIDGE_ADDRESS.KLAYTN_3RDSIGHT_NFT.DEVNET
-);
-export const KLAYTN_3RDSIGHT_TOKEN_BRIDGE_ADDRESS = getAddress(
-  CLUSTER === "mainnet"
-    ? CONTRACT_BRIDGE_ADDRESS.KLAYTN_3RDSIGHT_TOKEN.MAINNET
-    : CLUSTER === "testnet"
-    ? CONTRACT_BRIDGE_ADDRESS.KLAYTN_3RDSIGHT_TOKEN.TESTNET
-    : CONTRACT_BRIDGE_ADDRESS.KLAYTN_3RDSIGHT_TOKEN.DEVNET
-);
-
 export const SOL_CUSTODY_ADDRESS =
   "GugU1tP7doLeTw9hQP51xRJyS8Da1fWxuiy2rVrnMD2m";
 export const SOL_NFT_CUSTODY_ADDRESS =
@@ -465,8 +427,6 @@ export const getBridgeAddressForChain = (chainId: ChainId) =>
     ? ROPSTEN_ETH_BRIDGE_ADDRESS
     : chainId === CHAIN_ID_AVAX
     ? AVAX_BRIDGE_ADDRESS
-    : chainId === CHAIN_ID_KLAYTN_3RDSIGHT
-    ? KLAYTN_3RDSIGHT_BRIDGE_ADDRESS
     : chainId === CHAIN_ID_KLAYTN_BAOBAB
     ? KLAYTN_BRIDGE_ADDRESS
     : "";
@@ -483,8 +443,6 @@ export const getNFTBridgeAddressForChain = (chainId: ChainId) =>
     ? ROPSTEN_ETH_NFT_BRIDGE_ADDRESS
     : chainId === CHAIN_ID_AVAX
     ? AVAX_NFT_BRIDGE_ADDRESS
-    : chainId === CHAIN_ID_KLAYTN_3RDSIGHT
-    ? KLAYTN_3RDSIGHT_NFT_BRIDGE_ADDRESS
     : chainId === CHAIN_ID_KLAYTN_BAOBAB
     ? KLAYTN_NFT_BRIDGE_ADDRESS
     : "";
@@ -503,8 +461,6 @@ export const getTokenBridgeAddressForChain = (chainId: ChainId) =>
     ? ROPSTEN_ETH_TOKEN_BRIDGE_ADDRESS
     : chainId === CHAIN_ID_AVAX
     ? AVAX_TOKEN_BRIDGE_ADDRESS
-    : chainId === CHAIN_ID_KLAYTN_3RDSIGHT
-    ? KLAYTN_3RDSIGHT_TOKEN_BRIDGE_ADDRESS
     : chainId === CHAIN_ID_KLAYTN_BAOBAB
     ? KLAYTN_TOKEN_BRIDGE_ADDRESS
     : "";
@@ -533,8 +489,6 @@ export const COVALENT_GET_TOKENS_URL = (
       ? COVALENT_POLYGON
       : chainId === CHAIN_ID_AVAX
       ? COVALENT_AVAX
-      : chainId === CHAIN_ID_KLAYTN_3RDSIGHT
-      ? _3RDSIGHT_NETWORK_CHAIN_ID
       : chainId === CHAIN_ID_KLAYTN_BAOBAB
       ? CHAIN_ID_KLAYTN_BAOBAB
       : "";
@@ -561,14 +515,6 @@ export const WBNB_ADDRESS =
     ? "0xae13d989dac2f0debff460ac112a837c89baa7cd"
     : "0xDDb64fE46a91D46ee29420539FC25FD07c5FEa3E";
 export const WBNB_DECIMALS = 18;
-//TODO: REPLACE WORMHOLE KLAYTN 3RDSIGHT
-export const WKLAY_3RDSIGHT_ADDRESS =
-  CLUSTER === "mainnet"
-    ? "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c"
-    : CLUSTER === "testnet"
-    ? "0xb10A7Fe1B6131E7d6a1630977Ae79E858a5b361B"
-    : "0xDDb64fE46a91D46ee29420539FC25FD07c5FEa3E";
-export const WKLAY_3RDSIGHT_DECIMALS = 18;
 
 // TODO: REPLACE WORMHOLE KLAYTN ADDRESS WHEN BE READY
 export const WKLAY_ADDRESS =
