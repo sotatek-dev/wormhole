@@ -11,6 +11,7 @@ import {
   CHAIN_ID_AURORA,
   CHAIN_ID_FANTOM,
   CHAIN_ID_KLAYTN_3RDSIGHT,
+  CHAIN_ID_KLAYTN_BAOBAB
 } from "./consts";
 import { humanAddress, canonicalAddress, isNativeDenom } from "../terra";
 import { PublicKey } from "@solana/web3.js";
