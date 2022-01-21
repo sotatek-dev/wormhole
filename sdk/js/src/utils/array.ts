@@ -27,7 +27,7 @@ export const isEVMChain = (chainId: ChainId) => {
     chainId === CHAIN_ID_OASIS ||
     chainId === CHAIN_ID_AURORA ||
     chainId === CHAIN_ID_FANTOM ||
-    chainId === CHAIN_ID_KLAYTN_BAOBAB
+    chainId === CHAIN_ID_POLYGON
   );
 };
 
