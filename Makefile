@@ -35,3 +35,15 @@ $(BIN)/guardiand: dirs generate
 	cd node && go build -ldflags "-X github.com/certusone/wormhole/node/pkg/version.version=${VERSION}" \
 	  -mod=readonly -o ../$(BIN)/guardiand \
 	  github.com/certusone/wormhole/node
+
+wormhole-build:
+	DOCKER_BUILDKIT=1 docker build --target node-export -f Dockerfile.proto -o type=local,dest=. .
+	DOCKER_BUILDKIT=1 docker build -f solana/Dockerfile.wasm -o type=local,dest=. solana
+	npm ci --prefix ethereum
+	npm ci --prefix sdk/js
+	npm run build --prefix sdk/js
+
+wormhole-build-sdk:
+	npm ci --prefix ethereum
+	npm ci --prefix sdk/js
+	npm run build --prefix sdk/js
