@@ -144,7 +144,6 @@ function useFetchTargetAsset(nft?: boolean) {
         signerAddressKaikas) {
         dispatch(setTargetAsset(fetchDataWrapper()));
         try {
-          debugger;
           const asset = await getForeignAssetKlaytn(
             getTokenBridgeAddressForChain(targetChain),
             providerKaikas,
@@ -152,7 +151,6 @@ function useFetchTargetAsset(nft?: boolean) {
             originChain,
             hexToUint8Array(originAsset)
           )
-          console.error(asset);
           if (!cancelled) {
             dispatch(
               setTargetAsset(
