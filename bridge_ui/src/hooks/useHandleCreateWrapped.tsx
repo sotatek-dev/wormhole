@@ -197,7 +197,7 @@ export function useHandleCreateWrapped(shouldUpdate: boolean) {
   const { signer: signerKaikas, provider: providerKaikas, signerAddress} = useKaikasProvider();
   const terraWallet = useConnectedWallet();
   const handleCreateClick = useCallback(() => {
-    console.log({signerKaikas, signedVAA, providerKaikas});
+    console.log({ signerKaikas, signedVAA, providerKaikas });
     
     if (targetChain === CHAIN_ID_KLAYTN_BAOBAB && !!signedVAA) {
       console.log('xxx');
