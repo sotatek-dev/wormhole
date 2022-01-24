@@ -12,7 +12,9 @@ import {
   parseSequenceFromLogEth,
   parseSequenceFromLogSolana,
   parseSequenceFromLogTerra,
+  parseSequenceFromLogKlaytn,
   uint8ArrayToHex,
+  CHAIN_ID_KLAYTN_BAOBAB
 } from "@certusone/wormhole-sdk";
 import { Alert } from "@material-ui/lab";
 import { WalletContextState } from "@solana/wallet-adapter-react";
@@ -25,7 +27,9 @@ import { Signer } from "ethers";
 import { useSnackbar } from "notistack";
 import { useCallback, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { attestFromKlaytn } from "../blockchain/klaytn/attestFromKlaytn";
 import { useEthereumProvider } from "../contexts/EthereumProviderContext";
+import { useKaikasProvider } from "../contexts/KaikasProviderContext";
 import { useSolanaWallet } from "../contexts/SolanaWalletContext";
 import {
   setAttestTx,
@@ -51,6 +55,58 @@ import { getSignedVAAWithRetry } from "../utils/getSignedVAAWithRetry";
 import parseError from "../utils/parseError";
 import { signSendAndConfirm } from "../utils/solana";
 import { postWithFees, waitForTerraExecution } from "../utils/terra";
+
+async function klaytn(
+  dispatch: any,
+  enqueueSnackbar: any,
+  provider: any,
+  sourceAsset: string,
+  chainId: ChainId,
+  signerAddress: any
+) {
+  dispatch(setIsSending(true));
+  try {
+    const receipt = await attestFromKlaytn(
+      getTokenBridgeAddressForChain(chainId),
+      provider,
+      sourceAsset,
+      signerAddress
+    );
+    dispatch(
+      setAttestTx({ id: receipt.transactionHash, block: receipt.blockNumber })
+    );
+    enqueueSnackbar(null, {
+      content: <Alert severity="success">Transaction confirmed</Alert>,
+    });
+    const sequence = parseSequenceFromLogKlaytn(
+      receipt,
+      getBridgeAddressForChain(chainId)
+    );
+    const emitterAddress = getEmitterAddressEth(
+      getTokenBridgeAddressForChain(chainId)
+    );
+    enqueueSnackbar(null, {
+      content: <Alert severity="info">Fetching VAA</Alert>,
+    });
+    console.log('sequence: ', sequence);
+    console.log('emiter: ', emitterAddress);
+    const { vaaBytes } = await getSignedVAAWithRetry(
+      chainId,
+      emitterAddress,
+      sequence
+    );
+    dispatch(setSignedVAAHex(uint8ArrayToHex(vaaBytes)));
+    enqueueSnackbar(null, {
+      content: <Alert severity="success">Fetched Signed VAA</Alert>,
+    });
+  } catch (e) {
+    console.error(e);
+    enqueueSnackbar(null, {
+      content: <Alert severity="error">{parseError(e)}</Alert>,
+    });
+    dispatch(setIsSending(false));
+  }
+}
 
 async function evm(
   dispatch: any,
@@ -208,12 +264,15 @@ export function useHandleAttest() {
   const isSending = useSelector(selectAttestIsSending);
   const isSendComplete = useSelector(selectAttestIsSendComplete);
   const { signer } = useEthereumProvider();
+  const {provider: providerKaikas, signerAddress} = useKaikasProvider();
   const solanaWallet = useSolanaWallet();
   const solPK = solanaWallet?.publicKey;
   const terraWallet = useConnectedWallet();
   const disabled = !isTargetComplete || isSending || isSendComplete;
   const handleAttestClick = useCallback(() => {
-    if (isEVMChain(sourceChain) && !!signer) {
+    if (sourceChain === CHAIN_ID_KLAYTN_BAOBAB && !!providerKaikas) {
+      klaytn(dispatch, enqueueSnackbar, providerKaikas, sourceAsset, sourceChain, signerAddress)
+    } else if (isEVMChain(sourceChain) && !!signer) {
       evm(dispatch, enqueueSnackbar, signer, sourceAsset, sourceChain);
     } else if (sourceChain === CHAIN_ID_SOLANA && !!solanaWallet && !!solPK) {
       solana(dispatch, enqueueSnackbar, solPK, sourceAsset, solanaWallet);
@@ -230,6 +289,8 @@ export function useHandleAttest() {
     solPK,
     terraWallet,
     sourceAsset,
+    providerKaikas,
+    signerAddress
   ]);
   return useMemo(
     () => ({

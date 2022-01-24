@@ -2,6 +2,7 @@ import {
   ChainId,
   CHAIN_ID_SOLANA,
   CHAIN_ID_TERRA,
+  CHAIN_ID_KLAYTN_BAOBAB,
   getEmitterAddressEth,
   getEmitterAddressSolana,
   getEmitterAddressTerra,
@@ -16,6 +17,7 @@ import {
   transferFromTerra,
   transferNativeSol,
   uint8ArrayToHex,
+  parseSequenceFromLogKlaytn,
 } from "@certusone/wormhole-sdk";
 import { Alert } from "@material-ui/lab";
 import { WalletContextState } from "@solana/wallet-adapter-react";
@@ -29,7 +31,9 @@ import { parseUnits, zeroPad } from "ethers/lib/utils";
 import { useSnackbar } from "notistack";
 import { useCallback, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { transferFromKlaytn, transferFromKlaytnNative } from "../blockchain/klaytn/transfer";
 import { useEthereumProvider } from "../contexts/EthereumProviderContext";
+import { useKaikasProvider } from "../contexts/KaikasProviderContext";
 import { useSolanaWallet } from "../contexts/SolanaWalletContext";
 import {
   selectTransferAmount,
@@ -61,6 +65,75 @@ import parseError from "../utils/parseError";
 import { signSendAndConfirm } from "../utils/solana";
 import { postWithFees, waitForTerraExecution } from "../utils/terra";
 import useTransferTargetAddressHex from "./useTransferTargetAddress";
+
+async function klaytn(
+  dispatch: any,
+  enqueueSnackbar: any,
+  provider: any,
+  tokenAddress: string,
+  decimals: any,
+  amount: string,
+  recipientChain: ChainId,
+  recipientAddress: Uint8Array,
+  isNative: boolean,
+  chainId: ChainId,
+  signerAddress: any,
+) {
+  dispatch(setIsSending(true));
+  try {
+    const amountParsed = parseUnits(amount, decimals);
+    const receipt = isNative
+        ? await transferFromKlaytnNative(
+            getTokenBridgeAddressForChain(chainId),
+            provider,
+            amountParsed,
+            recipientChain,
+            recipientAddress,
+            signerAddress
+          )
+        : await transferFromKlaytn(
+            getTokenBridgeAddressForChain(chainId),
+            provider,
+            tokenAddress,
+            amountParsed,
+            recipientChain,
+            recipientAddress,
+            signerAddress
+          );
+    dispatch(
+      setTransferTx({ id: receipt.transactionHash, block: receipt.blockNumber })
+    );
+    enqueueSnackbar(null, {
+      content: <Alert severity="success">Transaction confirmed</Alert>,
+    });
+    const sequence = parseSequenceFromLogKlaytn(
+      receipt,
+      getBridgeAddressForChain(chainId)
+    );
+    const emitterAddress = getEmitterAddressEth(
+      getTokenBridgeAddressForChain(chainId)
+    );
+    enqueueSnackbar(null, {
+      content: <Alert severity="info">Fetching VAA</Alert>,
+    });
+    const { vaaBytes } = await getSignedVAAWithRetry(
+      chainId,
+      emitterAddress,
+      sequence.toString()
+    );
+    dispatch(setSignedVAAHex(uint8ArrayToHex(vaaBytes)));
+    enqueueSnackbar(null, {
+      content: <Alert severity="success">Fetched Signed VAA</Alert>,
+    });
+  } catch (e) {
+    console.error(e);
+    enqueueSnackbar(null, {
+      content: <Alert severity="error">{parseError(e)}</Alert>,
+    });
+    dispatch(setIsSending(false));
+  }
+  
+}
 
 async function evm(
   dispatch: any,
@@ -283,6 +356,7 @@ export function useHandleTransfer() {
   const isSending = useSelector(selectTransferIsSending);
   const isSendComplete = useSelector(selectTransferIsSendComplete);
   const { signer } = useEthereumProvider();
+  const {provider: providerKaikas, signerAddress} = useKaikasProvider();
   const solanaWallet = useSolanaWallet();
   const solPK = solanaWallet?.publicKey;
   const terraWallet = useConnectedWallet();
@@ -295,7 +369,21 @@ export function useHandleTransfer() {
   const disabled = !isTargetComplete || isSending || isSendComplete;
   const handleTransferClick = useCallback(() => {
     // TODO: we should separate state for transaction vs fetching vaa
-    if (
+    if (sourceChain === CHAIN_ID_KLAYTN_BAOBAB && !!providerKaikas && !!sourceAsset && !!targetAddress) {
+      klaytn(
+        dispatch,
+        enqueueSnackbar,
+        providerKaikas,
+        sourceAsset,
+        decimals,
+        amount,
+        targetChain,
+        targetAddress,
+        isNative,
+        sourceChain,
+        signerAddress
+      )
+    } else if (
       isEVMChain(sourceChain) &&
       !!signer &&
       !!sourceAsset &&
@@ -374,6 +462,8 @@ export function useHandleTransfer() {
     originAsset,
     originChain,
     isNative,
+    providerKaikas,
+    signerAddress
   ]);
   return useMemo(
     () => ({
