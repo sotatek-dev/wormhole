@@ -2,7 +2,6 @@ package ethereum
 
 import (
 	"context"
-	"encoding/hex"
 	"fmt"
 	"github.com/certusone/wormhole/node/pkg/p2p"
 	gossipv1 "github.com/certusone/wormhole/node/pkg/proto/gossip/v1"
@@ -313,9 +312,7 @@ func (e *Watcher) Run(ctx context.Context) error {
 						delete(e.pending, key)
 						continue
 					}
-					qwe := hex.EncodeToString(pLock.message.Payload)
-					logger.Info("Payload 2222222222", zap.Any("p", qwe))
-					logger.Info("3333333333333333x22132131", zap.Any("w2131", pLock.message.Payload))
+
 					//Transaction is now ready
 					if pLock.height+uint64(expectedConfirmations) <= blockNumberU {
 						timeout, cancel := context.WithTimeout(ctx, 5*time.Second)

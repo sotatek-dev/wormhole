@@ -23,9 +23,9 @@ func main() {
 
 	msg := publicrpcv1.GetSignedVAARequest{
 		MessageId: &publicrpcv1.MessageID{
-			EmitterChain:   publicrpcv1.ChainID(6),
-			EmitterAddress: "000000000000000000000000d734fe34d7904804a64a7f8a91e21bbcdf6603e3",
-			Sequence:       1,
+			EmitterChain:   publicrpcv1.ChainID(4097),
+			EmitterAddress: "0000000000000000000000007a0c9a0e9e6c82bd25acf6e3f5437bce64738b3b",
+			Sequence:       74,
 		},
 	}
 
