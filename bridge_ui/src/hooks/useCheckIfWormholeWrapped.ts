@@ -90,7 +90,7 @@ function useCheckIfWormholeWrapped(nft?: boolean) {
         const wrappedAddress = await getOriginalAssetKlaytn(sourceAsset, sourceChain);
         const wrappedInfo = await makeStateSafe(wrappedAddress as any);
         if (!cancelled) {
-          dispatch(setSourceWormholeWrappedInfo(wrappedInfo));
+          dispatch(setSourceWormholeWrappedInfo(wrappedInfo as any));
         }
       }
       if (isEVMChain(sourceChain) && sourceChain !== CHAIN_ID_KLAYTN_BAOBAB && provider && sourceAsset) {

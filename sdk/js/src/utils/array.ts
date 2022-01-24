@@ -7,6 +7,7 @@ import {
   CHAIN_ID_POLYGON,
   CHAIN_ID_ETHEREUM_ROPSTEN,
   CHAIN_ID_AVAX,
+  CHAIN_ID_KLAYTN_BAOBAB,
 } from "./consts";
 import { humanAddress, canonicalAddress, isNativeDenom } from "../terra";
 import { PublicKey } from "@solana/web3.js";
@@ -36,7 +37,7 @@ export const hexToNativeString = (h: string | undefined, c: ChainId) => {
       ? undefined
       : c === CHAIN_ID_SOLANA
       ? new PublicKey(hexToUint8Array(h)).toString()
-      : isEVMChain(c)
+      : (isEVMChain(c) || c === CHAIN_ID_KLAYTN_BAOBAB)
       ? hexZeroPad(hexValue(hexToUint8Array(h)), 20)
       : c === CHAIN_ID_TERRA
       ? isHexNativeTerra(h)
