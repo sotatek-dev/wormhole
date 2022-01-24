@@ -2,7 +2,6 @@ package klaytn
 
 import (
 	"context"
-	"encoding/hex"
 	"fmt"
 	"github.com/certusone/wormhole/node/pkg/common"
 	"github.com/certusone/wormhole/node/pkg/klaytn/kabi"
@@ -148,7 +147,7 @@ func (e *Watcher) Run(ctx context.Context) error {
 					errC <- fmt.Errorf("failed to request timestamp for block %d: %w", ev.Raw.BlockNumber, err)
 					return
 				}
-				b.Time().Int64()
+				logger.Info("Hashhhhhhhhhhhhhh", zap.String("Klaytn", ev.Raw.TxHash.String()))
 				hash, err := KlayHashToEthHash(ev.Raw.TxHash)
 				if err != nil {
 					logger.Info("Conversion from klay hash to eth hash failed", zap.Error(err))
@@ -193,7 +192,7 @@ func (e *Watcher) Run(ctx context.Context) error {
 				p2p.DefaultRegistry.AddErrorCount(e.chainID, 1)
 				return
 			case ev := <-headSink:
-				start := time.Now()
+				//start := time.Now()
 				currentHash := ev.Hash()
 				logger.Debug("processing new header",
 					zap.Stringer("current_block", ev.Number),
@@ -205,11 +204,11 @@ func (e *Watcher) Run(ctx context.Context) error {
 					Height:          ev.Number.Int64(),
 					ContractAddress: e.contract.Hex(),
 				})
-				logger.Info("processed new header",
-					zap.Stringer("current_block", ev.Number),
-					zap.Stringer("current_blockhash", currentHash),
-					zap.Duration("took", time.Since(start)),
-					zap.String("klay_network", e.networkName))
+				//logger.Info("processed new header",
+				//	zap.Stringer("current_block", ev.Number),
+				//	zap.Stringer("current_blockhash", currentHash),
+				//	zap.Duration("took", time.Since(start)),
+				//	zap.String("klay_network", e.networkName))
 			}
 		}
 	}()
@@ -222,9 +221,8 @@ func (e *Watcher) Run(ctx context.Context) error {
 }
 
 func KlayHashToEthHash(klayHash klay_common.Hash) (eth_common.Hash, error) {
-	klayHash.String()
 	var ethHash eth_common.Hash
-	res, err := hex.DecodeString(klayHash.String())
+	res, err := klayHash.MarshalText()
 	if err != nil {
 		return ethHash, err
 	}

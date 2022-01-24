@@ -356,6 +356,12 @@ func runNode(cmd *cobra.Command, args []string) {
 	if *ethRopstenContract == "" {
 		logger.Fatal("Please specify --ethRopstenContract")
 	}
+	if *klaytnContract == "" {
+		logger.Fatal("Please specify --klaytnContract")
+	}
+	if *klaytnRPC == "" {
+		logger.Fatal("Please specify --klaytnRPC")
+	}
 	//if *nodeName == "" {
 	//	logger.Fatal("Please specify --nodeName")
 	//}

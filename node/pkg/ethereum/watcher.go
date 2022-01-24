@@ -275,7 +275,7 @@ func (e *Watcher) Run(ctx context.Context) error {
 				p2p.DefaultRegistry.AddErrorCount(e.chainID, 1)
 				return
 			case ev := <-headSink:
-				start := time.Now()
+				//start := time.Now()
 				currentHash := ev.Hash()
 				logger.Debug("processing new header",
 					zap.Stringer("current_block", ev.Number),
@@ -391,11 +391,11 @@ func (e *Watcher) Run(ctx context.Context) error {
 				}
 
 				e.pendingMu.Unlock()
-				logger.Info("processed new header",
-					zap.Stringer("current_block", ev.Number),
-					zap.Stringer("current_blockhash", currentHash),
-					zap.Duration("took", time.Since(start)),
-					zap.String("eth_network", e.networkName))
+				//logger.Info("processed new header",
+				//	zap.Stringer("current_block", ev.Number),
+				//	zap.Stringer("current_blockhash", currentHash),
+				//	zap.Duration("took", time.Since(start)),
+				//	zap.String("eth_network", e.networkName))
 			}
 		}
 	}()
