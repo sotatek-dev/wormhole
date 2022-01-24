@@ -156,7 +156,7 @@ const (
 	// ChainIDEthereumRopsten is the ChainID of Ethereum Ropsten
 	ChainIDEthereumRopsten ChainID = 4097
 
-	ChainIDKlaytn ChainID = 7
+	ChainIDKlaytn ChainID = 8
 
 	minVAALength        = 1 + 4 + 52 + 4 + 1 + 1
 	SupportedVAAVersion = 0x01

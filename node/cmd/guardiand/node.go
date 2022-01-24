@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/certusone/wormhole/node/pkg/db"
+	"github.com/certusone/wormhole/node/pkg/klaytn"
 	"github.com/certusone/wormhole/node/pkg/notify/discord"
 	"log"
 	"net/http"
@@ -27,12 +28,12 @@ import (
 	"github.com/certusone/wormhole/node/pkg/vaa"
 	eth_common "github.com/ethereum/go-ethereum/common"
 	ethcrypto "github.com/ethereum/go-ethereum/crypto"
+	ipfslog "github.com/ipfs/go-log/v2"
+	klay_common "github.com/klaytn/klaytn/common"
 	"github.com/libp2p/go-libp2p-core/crypto"
 	"github.com/libp2p/go-libp2p-core/peer"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
-
-	ipfslog "github.com/ipfs/go-log/v2"
 )
 
 var (
@@ -418,7 +419,7 @@ func runNode(cmd *cobra.Command, args []string) {
 	}
 
 	ethContractAddr := eth_common.HexToAddress(*ethContract)
-	klaytnContractAddr := eth_common.HexToAddress(*klaytnContract)
+	klaytnContractAddr := klay_common.HexToAddress(*klaytnContract)
 	//bscContractAddr := eth_common.HexToAddress(*bscContract)
 	//polygonContractAddr := eth_common.HexToAddress(*polygonContract)
 	ethRopstenContractAddr := eth_common.HexToAddress(*ethRopstenContract)
@@ -553,7 +554,7 @@ func runNode(cmd *cobra.Command, args []string) {
 		}
 
 		if err := supervisor.Run(ctx, "klaytn",
-			ethereum.NewEthWatcher(*klaytnRPC, klaytnContractAddr, "klaytn", common.ReadinessKlaytnSyncing, vaa.ChainIDKlaytn, lockC, setC, 1).Run); err != nil {
+			klaytn.NewKlaytnWatcher(*klaytnRPC, klaytnContractAddr, "klaytn", common.ReadinessKlaytnSyncing, vaa.ChainIDKlaytn, lockC, setC).Run); err != nil {
 			return err
 		}
 
