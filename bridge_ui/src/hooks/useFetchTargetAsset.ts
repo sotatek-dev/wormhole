@@ -2,6 +2,7 @@ import {
   ChainId,
   CHAIN_ID_SOLANA,
   CHAIN_ID_TERRA,
+  CHAIN_ID_KLAYTN_BAOBAB,
   getForeignAssetEth,
   getForeignAssetSolana,
   getForeignAssetTerra,
@@ -21,6 +22,7 @@ import { ethers } from "ethers";
 import { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useEthereumProvider } from "../contexts/EthereumProviderContext";
+import { useKaikasProvider } from "../contexts/KaikasProviderContext";
 import {
   errorDataWrapper,
   fetchDataWrapper,
@@ -49,6 +51,7 @@ import {
   TERRA_HOST,
   TERRA_TOKEN_BRIDGE_ADDRESS,
 } from "../utils/consts";
+import { getForeignAssetKlaytn } from "../utils/klaytn";
 
 function useFetchTargetAsset(nft?: boolean) {
   const dispatch = useDispatch();
@@ -70,6 +73,11 @@ function useFetchTargetAsset(nft?: boolean) {
   );
   const setTargetAsset = nft ? setNFTTargetAsset : setTransferTargetAsset;
   const { provider, chainId: evmChainId } = useEthereumProvider();
+  const { provider: providerKaikas, signerAddress: signerAddressKaikas } =
+    useKaikasProvider()
+
+  console.log({ providerKaikas });
+
   const correctEvmNetwork = getEvmChainId(targetChain);
   const hasCorrectEvmNetwork = evmChainId === correctEvmNetwork;
   const [lastSuccessfulArgs, setLastSuccessfulArgs] = useState<{
@@ -83,12 +91,13 @@ function useFetchTargetAsset(nft?: boolean) {
   const argsMatchLastSuccess =
     !!lastSuccessfulArgs &&
     lastSuccessfulArgs.isSourceAssetWormholeWrapped ===
-      isSourceAssetWormholeWrapped &&
+    isSourceAssetWormholeWrapped &&
     lastSuccessfulArgs.originChain === originChain &&
     lastSuccessfulArgs.originAsset === originAsset &&
     lastSuccessfulArgs.targetChain === targetChain &&
     lastSuccessfulArgs.nft === nft &&
     lastSuccessfulArgs.tokenId === tokenId;
+
   const setArgs = useCallback(
     () =>
       setLastSuccessfulArgs({
@@ -128,6 +137,46 @@ function useFetchTargetAsset(nft?: boolean) {
     let cancelled = false;
     (async () => {
       if (
+        targetChain === CHAIN_ID_KLAYTN_BAOBAB &&
+        originChain &&
+        originAsset &&
+        providerKaikas &&
+        signerAddressKaikas) {
+        dispatch(setTargetAsset(fetchDataWrapper()));
+        try {
+          debugger;
+          const asset = await getForeignAssetKlaytn(
+            getTokenBridgeAddressForChain(targetChain),
+            providerKaikas,
+            signerAddressKaikas,
+            originChain,
+            hexToUint8Array(originAsset)
+          )
+          console.error(asset);
+          if (!cancelled) {
+            dispatch(
+              setTargetAsset(
+                receiveDataWrapper({
+                  doesExist: asset !== ethers.constants.AddressZero,
+                  address: asset,
+                })
+              )
+            );
+            setArgs();
+          }
+        } catch (e) {
+          if (!cancelled) {
+            dispatch(
+              setTargetAsset(
+                errorDataWrapper(
+                  "Unable to determine existence of wrapped asset"
+                )
+              )
+            );
+          }
+        }
+      }
+      if (
         isEVMChain(targetChain) &&
         provider &&
         hasCorrectEvmNetwork &&
@@ -138,17 +187,17 @@ function useFetchTargetAsset(nft?: boolean) {
         try {
           const asset = await (nft
             ? getForeignAssetEthNFT(
-                getNFTBridgeAddressForChain(targetChain),
-                provider,
-                originChain,
-                hexToUint8Array(originAsset)
-              )
+              getNFTBridgeAddressForChain(targetChain),
+              provider,
+              originChain,
+              hexToUint8Array(originAsset)
+            )
             : getForeignAssetEth(
-                getTokenBridgeAddressForChain(targetChain),
-                provider,
-                originChain,
-                hexToUint8Array(originAsset)
-              ));
+              getTokenBridgeAddressForChain(targetChain),
+              provider,
+              originChain,
+              hexToUint8Array(originAsset)
+            ));
           if (!cancelled) {
             dispatch(
               setTargetAsset(
@@ -178,17 +227,17 @@ function useFetchTargetAsset(nft?: boolean) {
           const connection = new Connection(SOLANA_HOST, "confirmed");
           const asset = await (nft
             ? getForeignAssetSolNFT(
-                SOL_NFT_BRIDGE_ADDRESS,
-                originChain,
-                hexToUint8Array(originAsset),
-                arrayify(BigNumber.from(tokenId || "0"))
-              )
+              SOL_NFT_BRIDGE_ADDRESS,
+              originChain,
+              hexToUint8Array(originAsset),
+              arrayify(BigNumber.from(tokenId || "0"))
+            )
             : getForeignAssetSolana(
-                connection,
-                SOL_TOKEN_BRIDGE_ADDRESS,
-                originChain,
-                hexToUint8Array(originAsset)
-              ));
+              connection,
+              SOL_TOKEN_BRIDGE_ADDRESS,
+              originChain,
+              hexToUint8Array(originAsset)
+            ));
           if (!cancelled) {
             dispatch(
               setTargetAsset(
@@ -256,6 +305,8 @@ function useFetchTargetAsset(nft?: boolean) {
     hasCorrectEvmNetwork,
     argsMatchLastSuccess,
     setArgs,
+    providerKaikas,
+    signerAddressKaikas
   ]);
 }
 
