@@ -205,7 +205,7 @@ export function useHandleCreateWrapped(shouldUpdate: boolean) {
   const handleCreateClick = useCallback(() => {
     console.log({signerKaikas, signedVAA, providerKaikas});
     
-    if (targetChain === CHAIN_ID_KLAYTN_BAOBAB && !!signerAddress && !!signedVAA) {
+    if (targetChain === CHAIN_ID_KLAYTN_BAOBAB && !!signedVAA) {
       console.log('xxx');
       console.log('signerAddress baobab: ', signerAddress);
       console.log('signedVAA: ', signedVAA);
