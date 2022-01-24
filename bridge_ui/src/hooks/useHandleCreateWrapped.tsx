@@ -2,6 +2,7 @@ import {
   ChainId,
   CHAIN_ID_SOLANA,
   CHAIN_ID_TERRA,
+  CHAIN_ID_KLAYTN_BAOBAB,
   createWrappedOnEth,
   createWrappedOnSolana,
   createWrappedOnTerra,
@@ -42,6 +43,8 @@ import parseError from "../utils/parseError";
 import { signSendAndConfirm } from "../utils/solana";
 import { Alert } from "@material-ui/lab";
 import { postWithFees } from "../utils/terra";
+import { createWrappedOnKlaytn } from "../blockchain/klaytn/createWrappedOnKlaytn";
+import { useKaikasProvider } from "../contexts/KaikasProviderContext";
 
 async function evm(
   dispatch: any,
@@ -53,6 +56,7 @@ async function evm(
 ) {
   dispatch(setIsCreating(true));
   try {
+    console.log("signedVAA: ", signedVAA);
     const receipt = shouldUpdate
       ? await updateWrappedOnEth(
           getTokenBridgeAddressForChain(chainId),
@@ -77,7 +81,23 @@ async function evm(
     dispatch(setIsCreating(false));
   }
 }
-
+async function klaytn(
+  dispatch: any,
+  enqueueSnackbar: any,
+  signer: any,
+  signedVAA: Uint8Array,
+  chainId: ChainId,
+  shouldUpdate: boolean
+){
+  dispatch(setIsCreating(true));
+  const receipt = await createWrappedOnKlaytn(
+    getTokenBridgeAddressForChain(chainId),
+    signer,
+    signedVAA
+  )
+  console.log(receipt);
+  
+}
 async function solana(
   dispatch: any,
   enqueueSnackbar: any,
@@ -179,10 +199,28 @@ export function useHandleCreateWrapped(shouldUpdate: boolean) {
   const signedVAA = useAttestSignedVAA();
   const isCreating = useSelector(selectAttestIsCreating);
   const { signer } = useEthereumProvider();
+  const { signer: signerKaikas, provider: providerKaikas, signerAddress} = useKaikasProvider();
   const terraWallet = useConnectedWallet();
   const terraFeeDenom = useSelector(selectTerraFeeDenom);
   const handleCreateClick = useCallback(() => {
+    console.log({signerKaikas, signedVAA, providerKaikas});
+    
+    if (targetChain === CHAIN_ID_KLAYTN_BAOBAB && !!signerAddress && !!signedVAA) {
+      console.log('xxx');
+      console.log('signerAddress baobab: ', signerAddress);
+      console.log('signedVAA: ', signedVAA);
+      klaytn(
+        dispatch,
+        enqueueSnackbar,
+        signerAddress,
+        signedVAA,
+        targetChain,
+        shouldUpdate
+      )
+    }
     if (isEVMChain(targetChain) && !!signer && !!signedVAA) {
+      console.log('signer evm', signer);
+      
       evm(
         dispatch,
         enqueueSnackbar,
@@ -233,6 +271,9 @@ export function useHandleCreateWrapped(shouldUpdate: boolean) {
     signer,
     shouldUpdate,
     terraFeeDenom,
+    signerKaikas,
+    providerKaikas,
+    signerAddress
   ]);
   return useMemo(
     () => ({
