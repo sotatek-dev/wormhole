@@ -6,7 +6,7 @@ import {
   useMemo,
   useState,
 } from "react";
-
+import Caver from "caver-js";
 declare global {
   interface Window {
     klaytn: any;
@@ -53,7 +53,10 @@ export const KaikasProviderProvider = ({
     if (klaytn) {
       try {
         await klaytn.enable();
-        setProvider(window.klaytn);
+        const caver = new Caver(window.klaytn);
+        setProvider(caver.klay);
+        console.log(caver.klay.getAccountKey(klaytn.selectedAddress).then((account) => console.log(account)));
+        
         setSignerAddress(klaytn.selectedAddress);
         setChainId(klaytn.networkVersion);
         klaytn.on("networkChanged", () => setChainId(klaytn.networkVersion));
