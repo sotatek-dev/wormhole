@@ -13,41 +13,14 @@ export async function createWrappedOnKlaytn (
 ) {
     await window.klaytn.enable();
     const caver =  new Caver(window.klaytn);
-    const data = caver.klay.abi.encodeFunctionCall(
-        {
-            inputs: [
-              {
-                internalType: "bytes",
-                name: "encodedVm",
-                type: "bytes"
-              }
-            ],
-            name: "createWrapped",
-            outputs: [
-              {
-                internalType: "address",
-                name: "token",
-                type: "address"
-              }
-            ],
-            stateMutability: "nonpayable",
-            type: "function"
-          },
-        [signedVAA]
-      )
-     const result = caver.klay.sendTransaction({
-        type: 'SMART_CONTRACT_EXECUTION',
+    const contract = new caver.klay.Contract(klaytnBridgeImplementationAbi as any, tokenBridgeAddress);
+    const encodeVM = caver.utils.bytesToHex(signedVAA as any)
+    const result = await contract.methods.updateWrapped(
+      encodeVM
+    ).send({
         from: signerAddress,
-        to: tokenBridgeAddress,
-        gas: '8000000',
-        data
-    })
-    // const contract = new caver.klay.Contract(klaytnBridgeImplementationAbi as any, tokenBridgeAddress);
-    // const result = await contract.methods.createWrapped(
-    //     signedVAA
-    // ).send({
-    //     from: signerAddress,
-    // });
+        gas: 3000000
+    });
     console.log('result: ', result);
     return result;
 }
