@@ -55,8 +55,6 @@ export const KaikasProviderProvider = ({
         await klaytn.enable();
         const caver = new Caver(window.klaytn);
         setProvider(caver.klay);
-        console.log(caver.klay.getAccountKey(klaytn.selectedAddress).then((account) => console.log(account)));
-        
         setSignerAddress(klaytn.selectedAddress);
         setChainId(klaytn.networkVersion);
         klaytn.on("networkChanged", () => setChainId(klaytn.networkVersion));
