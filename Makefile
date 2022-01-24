@@ -44,6 +44,5 @@ wormhole-build:
 	npm run build --prefix sdk/js
 
 wormhole-build-sdk:
-	npm ci --prefix ethereum
 	npm ci --prefix sdk/js
 	npm run build --prefix sdk/js

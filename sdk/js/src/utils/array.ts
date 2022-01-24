@@ -44,7 +44,7 @@ export const hexToNativeString = (h: string | undefined, c: ChainId) => {
       ? undefined
       : c === CHAIN_ID_SOLANA
       ? new PublicKey(hexToUint8Array(h)).toString()
-      : isEVMChain(c)
+      : (isEVMChain(c) || c === CHAIN_ID_KLAYTN_BAOBAB)
       ? hexZeroPad(hexValue(hexToUint8Array(h)), 20)
       : c === CHAIN_ID_TERRA
       ? isHexNativeTerra(h)
