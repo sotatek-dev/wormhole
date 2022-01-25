@@ -1,6 +1,7 @@
 import {
   CHAIN_ID_SOLANA,
   CHAIN_ID_TERRA,
+  CHAIN_ID_KLAYTN_BAOBAB,
   isEVMChain,
   TokenImplementation__factory,
 } from "@certusone/wormhole-sdk";
@@ -11,6 +12,7 @@ import { formatUnits } from "ethers/lib/utils";
 import { useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useEthereumProvider } from "../contexts/EthereumProviderContext";
+import { useKaikasProvider } from "../contexts/KaikasProviderContext";
 import { useSolanaWallet } from "../contexts/SolanaWalletContext";
 import {
   selectTransferTargetAsset,
@@ -20,6 +22,8 @@ import { setTargetParsedTokenAccount } from "../store/transferSlice";
 import { getEvmChainId, SOLANA_HOST, TERRA_HOST } from "../utils/consts";
 import { createParsedTokenAccount } from "./useGetSourceParsedTokenAccounts";
 import useMetadata from "./useMetadata";
+import TokenImplementation from "../blockchain/abi/TokenImplementation.json";
+
 
 function useGetTargetParsedTokenAccounts() {
   const dispatch = useDispatch();
@@ -36,6 +40,7 @@ function useGetTargetParsedTokenAccounts() {
     (targetAsset && metadata.data?.get(targetAsset)?.symbol) || undefined;
   const logo =
     (targetAsset && metadata.data?.get(targetAsset)?.logo) || undefined;
+
   const solanaWallet = useSolanaWallet();
   const solPK = solanaWallet?.publicKey;
   const terraWallet = useConnectedWallet();
@@ -44,6 +49,10 @@ function useGetTargetParsedTokenAccounts() {
     signerAddress,
     chainId: evmChainId,
   } = useEthereumProvider();
+  const {
+    provider: providerKaikas,
+    signerAddress: signerAddressKaikas,
+  } = useKaikasProvider();
   const hasCorrectEvmNetwork = evmChainId === getEvmChainId(targetChain);
   const hasResolvedMetadata = metadata.data || metadata.error;
   useEffect(() => {
@@ -53,6 +62,37 @@ function useGetTargetParsedTokenAccounts() {
       return;
     }
     let cancelled = false;
+
+    if (
+      targetChain === CHAIN_ID_KLAYTN_BAOBAB &&
+      providerKaikas &&
+      signerAddressKaikas
+    ) {
+      const loadDataFromSmartContract = async () => {
+        const contract = new providerKaikas.Contract(TokenImplementation, targetAsset);
+        const decimals = await contract.methods.decimals().call();
+        const balance = await contract.methods.balanceOf(signerAddressKaikas).call();
+        // const balance = await contract.methods.balanceOf(signerAddressKaikas).call();
+        dispatch(
+          setTargetParsedTokenAccount(
+            // TODO: verify accuracy
+            createParsedTokenAccount(
+              signerAddressKaikas,
+              contract.address,
+              balance.toString(),
+              decimals,
+              Number(formatUnits(balance, decimals)),
+              formatUnits(balance, decimals),
+              symbol,
+              tokenName,
+              logo
+            )
+          )
+        );
+      }
+
+      loadDataFromSmartContract()
+    }
 
     if (targetChain === CHAIN_ID_TERRA && terraWallet) {
       const lcd = new LCDClient(TERRA_HOST);
@@ -182,6 +222,8 @@ function useGetTargetParsedTokenAccounts() {
     symbol,
     tokenName,
     logo,
+    signerAddressKaikas,
+    providerKaikas
   ]);
 }
 
