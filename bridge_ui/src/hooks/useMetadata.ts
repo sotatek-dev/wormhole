@@ -2,6 +2,7 @@ import {
   ChainId,
   CHAIN_ID_SOLANA,
   CHAIN_ID_TERRA,
+  CHAIN_ID_KLAYTN_BAOBAB,
   isEVMChain,
 } from "@certusone/wormhole-sdk";
 import { TokenInfo } from "@solana/spl-token-registry";
@@ -10,6 +11,7 @@ import { DataWrapper, getEmptyDataWrapper } from "../store/helpers";
 import { logoOverrides } from "../utils/consts";
 import { Metadata } from "../utils/metaplex";
 import useEvmMetadata, { EvmMetadata } from "./useEvmMetadata";
+import useKlaytnMetadata from "./useKaikasMetadata";
 import useMetaplexData from "./useMetaplexData";
 import useSolanaTokenMap from "./useSolanaTokenMap";
 import useTerraMetadata, { TerraMetadata } from "./useTerraMetadata";
@@ -111,6 +113,33 @@ const constructEthMetadata = (
   };
 };
 
+const constructKlaytnMetadata = (
+  addresses: string[],
+  metadataMap: DataWrapper<Map<string, EvmMetadata> | null>
+) => {
+  const isFetching = metadataMap.isFetching;
+  const error = metadataMap.error;
+  const receivedAt = metadataMap.receivedAt;
+  const data = new Map<string, GenericMetadata>();
+  addresses.forEach((address) => {
+    const meta = metadataMap.data?.get(address);
+    const obj = {
+      symbol: meta?.symbol || undefined,
+      logo: logoOverrides.get(address) || meta?.logo || undefined,
+      tokenName: meta?.tokenName || undefined,
+      decimals: meta?.decimals,
+    };
+    data.set(address, obj);
+  });
+
+  return {
+    isFetching,
+    error,
+    receivedAt,
+    data,
+  };
+};
+
 export default function useMetadata(
   chainId: ChainId,
   addresses: string[]
@@ -127,20 +156,26 @@ export default function useMetadata(
   const ethereumAddresses = useMemo(() => {
     return isEVMChain(chainId) ? addresses : [];
   }, [chainId, addresses]);
+  const klaytnAddresses = useMemo(() => {
+    return chainId === CHAIN_ID_KLAYTN_BAOBAB ? addresses : [];
+  }, [chainId, addresses]);
 
   const metaplexData = useMetaplexData(solanaAddresses);
   const terraMetadata = useTerraMetadata(terraAddresses);
   const ethMetadata = useEvmMetadata(ethereumAddresses, chainId);
+  const klaytnMetadata = useKlaytnMetadata(klaytnAddresses);
 
   const output: DataWrapper<Map<string, GenericMetadata>> = useMemo(
     () =>
       chainId === CHAIN_ID_SOLANA
         ? constructSolanaMetadata(solanaAddresses, solanaTokenMap, metaplexData)
-        : isEVMChain(chainId)
-        ? constructEthMetadata(ethereumAddresses, ethMetadata)
-        : chainId === CHAIN_ID_TERRA
-        ? constructTerraMetadata(terraAddresses, terraTokenMap, terraMetadata)
-        : getEmptyDataWrapper(),
+        : chainId === CHAIN_ID_KLAYTN_BAOBAB
+          ? constructKlaytnMetadata(klaytnAddresses, klaytnMetadata) :
+          isEVMChain(chainId)
+            ? constructEthMetadata(ethereumAddresses, ethMetadata)
+            : chainId === CHAIN_ID_TERRA
+              ? constructTerraMetadata(terraAddresses, terraTokenMap, terraMetadata)
+              : getEmptyDataWrapper(),
     [
       chainId,
       solanaAddresses,
@@ -151,6 +186,8 @@ export default function useMetadata(
       terraAddresses,
       terraMetadata,
       terraTokenMap,
+      klaytnMetadata,
+      klaytnAddresses
     ]
   );
 
