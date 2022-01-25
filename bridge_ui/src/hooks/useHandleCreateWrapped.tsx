@@ -43,6 +43,7 @@ import { Alert } from "@material-ui/lab";
 import { postWithFees } from "../utils/terra";
 import { createWrappedOnKlaytn } from "../blockchain/klaytn/createWrappedOnKlaytn";
 import { useKaikasProvider } from "../contexts/KaikasProviderContext";
+import { updateWrappedOnKlaytn } from "../blockchain/klaytn/updateWrappedOnKlaytn";
 
 async function evm(
   dispatch: any,
@@ -79,23 +80,46 @@ async function evm(
     dispatch(setIsCreating(false));
   }
 }
+
 async function klaytn(
   dispatch: any,
   enqueueSnackbar: any,
-  signer: any,
+  provider: any,
+  signerAddress: string | undefined,
   signedVAA: Uint8Array,
   chainId: ChainId,
   shouldUpdate: boolean
 ){
   dispatch(setIsCreating(true));
-  const receipt = await createWrappedOnKlaytn(
-    getTokenBridgeAddressForChain(chainId),
-    signer,
-    signedVAA
-  )
-  console.log(receipt);
-  
+  try {
+    const receipt = shouldUpdate
+      ? await updateWrappedOnKlaytn(
+        getTokenBridgeAddressForChain(chainId),
+        provider,
+        signerAddress,
+        signedVAA
+      )
+      : await createWrappedOnKlaytn(
+        getTokenBridgeAddressForChain(chainId),
+        provider,
+        signerAddress,
+        signedVAA
+      );
+    
+    dispatch(
+      setCreateTx({ id: receipt.transactionHash, block: receipt.blockNumber })
+    );
+    enqueueSnackbar(null, {
+      content: <Alert severity="success">Transaction confirmed</Alert>,
+    });
+  } catch (e) {
+    enqueueSnackbar(null, {
+      content: <Alert severity="error">{parseError(e)}</Alert>,
+    });
+    dispatch(setIsCreating(false));
+  }  
 }
+
 async function solana(
   dispatch: any,
   enqueueSnackbar: any,
@@ -206,6 +230,7 @@ export function useHandleCreateWrapped(shouldUpdate: boolean) {
       klaytn(
         dispatch,
         enqueueSnackbar,
+        providerKaikas,
         signerAddress,
         signedVAA,
         targetChain,
