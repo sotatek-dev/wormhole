@@ -2,6 +2,7 @@ import {
   ChainId,
   CHAIN_ID_SOLANA,
   CHAIN_ID_TERRA,
+  CHAIN_ID_KLAYTN_BAOBAB,
   isEVMChain,
   postVaaSolanaWithRetry,
   redeemAndUnwrapOnSolana,
@@ -41,6 +42,47 @@ import parseError from "../utils/parseError";
 import { signSendAndConfirm } from "../utils/solana";
 import { Alert } from "@material-ui/lab";
 import { postWithFees } from "../utils/terra";
+import { useKaikasProvider } from "../contexts/KaikasProviderContext";
+import { redeemOnKlaytnNative } from "../blockchain/klaytn/redeemOnKlaytnNative";
+import { redeemOnKlaytn } from "../blockchain/klaytn/redeemOnKlaytn";
+
+async function klaytn(
+  dispatch: any,
+  enqueueSnackbar: any,
+  provider: Signer,
+  signerAddress: string,
+  signedVAA: Uint8Array,
+  isNative: boolean,
+) {
+  dispatch(setIsRedeeming(true));
+  try {
+    const receipt = isNative
+      ? await redeemOnKlaytnNative(
+          getTokenBridgeAddressForChain(CHAIN_ID_KLAYTN_BAOBAB),
+          provider,
+          signerAddress,
+          signedVAA
+        )
+      : await redeemOnKlaytn(
+          getTokenBridgeAddressForChain(CHAIN_ID_KLAYTN_BAOBAB),
+          provider,
+          signerAddress,
+          signedVAA
+        );
+    dispatch(
+      setRedeemTx({ id: receipt.transactionHash, block: receipt.blockNumber })
+    );
+    enqueueSnackbar(null, {
+      content: <Alert severity="success">Transaction confirmed</Alert>,
+    });
+  } catch (e) {
+    enqueueSnackbar(null, {
+      content: <Alert severity="error">{parseError(e)}</Alert>,
+    });
+    dispatch(setIsRedeeming(false));
+  }
+}
+
 
 async function evm(
   dispatch: any,
@@ -170,6 +212,7 @@ export function useHandleRedeem() {
   const solanaWallet = useSolanaWallet();
   const solPK = solanaWallet?.publicKey;
   const { signer } = useEthereumProvider();
+  const { provider: providerKaikas, signerAddress: signerAddressKaikas } = useKaikasProvider();
   const terraWallet = useConnectedWallet();
   const terraFeeDenom = useSelector(selectTerraFeeDenom);
   const signedVAA = useTransferSignedVAA();
@@ -177,6 +220,8 @@ export function useHandleRedeem() {
   const handleRedeemClick = useCallback(() => {
     if (isEVMChain(targetChain) && !!signer && signedVAA) {
       evm(dispatch, enqueueSnackbar, signer, signedVAA, false, targetChain);
+    } else if (targetChain === CHAIN_ID_KLAYTN_BAOBAB && !!providerKaikas && signerAddressKaikas && signedVAA) {
+      klaytn(dispatch, enqueueSnackbar, providerKaikas, signerAddressKaikas, signedVAA, false);
     } else if (
       targetChain === CHAIN_ID_SOLANA &&
       !!solanaWallet &&
@@ -205,6 +250,8 @@ export function useHandleRedeem() {
     solPK,
     terraWallet,
     terraFeeDenom,
+    signerAddressKaikas,
+    providerKaikas
   ]);
 
   const handleRedeemNativeClick = useCallback(() => {
