@@ -53,7 +53,6 @@ const (
 func (p *Processor) handleCleanup(ctx context.Context) {
 	p.logger.Info("aggregation state summary", zap.Int("cached", len(p.state.vaaSignatures)))
 	aggregationStateEntries.Set(float64(len(p.state.vaaSignatures)))
-	p.logger.Info("aggregation...............", zap.Any("set", p.state.vaaSignatures))
 	for hash, s := range p.state.vaaSignatures {
 		delta := time.Since(s.firstObserved)
 

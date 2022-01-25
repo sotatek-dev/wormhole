@@ -245,7 +245,6 @@ func (p *Processor) handleObservation(ctx context.Context, m *gossipv1.SignedObs
 			p.broadcastSignedVAA(signed)
 			p.attestationEvents.ReportVAAQuorum(signed)
 			p.state.vaaSignatures[hash].submitted = true
-			p.logger.Info("xxxxxxxxxxxxxxxxxxxxxxxx")
 		} else {
 			p.logger.Info("quorum not met or already submitted, doing nothing",
 				zap.String("digest", hash))
