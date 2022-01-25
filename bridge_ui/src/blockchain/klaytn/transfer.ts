@@ -33,6 +33,5 @@ export async function transferFromKlaytnNative(
   const encodeVM = caver.utils.bytesToHex(recipientAddress as any)
   const result = await contract.methods.wrapAndTransferETH(recipientChain, encodeVM, fee, createNonce())
     .send({ from: signerAddress, value: amount, gas: 3000000 })
-  console.log("result klaytn native:: ", result);
   return result;
 }
