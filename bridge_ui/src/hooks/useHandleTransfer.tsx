@@ -117,6 +117,9 @@ async function klaytn(
     enqueueSnackbar(null, {
       content: <Alert severity="info">Fetching VAA</Alert>,
     });
+    console.log('sequence:: ', sequence);
+    console.log('emitterAddress:: ', emitterAddress);
+    
     const { vaaBytes } = await getSignedVAAWithRetry(
       chainId,
       emitterAddress,
