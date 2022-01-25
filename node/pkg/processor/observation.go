@@ -109,7 +109,6 @@ func (p *Processor) handleObservation(ctx context.Context, m *gossipv1.SignedObs
 	// During an update, vaaState.signatures can contain signatures from *both* guardian sets.
 	//
 	var gs *node_common.GuardianSet
-	p.logger.Info("Node guardian: ", zap.Any("gs", p.gs))
 	if p.state.vaaSignatures[hash] != nil && p.state.vaaSignatures[hash].gs != nil {
 
 		gs = p.state.vaaSignatures[hash].gs
@@ -117,7 +116,7 @@ func (p *Processor) handleObservation(ctx context.Context, m *gossipv1.SignedObs
 	} else {
 		gs = p.gs
 	}
-
+	p.logger.Info("guardian after set: ", zap.Any("gs", gs))
 	// We haven't yet observed the trusted guardian set on Ethereum, and therefore, it's impossible to verify it.
 	// May as well not have received it/been offline - drop it and wait for the guardian set.
 	if gs == nil {

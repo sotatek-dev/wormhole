@@ -633,7 +633,6 @@ func runNode(cmd *cobra.Command, args []string) {
 			}
 		}
 		if *publicWeb != "" {
-			log.Println("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
 			if err := supervisor.Run(ctx, "publicweb", publicwebService); err != nil {
 				return err
 			}

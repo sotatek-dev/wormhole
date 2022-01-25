@@ -315,7 +315,6 @@ func Run(obsvC chan *gossipv1.SignedObservation, sendC chan []byte, signedInC ch
 			case *gossipv1.GossipMessage_SignedHeartbeat:
 				s := m.SignedHeartbeat
 				gs := gst.Get()
-				logger.Info("gst++++++++", zap.Any("guardiand set state", gst.Get()))
 				if gs == nil {
 					// No valid guardian set yet - dropping heartbeat
 					logger.Info("skipping heartbeat - no guardian set",
