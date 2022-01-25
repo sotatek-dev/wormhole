@@ -11,8 +11,6 @@ export async function getOriginalAssetKlaytn (
     wrappedAddress?: string,
     lookupChainId?: ChainId
 ) {
-    console.log(wrappedAddress);
-    
     const isWrapped = await isWrappedAsset(wrappedAddress)
     if (isWrapped) {
         const caver = new Caver(KLAYTN_PROVIDER_API);
