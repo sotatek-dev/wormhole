@@ -73,7 +73,8 @@ function useFetchTargetAsset(nft?: boolean) {
   );
   const setTargetAsset = nft ? setNFTTargetAsset : setTransferTargetAsset;
   const { provider, chainId: evmChainId } = useEthereumProvider();
-  const { provider: providerKaikas, signerAddress: signerAddressKaikas } = useKaikasProvider()
+  const { provider: providerKaikas, signerAddress: signerAddressKaikas } =
+    useKaikasProvider()
 
   const correctEvmNetwork = getEvmChainId(targetChain);
   const hasCorrectEvmNetwork = evmChainId === correctEvmNetwork;
