@@ -83,8 +83,8 @@ func (s *PublicrpcServer) GetSignedVAA(ctx context.Context, req *publicrpcv1.Get
 		if err == db.ErrVAANotFound {
 			return nil, status.Error(codes.NotFound, err.Error())
 		}
-		s.logger.Error("failed to fetch VAA", zap.Error(err), zap.Any("request", req))
-		return nil, status.Error(codes.Internal, "internal server error")
+		//s.logger.Error("failed to fetch VAA", zap.Error(err), zap.Any("request", req))
+		//return nil, status.Error(codes.Internal, "internal server error")
 	}
 
 	return &publicrpcv1.GetSignedVAAResponse{

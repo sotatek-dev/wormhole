@@ -165,7 +165,7 @@ func (e *Watcher) Run(ctx context.Context) error {
 				}
 
 				logger.Info("found new message publication transaction", zap.Stringer("tx", ev.Raw.TxHash),
-					zap.Uint64("block", ev.Raw.BlockNumber), zap.String("eth_network", e.networkName))
+					zap.Uint64("block", ev.Raw.BlockNumber), zap.String("klay_network", e.networkName))
 
 				klaytnMessagesObserved.WithLabelValues(e.networkName).Inc()
 				e.msgChan <- message

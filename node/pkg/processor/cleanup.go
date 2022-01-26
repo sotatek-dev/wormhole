@@ -119,6 +119,8 @@ func (p *Processor) handleCleanup(ctx context.Context) {
 				zap.Int("required_sigs", wantSigs),
 				zap.Bool("quorum", quorum),
 				zap.Stringer("emitter_chain", chain),
+				zap.Any("VAA", s.ourVAA),
+				zap.Any("Mess", s.ourMsg),
 			)
 
 			for _, k := range gs.Keys {
