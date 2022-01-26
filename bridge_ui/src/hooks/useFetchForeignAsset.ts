@@ -112,7 +112,6 @@ function useFetchForeignAsset(
       ? () => getForeignAssetKlaytn(
         getTokenBridgeAddressForChain(foreignChain),
         providerKaikas,
-        signerAddressKaikas,
         originChain,
         hexToUint8Array(originAssetHex)
       )

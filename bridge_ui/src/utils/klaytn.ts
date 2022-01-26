@@ -1,27 +1,46 @@
+import {
+  Implementation__factory
+} from "@certusone/wormhole-sdk";
 import klaytnBridgeImplementationAbi from "../blockchain/abi/BridgeImplementation.json";
 import klaytnTokenImplementationAbi from "../blockchain/abi/TokenImplementation.json";
-import Caver from 'caver-js';
 import {arrayify, zeroPad} from 'ethers/lib/utils';
-
+import caver from "../blockchain/klaytn/caver";
 import { ChainId } from '@certusone/wormhole-sdk';
 import { createNonce } from "../blockchain/klaytn/utils";
 
-const caver = new Caver(window.klaytn);
-const TOKEN_BRIDGE_ADDRESS_KLAYTN = process.env.REACT_APP_TOKEN_BRIDGE;
-const KLAYTN_PROVIDER_API = process.env.REACT_APP_KLAYTN_PROVIDER_API;
-const KEY_KLAYTN = process.env.REACT_APP_KEY_KLAYTN;
+export const GAS_DEFAULT_KLAYTN = 3000000;
 
-const GAS_PRICE_KLAYTN = "25000000000";
+export function parseSequenceFromLogKlaytn (
+  receipt: any,
+  bridgeAddress: string
+): string {
+  let bridge = {} as any;
+  const keyEvents = Object.keys(receipt?.events);
+  for(let i = 0; i <keyEvents.length; i++) {
+    const bridgeItem = receipt?.events[keyEvents[i]];
+    if (bridgeItem?.address === bridgeAddress) {
+      bridge = bridgeItem
+    }
+  }
+  
+  const bridgeLog = {
+    ...bridge,
+    data: bridge?.raw?.data,
+    topics: bridge?.raw?.topics
+  }
+  const {
+    args: { sequence },
+  } = Implementation__factory.createInterface().parseLog(bridgeLog);
+  return sequence.toString();
+}
 
 export async function getForeignAssetKlaytn(
   tokenBridgeAddress: string,
   provider: any,
-  signerAddressKaikas: string | undefined,
   originChain: ChainId,
   originAsset: Uint8Array
 ) {
   try {
-    console.log("xx");
     const contract = new provider.Contract(klaytnBridgeImplementationAbi as any, tokenBridgeAddress);
     const _originAsset = caver.utils.bytesToHex(originAsset as any)
     const result = await contract.methods.wrappedAsset(originChain, _originAsset).call();
@@ -42,7 +61,7 @@ export async function attestFromKlaytn (
   console.log(tokenAddress);
   
   const result = await contract.methods.attestToken(tokenAddress, createNonce())
-  .send({from: signerAddress, gas: 3000000 })
+  .send({from: signerAddress, gas: GAS_DEFAULT_KLAYTN })
   return result;
   
 }
@@ -59,7 +78,7 @@ export async function createWrappedOnKlaytn(
     encodeVM
   ).send({
     from: signerAddress,
-    gas: 3000000
+    gas: GAS_DEFAULT_KLAYTN
   });
   return result;
 }
@@ -76,21 +95,18 @@ export async function updateWrappedOnKlaytn(
     encodeVM
   ).send({
     from: signerAddress,
-    gas: 3000000
+    gas: GAS_DEFAULT_KLAYTN
   });
   return result;
 }
 
 export default async function isWrappedAsset(
     address?: string, 
+    provider?: any,
+    tokenBridgeAddress?: string
 ) {
     
-    const caver = new Caver(KLAYTN_PROVIDER_API);
-
-    const contract = new caver.klay.Contract(klaytnBridgeImplementationAbi as any, TOKEN_BRIDGE_ADDRESS_KLAYTN, {
-        from: KEY_KLAYTN,
-        gasPrice: GAS_PRICE_KLAYTN
-    })
+    const contract = new provider.Contract(klaytnBridgeImplementationAbi as any, tokenBridgeAddress)
 
     const result = await contract.methods.isWrappedAsset(address).call();
     
@@ -99,15 +115,13 @@ export default async function isWrappedAsset(
 
 export async function getOriginalAssetKlaytn (
   wrappedAddress?: string,
-  lookupChainId?: ChainId
+  lookupChainId?: ChainId,
+  provider?: any,
+  tokenBridgeAddress?: string,
 ) {
-  const isWrapped = await isWrappedAsset(wrappedAddress)
+  const isWrapped = await isWrappedAsset(wrappedAddress, provider, tokenBridgeAddress)
   if (isWrapped) {
-      const caver = new Caver(KLAYTN_PROVIDER_API);
-      const contract = new caver.klay.Contract(klaytnTokenImplementationAbi as any, wrappedAddress, {
-          from: KEY_KLAYTN,
-          gasPrice: GAS_PRICE_KLAYTN
-      })
+      const contract = new provider.Contract(klaytnTokenImplementationAbi as any, wrappedAddress)
       const result = await contract.methods.nativeContract().call();
 
       return {
@@ -135,7 +149,7 @@ export async function redeemOnKlaytn(
     encodeVM
   ).send({
     from: signerAddress,
-    gas: 3000000
+    gas: GAS_DEFAULT_KLAYTN
   });
   return result;
 }
@@ -152,7 +166,7 @@ export async function redeemOnKlaytnNative(
     encodeVM
   ).send({
     from: signerAddress,
-    gas: 3000000
+    gas: GAS_DEFAULT_KLAYTN
   });
   return result;
 }
@@ -171,7 +185,7 @@ export async function transferFromKlaytn(
   const fee = 0;
   const result = await contract.methods
   .transferTokens(tokenAddress, amount, recipientChain, recipientAddress, fee, createNonce())
-  .send({ from: signerAddress, gas: 3000000 })
+  .send({ from: signerAddress, gas: GAS_DEFAULT_KLAYTN })
   return result;
 }
 
@@ -183,11 +197,10 @@ export async function transferFromKlaytnNative(
   recipientAddress: Uint8Array,
   signerAddress: any,
 ) {
-  const caver =  new Caver(window.klaytn);
   const contract = new provider.Contract(klaytnBridgeImplementationAbi as any, tokenBridgeAddress)
   const fee = 0;
   const encodeVM = caver.utils.bytesToHex(recipientAddress as any)
   const result = await contract.methods.wrapAndTransferETH(recipientChain, encodeVM, fee, createNonce())
-    .send({ from: signerAddress, value: amount, gas: 3000000 })
+    .send({ from: signerAddress, value: amount, gas: GAS_DEFAULT_KLAYTN })
   return result;
 }

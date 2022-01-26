@@ -145,7 +145,6 @@ function useFetchTargetAsset(nft?: boolean) {
           const asset = await getForeignAssetKlaytn(
             getTokenBridgeAddressForChain(targetChain),
             providerKaikas,
-            signerAddressKaikas,
             originChain,
             hexToUint8Array(originAsset)
           )
