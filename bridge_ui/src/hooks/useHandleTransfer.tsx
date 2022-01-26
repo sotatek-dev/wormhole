@@ -17,7 +17,6 @@ import {
   transferFromTerra,
   transferNativeSol,
   uint8ArrayToHex,
-  parseSequenceFromLogKlaytn,
 } from "@certusone/wormhole-sdk";
 import { Alert } from "@material-ui/lab";
 import { WalletContextState } from "@solana/wallet-adapter-react";
@@ -61,7 +60,7 @@ import {
   TERRA_TOKEN_BRIDGE_ADDRESS,
 } from "../utils/consts";
 import { getSignedVAAWithRetry } from "../utils/getSignedVAAWithRetry";
-import { transferFromKlaytn, transferFromKlaytnNative } from "../utils/klaytn";
+import { parseSequenceFromLogKlaytn, transferFromKlaytn, transferFromKlaytnNative } from "../utils/klaytn";
 import parseError from "../utils/parseError";
 import { signSendAndConfirm } from "../utils/solana";
 import { postWithFees, waitForTerraExecution } from "../utils/terra";

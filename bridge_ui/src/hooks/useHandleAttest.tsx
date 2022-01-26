@@ -12,7 +12,6 @@ import {
   parseSequenceFromLogEth,
   parseSequenceFromLogSolana,
   parseSequenceFromLogTerra,
-  parseSequenceFromLogKlaytn,
   uint8ArrayToHex,
   CHAIN_ID_KLAYTN_BAOBAB
 } from "@certusone/wormhole-sdk";
@@ -52,7 +51,7 @@ import {
   TERRA_TOKEN_BRIDGE_ADDRESS,
 } from "../utils/consts";
 import { getSignedVAAWithRetry } from "../utils/getSignedVAAWithRetry";
-import { attestFromKlaytn } from "../utils/klaytn";
+import { attestFromKlaytn, parseSequenceFromLogKlaytn } from "../utils/klaytn";
 import parseError from "../utils/parseError";
 import { signSendAndConfirm } from "../utils/solana";
 import { postWithFees, waitForTerraExecution } from "../utils/terra";

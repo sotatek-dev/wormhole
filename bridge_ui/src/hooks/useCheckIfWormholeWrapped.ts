@@ -87,7 +87,7 @@ function useCheckIfWormholeWrapped(nft?: boolean) {
     
     (async () => {
       if (sourceChain === CHAIN_ID_KLAYTN_BAOBAB && providerKaikas && sourceAsset) {
-        const wrappedAddress = await getOriginalAssetKlaytn(sourceAsset, sourceChain);
+        const wrappedAddress = await getOriginalAssetKlaytn(sourceAsset, sourceChain, providerKaikas, getTokenBridgeAddressForChain(sourceChain));
         const wrappedInfo = await makeStateSafe(wrappedAddress as any);
         if (!cancelled) {
           dispatch(setSourceWormholeWrappedInfo(wrappedInfo as any));
