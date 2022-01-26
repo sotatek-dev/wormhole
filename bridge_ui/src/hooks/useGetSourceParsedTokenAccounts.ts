@@ -767,7 +767,6 @@ function useGetAvailableTokens(nft: boolean = false) {
     if (
       signerAddressKaikas &&
       lookupChain === CHAIN_ID_KLAYTN_BAOBAB &&
-      !ethNativeAccount &&
       !nft
     ) {
       setEthNativeAccountLoading(true);
@@ -796,7 +795,7 @@ function useGetAvailableTokens(nft: boolean = false) {
     return () => {
       cancelled = true;
     };
-  }, [lookupChain, providerKaikas, signerAddressKaikas, nft, ethNativeAccount]);
+  }, [lookupChain, providerKaikas, signerAddressKaikas, nft]);
 
   //Polygon native asset load
   useEffect(() => {
