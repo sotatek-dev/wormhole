@@ -16,29 +16,7 @@ export function parseSequenceFromLogEth(
   } = Implementation__factory.createInterface().parseLog(bridgeLog);
   return sequence.toString();
 }
-export function parseSequenceFromLogKlaytn (
-  receipt: any,
-  bridgeAddress: string
-): string {
-  let bridge = {} as any;
-  const keyEvents = Object.keys(receipt?.events);
-  for(let i = 0; i <keyEvents.length; i++) {
-    const bridgeItem = receipt?.events[keyEvents[i]];
-    if (bridgeItem?.address === bridgeAddress) {
-      bridge = bridgeItem
-    }
-  }
-  
-  const bridgeLog = {
-    ...bridge,
-    data: bridge?.raw?.data,
-    topics: bridge?.raw?.topics
-  }
-  const {
-    args: { sequence },
-  } = Implementation__factory.createInterface().parseLog(bridgeLog);
-  return sequence.toString();
-}
+
 export function parseSequenceFromLogTerra(info: TxInfo): string {
   // Scan for the Sequence attribute in all the outputs of the transaction.
   // TODO: Make this not horrible.
