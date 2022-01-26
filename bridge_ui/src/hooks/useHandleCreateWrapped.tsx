@@ -41,9 +41,8 @@ import parseError from "../utils/parseError";
 import { signSendAndConfirm } from "../utils/solana";
 import { Alert } from "@material-ui/lab";
 import { postWithFees } from "../utils/terra";
-import { createWrappedOnKlaytn } from "../blockchain/klaytn/createWrappedOnKlaytn";
 import { useKaikasProvider } from "../contexts/KaikasProviderContext";
-import { updateWrappedOnKlaytn } from "../blockchain/klaytn/updateWrappedOnKlaytn";
+import { createWrappedOnKlaytn, updateWrappedOnKlaytn } from "../utils/klaytn";
 
 async function evm(
   dispatch: any,

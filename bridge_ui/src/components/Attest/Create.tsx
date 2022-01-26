@@ -34,6 +34,7 @@ function Create() {
     originAsset,
     targetChain
   );
+  console.log(foreignAssetInfo);
   const shouldUpdate = foreignAssetInfo.data?.doesExist;
   const error = foreignAssetInfo.error || statusMessage;
   const { handleClick, disabled, showLoader } = useHandleCreateWrapped(
