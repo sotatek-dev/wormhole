@@ -100,7 +100,7 @@ export const RPC_BACKEND = {
     "https://wormhole-v2-mainnet-api.staking.fund",
     "https://wormhole-v2-mainnet.01node.com",
   ],
-  TESTNET: ["http://172.16.1.217:7071"],
+  TESTNET: ["http://172.16.1.217:7071", "http://172.16.1.217:7072", "http://172.16.1.217:7073"],
   DEVNET: ["http://localhost:7071"],
 }
 
