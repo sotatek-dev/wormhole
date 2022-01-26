@@ -43,8 +43,7 @@ import { signSendAndConfirm } from "../utils/solana";
 import { Alert } from "@material-ui/lab";
 import { postWithFees } from "../utils/terra";
 import { useKaikasProvider } from "../contexts/KaikasProviderContext";
-import { redeemOnKlaytnNative } from "../blockchain/klaytn/redeemOnKlaytnNative";
-import { redeemOnKlaytn } from "../blockchain/klaytn/redeemOnKlaytn";
+import { redeemOnKlaytn, redeemOnKlaytnNative } from "../utils/klaytn";
 
 async function klaytn(
   dispatch: any,
