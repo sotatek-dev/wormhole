@@ -7,12 +7,15 @@ import {
   hexToUint8Array,
   isEVMChain,
   nativeToHexString,
+  CHAIN_ID_KLAYTN_BAOBAB
 } from "@certusone/wormhole-sdk";
 import { Connection } from "@solana/web3.js";
 import { LCDClient } from "@terra-money/terra.js";
 import { ethers } from "ethers";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { nativeToHexStringKlaytn } from "../blockchain/klaytn/utils";
 import { useEthereumProvider } from "../contexts/EthereumProviderContext";
+import { useKaikasProvider } from "../contexts/KaikasProviderContext";
 import { DataWrapper } from "../store/helpers";
 import {
   getEvmChainId,
@@ -22,6 +25,7 @@ import {
   TERRA_HOST,
   TERRA_TOKEN_BRIDGE_ADDRESS,
 } from "../utils/consts";
+import { getForeignAssetKlaytn } from "../utils/klaytn";
 import useIsWalletReady from "./useIsWalletReady";
 
 export type ForeignAssetInfo = {
@@ -35,6 +39,8 @@ function useFetchForeignAsset(
   foreignChain: ChainId
 ): DataWrapper<ForeignAssetInfo> {
   const { provider, chainId: evmChainId } = useEthereumProvider();
+  const { provider: providerKaikas, signerAddress: signerAddressKaikas } =
+    useKaikasProvider()
   const { isReady } = useIsWalletReady(foreignChain, false);
   const correctEvmNetwork = getEvmChainId(foreignChain);
   const hasCorrectEvmNetwork = evmChainId === correctEvmNetwork;
@@ -45,6 +51,9 @@ function useFetchForeignAsset(
   const [isLoading, setIsLoading] = useState(false);
   const originAssetHex = useMemo(() => {
     try {
+      if (originChain === CHAIN_ID_KLAYTN_BAOBAB) {
+        return nativeToHexStringKlaytn(originAsset, originChain)
+      }
       return nativeToHexString(originAsset, originChain);
     } catch (e) {
       return null;
@@ -71,8 +80,8 @@ function useFetchForeignAsset(
       !foreignChain ||
       !originAssetHex ||
       foreignChain === originChain ||
-      (isEVMChain(foreignChain) && !isReady) ||
-      (isEVMChain(foreignChain) && !hasCorrectEvmNetwork) ||
+      ((isEVMChain(foreignChain) || foreignChain === CHAIN_ID_KLAYTN_BAOBAB) && !isReady) ||
+      ((isEVMChain(foreignChain) || foreignChain === CHAIN_ID_KLAYTN_BAOBAB) && !hasCorrectEvmNetwork) ||
       argsEqual,
     [
       isReady,
@@ -99,7 +108,15 @@ function useFetchForeignAsset(
     let cancelled = false;
     setIsLoading(true);
     try {
-      const getterFunc: () => Promise<string | null> = isEVMChain(foreignChain)
+      const getterFunc: () => Promise<string | null> = foreignChain === CHAIN_ID_KLAYTN_BAOBAB
+      ? () => getForeignAssetKlaytn(
+        getTokenBridgeAddressForChain(foreignChain),
+        providerKaikas,
+        signerAddressKaikas,
+        originChain,
+        hexToUint8Array(originAssetHex)
+      )
+      : isEVMChain(foreignChain)
         ? () =>
             getForeignAssetEth(
               getTokenBridgeAddressForChain(foreignChain),
@@ -133,7 +150,7 @@ function useFetchForeignAsset(
             if (
               result &&
               !(
-                isEVMChain(foreignChain) &&
+                (isEVMChain(foreignChain) || foreignChain === CHAIN_ID_KLAYTN_BAOBAB) &&
                 result === ethers.constants.AddressZero
               )
             ) {
@@ -170,6 +187,8 @@ function useFetchForeignAsset(
     provider,
     setArgs,
     argsEqual,
+    providerKaikas,
+    signerAddressKaikas
   ]);
 
   const compoundError = useMemo(() => {

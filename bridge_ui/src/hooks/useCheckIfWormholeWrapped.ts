@@ -18,7 +18,6 @@ import { Connection } from "@solana/web3.js";
 import { LCDClient } from "@terra-money/terra.js";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getOriginalAssetKlaytn } from "../blockchain/klaytn/getOriginalAssetKlaytn";
 import { useEthereumProvider } from "../contexts/EthereumProviderContext";
 import { useKaikasProvider } from "../contexts/KaikasProviderContext";
 import { setSourceWormholeWrappedInfo as setNFTSourceWormholeWrappedInfo } from "../store/nftSlice";
@@ -40,6 +39,7 @@ import {
   SOL_TOKEN_BRIDGE_ADDRESS,
   TERRA_HOST,
 } from "../utils/consts";
+import { getOriginalAssetKlaytn } from "../utils/klaytn";
 
 export interface StateSafeWormholeWrappedInfo {
   isWrapped: boolean;
