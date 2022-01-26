@@ -7,6 +7,7 @@ import {
   CHAIN_ID_POLYGON,
   CHAIN_ID_SOLANA,
   CHAIN_ID_TERRA,
+  CHAIN_ID_KLAYTN_BAOBAB,
 } from "@certusone/wormhole-sdk";
 import { Button, makeStyles, Typography } from "@material-ui/core";
 import { Transaction } from "../store/transferSlice";
@@ -36,7 +37,9 @@ export default function ShowTx({
     (CLUSTER === "devnet" &&
       (chainId === CHAIN_ID_SOLANA || chainId === CHAIN_ID_TERRA));
   const explorerAddress =
-    chainId === CHAIN_ID_ETH
+    chainId === CHAIN_ID_KLAYTN_BAOBAB
+    ? `https://${CLUSTER === "testnet" ? "baobab" : ""}.scope.klaytn.com/tx/${tx?.id}`
+    : chainId === CHAIN_ID_ETH
       ? `https://${CLUSTER === "testnet" ? "goerli." : ""}etherscan.io/tx/${
           tx?.id
         }`

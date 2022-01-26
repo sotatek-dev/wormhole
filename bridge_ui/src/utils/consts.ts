@@ -187,6 +187,8 @@ export const getExplorerName = (chainId: ChainId) =>
     ? "Polygonscan"
     : chainId === CHAIN_ID_AVAX
     ? "Snowtrace"
+    : chainId === CHAIN_ID_KLAYTN_BAOBAB
+    ? "Klaytn Scope"
     : "Explorer";
 export const WORMHOLE_RPC_HOSTS =
   CLUSTER === "mainnet"
