@@ -767,7 +767,6 @@ function useGetAvailableTokens(nft: boolean = false) {
     if (
       signerAddressKaikas &&
       lookupChain === CHAIN_ID_KLAYTN_BAOBAB &&
-      !ethNativeAccount &&
       !nft
     ) {
       setEthNativeAccountLoading(true);

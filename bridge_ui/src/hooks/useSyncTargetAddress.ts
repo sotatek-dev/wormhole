@@ -2,6 +2,7 @@ import {
   canonicalAddress,
   CHAIN_ID_SOLANA,
   CHAIN_ID_TERRA,
+  CHAIN_ID_KLAYTN_BAOBAB,
   isEVMChain,
   uint8ArrayToHex,
 } from "@certusone/wormhole-sdk";
@@ -16,6 +17,7 @@ import { useConnectedWallet } from "@terra-money/wallet-provider";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useEthereumProvider } from "../contexts/EthereumProviderContext";
+import { useKaikasProvider } from "../contexts/KaikasProviderContext";
 import { useSolanaWallet } from "../contexts/SolanaWalletContext";
 import { setTargetAddressHex as setNFTTargetAddressHex } from "../store/nftSlice";
 import {
@@ -33,6 +35,7 @@ function useSyncTargetAddress(shouldFire: boolean, nft?: boolean) {
     nft ? selectNFTTargetChain : selectTransferTargetChain
   );
   const { signerAddress } = useEthereumProvider();
+  const { signerAddress: signerAddressKaikas } = useKaikasProvider();
   const solanaWallet = useSolanaWallet();
   const solPK = solanaWallet?.publicKey;
   const targetAsset = useSelector(
@@ -53,6 +56,13 @@ function useSyncTargetAddress(shouldFire: boolean, nft?: boolean) {
         dispatch(
           setTargetAddressHex(
             uint8ArrayToHex(zeroPad(arrayify(signerAddress), 32))
+          )
+        );
+      }
+      else if (targetChain === CHAIN_ID_KLAYTN_BAOBAB && signerAddressKaikas) {
+        dispatch(
+          setTargetAddressHex(
+            uint8ArrayToHex(zeroPad(arrayify(signerAddressKaikas), 32))
           )
         );
       }
@@ -124,6 +134,7 @@ function useSyncTargetAddress(shouldFire: boolean, nft?: boolean) {
     terraWallet,
     nft,
     setTargetAddressHex,
+    signerAddressKaikas
   ]);
 }
 
