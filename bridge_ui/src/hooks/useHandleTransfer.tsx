@@ -31,7 +31,6 @@ import { parseUnits, zeroPad } from "ethers/lib/utils";
 import { useSnackbar } from "notistack";
 import { useCallback, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { transferFromKlaytn, transferFromKlaytnNative } from "../blockchain/klaytn/transfer";
 import { useEthereumProvider } from "../contexts/EthereumProviderContext";
 import { useKaikasProvider } from "../contexts/KaikasProviderContext";
 import { useSolanaWallet } from "../contexts/SolanaWalletContext";
@@ -62,6 +61,7 @@ import {
   TERRA_TOKEN_BRIDGE_ADDRESS,
 } from "../utils/consts";
 import { getSignedVAAWithRetry } from "../utils/getSignedVAAWithRetry";
+import { transferFromKlaytn, transferFromKlaytnNative } from "../utils/klaytn";
 import parseError from "../utils/parseError";
 import { signSendAndConfirm } from "../utils/solana";
 import { postWithFees, waitForTerraExecution } from "../utils/terra";
