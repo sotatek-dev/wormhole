@@ -3,7 +3,7 @@ import {
 } from "@certusone/wormhole-sdk";
 import klaytnBridgeImplementationAbi from "../blockchain/abi/BridgeImplementation.json";
 import klaytnTokenImplementationAbi from "../blockchain/abi/TokenImplementation.json";
-import {arrayify, zeroPad} from 'ethers/lib/utils';
+import {arrayify, zeroPad, formatUnits} from 'ethers/lib/utils';
 import caver from "../blockchain/klaytn/caver";
 import { ChainId } from '@certusone/wormhole-sdk';
 import { createNonce } from "../blockchain/klaytn/utils";
@@ -203,4 +203,24 @@ export async function transferFromKlaytnNative(
   const result = await contract.methods.wrapAndTransferETH(recipientChain, encodeVM, fee, createNonce())
     .send({ from: signerAddress, value: amount, gas: GAS_DEFAULT_KLAYTN })
   return result;
+}
+export async function klaytnTokenToParsedTokenAccount (
+  tokenAddress: string,
+  provider: any,
+  signerAddress: string,
+) {
+  const contract = new provider.Contract(klaytnTokenImplementationAbi as any, tokenAddress)
+  const decimals = await contract.methods.decimals().call()
+  const balance = await contract.methods.balanceOf(signerAddress).call();
+  const symbol = await contract.methods.symbol().call();
+  const name = await contract.methods.name().call();
+  console.log(contract);
+  
+  return {
+    address: contract?._address,
+    decimals,
+    balance: formatUnits(balance, decimals),
+    symbol,
+    name
+  };
 }

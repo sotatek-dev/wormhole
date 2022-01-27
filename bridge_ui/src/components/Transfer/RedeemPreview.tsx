@@ -8,6 +8,7 @@ import {
 import { reset } from "../../store/transferSlice";
 import ButtonWithLoader from "../ButtonWithLoader";
 import ShowTx from "../ShowTx";
+import AddToKaikas from "./AddToKaikas";
 import AddToMetamask from "./AddToMetamask";
 import FeaturedMarkets from "./FeaturedMarkets";
 
@@ -41,6 +42,7 @@ export default function RedeemPreview() {
       {redeemTx ? <ShowTx chainId={targetChain} tx={redeemTx} /> : null}
       <AddToMetamask />
       <FeaturedMarkets />
+      <AddToKaikas />
       <ButtonWithLoader onClick={handleResetClick}>
         Transfer More Tokens!
       </ButtonWithLoader>
