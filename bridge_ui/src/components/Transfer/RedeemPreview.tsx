@@ -8,6 +8,7 @@ import {
 import { reset } from "../../store/transferSlice";
 import ButtonWithLoader from "../ButtonWithLoader";
 import ShowTx from "../ShowTx";
+import AddToKaikas from "./AddToKaikas";
 import AddToMetamask from "./AddToMetamask";
 
 const useStyles = makeStyles((theme) => ({
@@ -39,6 +40,7 @@ export default function RedeemPreview() {
       </Typography>
       {redeemTx ? <ShowTx chainId={targetChain} tx={redeemTx} /> : null}
       <AddToMetamask />
+      <AddToKaikas />
       <ButtonWithLoader onClick={handleResetClick}>
         Transfer More Tokens!
       </ButtonWithLoader>
