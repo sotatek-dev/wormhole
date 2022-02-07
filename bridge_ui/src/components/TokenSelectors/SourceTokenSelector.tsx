@@ -26,6 +26,7 @@ import {
   setSourceWalletAddress as setTransferSourceWalletAddress,
 } from "../../store/transferSlice";
 import EvmTokenPicker from "./EvmTokenPicker";
+import KlaytnTokenPicker from "./KlaytnTokenPicker";
 import RefreshButtonWrapper from "./RefreshButtonWrapper";
 import SolanaTokenPicker from "./SolanaTokenPicker";
 import TerraTokenPicker from "./TerraTokenPicker";
@@ -82,7 +83,6 @@ export const TokenSelector = (props: TokenSelectorProps) => {
     isEVMChain(lookupChain) &&
     lookupChain !== CHAIN_ID_TERRA &&
     maps?.tokenAccounts?.error; //Terra & ETH can proceed because it has advanced mode
-
   const content = fatalError ? (
     <RefreshButtonWrapper callback={resetAccountWrapper}>
       <Typography>{fatalError}</Typography>
@@ -116,7 +116,7 @@ export const TokenSelector = (props: TokenSelectorProps) => {
       tokenAccounts={maps?.tokenAccounts}
     />
   ) : lookupChain === CHAIN_ID_KLAYTN_BAOBAB ? (
-    <EvmTokenPicker
+    <KlaytnTokenPicker
       value={sourceParsedTokenAccount || null}
       disabled={disabled}
       onChange={handleOnChange}
