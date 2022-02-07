@@ -58,7 +58,6 @@ export default function KlaytnTokenPicker(
     chainId,
     nft,
   } = props;
-  debugger
   const { provider: providerKaikas, signerAddress: signerAddressKaikas } = useKaikasProvider();
   const { isReady } = useIsWalletReady(chainId);
   const selectedTokenAccount: NFTParsedTokenAccount | undefined = useSelector(
@@ -105,7 +104,7 @@ export default function KlaytnTokenPicker(
           const tokenAccount = await (nft
             ? getKlaytnNFT(address, providerKaikas)
             : getKlaytnToken(address, providerKaikas));
-          console.log(tokenAccount);
+          console.log({tokenAccount});
           if (!tokenAccount) {
             return Promise.reject("Could not find the specified token.");
           }
