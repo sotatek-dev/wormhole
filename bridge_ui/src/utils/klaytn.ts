@@ -1,12 +1,15 @@
 import {
+  NFTImplementation,
   Implementation__factory
 } from "@certusone/wormhole-sdk";
 import klaytnBridgeImplementationAbi from "../blockchain/abi/BridgeImplementation.json";
 import klaytnTokenImplementationAbi from "../blockchain/abi/TokenImplementation.json";
+import klaytnNFTImplementationAbi from "../blockchain/abi/NFTImplementation.json"
 import {arrayify, zeroPad, formatUnits} from 'ethers/lib/utils';
 import caver from "../blockchain/klaytn/caver";
 import { ChainId } from '@certusone/wormhole-sdk';
 import { createNonce } from "../blockchain/klaytn/utils";
+import { createNFTParsedTokenAccount, createParsedTokenAccount } from "../hooks/useGetSourceParsedTokenAccounts";
 
 export const GAS_DEFAULT_KLAYTN = 3000000;
 
@@ -204,7 +207,7 @@ export async function transferFromKlaytnNative(
     .send({ from: signerAddress, value: amount, gas: GAS_DEFAULT_KLAYTN })
   return result;
 }
-export async function klaytnTokenToParsedTokenAccount (
+export async function klaytnTokenToParsedTokenAccount(
   tokenAddress: string,
   provider: any,
   signerAddress: string,
@@ -224,3 +227,63 @@ export async function klaytnTokenToParsedTokenAccount (
     name
   };
 }
+
+export async function getKlaytnNFT(
+  tokenAddress: string,
+  provider: any
+) {
+  const token = new provider.Contract(klaytnNFTImplementationAbi as any, tokenAddress)
+  return token;
+}
+
+export async function getKlaytnToken(
+  tokenAddress: string,
+  provider: any
+) {
+  const token = new provider.Contract(klaytnTokenImplementationAbi as any, tokenAddress)
+  return token;
+}
+
+export async function klaytnNFTToNFTParsedTokenAccount(
+  token: any,
+  tokenId: string,
+  signerAddress: string
+) {
+  const decimals = 0;
+  const balance = (await token.methods.ownerOf(tokenId).call()) === signerAddress ? 1 : 0;
+  const symbol = await token.methods.symbol().call();
+  const name = await token.methods.name().call();
+  const uri = await token.methods.tokenURI(tokenId).call();
+  return createNFTParsedTokenAccount(
+    signerAddress,
+    token.address,
+    balance.toString(),
+    decimals,
+    Number(formatUnits(balance, decimals)),
+    formatUnits(balance, decimals),
+    tokenId,
+    symbol,
+    name,
+    uri
+  );
+}
+
+export async function klaytnTokenToParsedTokenAccountNFT(
+  token: any,
+  signerAddress: string
+) {
+  const decimals = await token.methods.decimals().call();
+  const balance = await token.methods.balanceOf(signerAddress).call();
+  const symbol = await token.methods.symbol().call();
+  const name = await token.methods.name().call();
+  return createParsedTokenAccount(
+    signerAddress,
+    token.address,
+    balance.toString(),
+    decimals,
+    Number(formatUnits(balance, decimals)),
+    formatUnits(balance, decimals),
+    symbol,
+    name
+  );
+} 
