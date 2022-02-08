@@ -45,7 +45,7 @@ function useIsWalletReady(
     signerAddress,
     chainId: evmChainId,
   } = useEthereumProvider();
-  const kaikasWallet = useKaikasProvider();
+  const {signerAddress: signerAddressKaikas} = useKaikasProvider();
   const hasEthInfo = !!provider && !!signerAddress;
   const correctEvmNetwork = getEvmChainId(chainId);
   const hasCorrectEvmNetwork = evmChainId === correctEvmNetwork;
@@ -85,12 +85,12 @@ function useIsWalletReady(
         solPK.toString()
       );
     }
-    if (chainId === CHAIN_ID_KLAYTN_BAOBAB) {
+    if (chainId === CHAIN_ID_KLAYTN_BAOBAB && signerAddressKaikas) {
       return createWalletStatus(
         true,
         undefined,
         forceNetworkSwitch,
-        kaikasWallet.signerAddress
+        signerAddressKaikas
       );
     }
     if (isEVMChain(chainId) && hasEthInfo && signerAddress) {
@@ -113,7 +113,6 @@ function useIsWalletReady(
         );
       }
     }
-
     return createWalletStatus(
       false,
       "Wallet not connected",
@@ -132,7 +131,7 @@ function useIsWalletReady(
     provider,
     signerAddress,
     terraWallet,
-    kaikasWallet.signerAddress,
+    signerAddressKaikas,
   ]);
 }
 

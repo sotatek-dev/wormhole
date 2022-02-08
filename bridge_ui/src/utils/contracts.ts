@@ -100,7 +100,7 @@ export const RPC_BACKEND = {
     "https://wormhole-v2-mainnet-api.staking.fund",
     "https://wormhole-v2-mainnet.01node.com",
   ],
-  TESTNET: ["https://klaytn-api1.sotatek.works", "https://klaytn-api2.sotatek.works", "https://klaytn-api3.sotatek.works"],
+  TESTNET: ["https://klaytn-api1.sotatek.works"],
   DEVNET: ["http://localhost:7071"],
 }
 
