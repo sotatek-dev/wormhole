@@ -287,3 +287,20 @@ export async function klaytnTokenToParsedTokenAccountNFT(
     name
   );
 } 
+
+export async function redeemNftOnKlaytn (
+  tokenBridgeAddress: string,
+  provider: any,
+  signerAddress: string,
+  signedVAA: Uint8Array
+) {
+  const contract = new provider.Contract(klaytnBridgeImplementationAbi as any, tokenBridgeAddress);
+  const encodeVM = caver.utils.bytesToHex(signedVAA as any)
+  const result = await contract.methods.completeTransfer(
+    encodeVM
+  ).send({
+    from: signerAddress,
+    gas: GAS_DEFAULT_KLAYTN
+  });
+  return result;
+}

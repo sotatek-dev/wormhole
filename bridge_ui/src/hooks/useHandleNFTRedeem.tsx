@@ -6,6 +6,8 @@ import {
   isEVMChain,
   parseNFTPayload,
   postVaaSolanaWithRetry,
+  postVaaSolana,
+  CHAIN_ID_KLAYTN_BAOBAB,
 } from "@certusone/wormhole-sdk";
 import {
   createMetaOnSolana,
@@ -23,6 +25,7 @@ import { useSnackbar } from "notistack";
 import { useCallback, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useEthereumProvider } from "../contexts/EthereumProviderContext";
+import { useKaikasProvider } from "../contexts/KaikasProviderContext";
 import { useSolanaWallet } from "../contexts/SolanaWalletContext";
 import { setIsRedeeming, setRedeemTx } from "../store/nftSlice";
 import { selectNFTIsRedeeming, selectNFTTargetChain } from "../store/selectors";
@@ -33,6 +36,7 @@ import {
   SOL_BRIDGE_ADDRESS,
   SOL_NFT_BRIDGE_ADDRESS,
 } from "../utils/consts";
+import { redeemNftOnKlaytn } from "../utils/klaytn";
 import { getMetadataAddress } from "../utils/metaplex";
 import parseError from "../utils/parseError";
 import { signSendAndConfirm } from "../utils/solana";
@@ -65,7 +69,35 @@ async function evm(
     dispatch(setIsRedeeming(false));
   }
 }
-
+async function klaytn(
+  dispatch: any,
+  enqueueSnackbar: any,
+  provider: Signer,
+  signerAddress: string,
+  signedVAA: Uint8Array,
+) {
+  dispatch(setIsRedeeming(true));
+  try {
+    const receipt = await redeemNftOnKlaytn(
+      getNFTBridgeAddressForChain(CHAIN_ID_KLAYTN_BAOBAB),
+      provider,
+      signerAddress,
+      signedVAA
+    )
+    dispatch(
+      setRedeemTx({ id: receipt.transactionHash, block: receipt.blockNumber })
+    );
+    enqueueSnackbar(null, {
+      content: <Alert severity="success">Transaction confirmed</Alert>,
+    });
+  } catch (error) {
+    enqueueSnackbar(null, {
+      content: <Alert severity="error">{parseError(error)}</Alert>,
+    });
+    dispatch(setIsRedeeming(false));
+  }
+  
+}
 async function solana(
   dispatch: any,
   enqueueSnackbar: any,
@@ -152,10 +184,13 @@ export function useHandleNFTRedeem() {
   const solanaWallet = useSolanaWallet();
   const solPK = solanaWallet?.publicKey;
   const { signer } = useEthereumProvider();
+  const { provider: providerKaikas, signerAddress: signerAddressKaikas } = useKaikasProvider();
   const signedVAA = useNFTSignedVAA();
   const isRedeeming = useSelector(selectNFTIsRedeeming);
   const handleRedeemClick = useCallback(() => {
-    if (isEVMChain(targetChain) && !!signer && signedVAA) {
+    if (targetChain === CHAIN_ID_KLAYTN_BAOBAB && signedVAA && signerAddressKaikas) {
+      klaytn(dispatch, enqueueSnackbar, providerKaikas, signerAddressKaikas, signedVAA)
+    } else if (isEVMChain(targetChain) && !!signer && signedVAA) {
       evm(dispatch, enqueueSnackbar, signer, signedVAA, targetChain);
     } else if (
       targetChain === CHAIN_ID_SOLANA &&
@@ -180,6 +215,8 @@ export function useHandleNFTRedeem() {
     signedVAA,
     solanaWallet,
     solPK,
+    providerKaikas,
+    signerAddressKaikas
   ]);
   return useMemo(
     () => ({
