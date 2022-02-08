@@ -3,6 +3,7 @@ import {
   hexToNativeString,
   hexToUint8Array,
   isEVMChain,
+  CHAIN_ID_KLAYTN_BAOBAB
 } from "@certusone/wormhole-sdk";
 import { makeStyles, TextField, Typography } from "@material-ui/core";
 import { Alert } from "@material-ui/lab";
@@ -72,6 +73,7 @@ function Target() {
   const readableTargetAddress =
     hexToNativeString(targetAddressHex, targetChain) || "";
   const error = useSelector(selectNFTTargetError);
+  
   const isTargetComplete = useSelector(selectNFTIsTargetComplete);
   const shouldLockFields = useSelector(selectNFTShouldLockFields);
   const { statusMessage } = useIsWalletReady(targetChain);
@@ -115,7 +117,7 @@ function Target() {
             value={targetAsset || ""}
             disabled={true}
           />
-          {isEVMChain(targetChain) ? (
+          {(isEVMChain(targetChain) || targetChain === CHAIN_ID_KLAYTN_BAOBAB) ? (
             <TextField
               variant="outlined"
               label="TokenId"
