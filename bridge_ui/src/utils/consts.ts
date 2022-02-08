@@ -102,6 +102,11 @@ export const CHAINS: ChainInfo[] =
           logo: ethIcon,
         },
         {
+          id: CHAIN_ID_KLAYTN_BAOBAB,
+          name: "Klaytn Baobab",
+          logo: klaytnIcon,
+        },
+        {
           id: CHAIN_ID_POLYGON,
           name: "Polygon",
           logo: polygonIcon,
@@ -115,11 +120,6 @@ export const CHAINS: ChainInfo[] =
           id: CHAIN_ID_TERRA,
           name: "Terra",
           logo: terraIcon,
-        },
-        {
-          id: CHAIN_ID_KLAYTN_BAOBAB,
-          name: "Klaytn Baobab",
-          logo: klaytnIcon,
         },
       ]
     : [
