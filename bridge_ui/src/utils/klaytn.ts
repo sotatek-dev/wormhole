@@ -1,5 +1,4 @@
 import {
-  NFTImplementation,
   Implementation__factory
 } from "@certusone/wormhole-sdk";
 import klaytnBridgeImplementationAbi from "../blockchain/abi/BridgeImplementation.json";
@@ -245,18 +244,19 @@ export async function getKlaytnToken(
 }
 
 export async function klaytnNFTToNFTParsedTokenAccount(
-  token: any,
+  contract: any,
   tokenId: string,
   signerAddress: string
 ) {
   const decimals = 0;
-  const balance = (await token.methods.ownerOf(tokenId).call()) === signerAddress ? 1 : 0;
-  const symbol = await token.methods.symbol().call();
-  const name = await token.methods.name().call();
-  const uri = await token.methods.tokenURI(tokenId).call();
+  const ownerOf = await contract.methods.ownerOf(tokenId).call();
+  const balance = ownerOf.toLowerCase() === signerAddress ? 1 : 0;
+  const symbol = await contract.methods.symbol().call();
+  const name = await contract.methods.name().call();
+  const uri = await contract.methods.tokenURI(tokenId).call();
   return createNFTParsedTokenAccount(
     signerAddress,
-    token.address,
+    contract._address,
     balance.toString(),
     decimals,
     Number(formatUnits(balance, decimals)),

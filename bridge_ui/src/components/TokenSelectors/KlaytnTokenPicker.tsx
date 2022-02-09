@@ -36,7 +36,7 @@ const isWormholev1 = (provider: any, address: string, chainId: ChainId) => {
   return connection.isWrappedAsset(address);
 };
 
-type EthereumSourceTokenSelectorProps = {
+type KlaytnSourceTokenSelectorProps = {
   value: ParsedTokenAccount | null;
   onChange: (newValue: ParsedTokenAccount | null) => void;
   tokenAccounts: DataWrapper<ParsedTokenAccount[]> | undefined;
@@ -47,7 +47,7 @@ type EthereumSourceTokenSelectorProps = {
 };
 
 export default function KlaytnTokenPicker(
-  props: EthereumSourceTokenSelectorProps
+  props: KlaytnSourceTokenSelectorProps
 ) {
   const {
     value,
