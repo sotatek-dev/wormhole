@@ -3,8 +3,9 @@ import {
 } from "@certusone/wormhole-sdk";
 import klaytnBridgeImplementationAbi from "../blockchain/abi/BridgeImplementation.json";
 import klaytnTokenImplementationAbi from "../blockchain/abi/TokenImplementation.json";
-import klaytnNFTImplementationAbi from "../blockchain/abi/NFTImplementation.json"
-import {arrayify, zeroPad, formatUnits} from 'ethers/lib/utils';
+import klaytnNFTBridgeAbi from "../blockchain/abi/NFTBridge.json";
+import klaytnERC721Abi from "../blockchain/abi/ERC721.json"
+import { arrayify, zeroPad, formatUnits, BytesLike, Hexable } from 'ethers/lib/utils';
 import caver from "../blockchain/klaytn/caver";
 import { ChainId } from '@certusone/wormhole-sdk';
 import { createNonce } from "../blockchain/klaytn/utils";
@@ -24,7 +25,7 @@ export function parseSequenceFromLogKlaytn (
       bridge = bridgeItem
     }
   }
-  
+
   const bridgeLog = {
     ...bridge,
     data: bridge?.raw?.data,
@@ -60,12 +61,11 @@ export async function attestFromKlaytn (
   signerAddress: any,
 ) {
   const contract = new provider.Contract(klaytnBridgeImplementationAbi as any, tokenBridgeAddress)
-  console.log(tokenAddress);
-  
+
   const result = await contract.methods.attestToken(tokenAddress, createNonce())
   .send({from: signerAddress, gas: GAS_DEFAULT_KLAYTN })
   return result;
-  
+
 }
 
 export async function createWrappedOnKlaytn(
@@ -107,11 +107,11 @@ export default async function isWrappedAsset(
     provider?: any,
     tokenBridgeAddress?: string
 ) {
-    
+
     const contract = new provider.Contract(klaytnBridgeImplementationAbi as any, tokenBridgeAddress)
 
     const result = await contract.methods.isWrappedAsset(address).call();
-    
+
     return result;
 }
 
@@ -216,8 +216,7 @@ export async function klaytnTokenToParsedTokenAccount(
   const balance = await contract.methods.balanceOf(signerAddress).call();
   const symbol = await contract.methods.symbol().call();
   const name = await contract.methods.name().call();
-  console.log(contract);
-  
+
   return {
     address: contract?._address,
     decimals,
@@ -231,7 +230,7 @@ export async function getKlaytnNFT(
   tokenAddress: string,
   provider: any
 ) {
-  const token = new provider.Contract(klaytnNFTImplementationAbi as any, tokenAddress)
+  const token = new provider.Contract(klaytnERC721Abi as any, tokenAddress)
   return token;
 }
 
@@ -304,3 +303,50 @@ export async function redeemNftOnKlaytn (
   });
   return result;
 }
+
+export async function transferNFTFromKlaytn(
+  tokenBridgeAddress: string,
+  provider: any,
+  signerAddressKaikas: string | undefined,
+  tokenAddress: string,
+  tokenId: string,
+  recipientChain: any,
+  recipientAddress: Uint8Array,
+) {
+  const contractERC721__factory = new provider.Contract(klaytnERC721Abi, tokenAddress);
+  try {
+    await contractERC721__factory.methods
+      .approve(tokenBridgeAddress, tokenId)
+      .send({ from: signerAddressKaikas, gas: GAS_DEFAULT_KLAYTN });
+  } catch (error) {
+    console.error(error)
+  }
+
+  const contractNFTBridge__factory = new provider.Contract(klaytnNFTBridgeAbi, tokenBridgeAddress)
+  try {
+    const _recipientAddress = caver.utils.bytesToHex(recipientAddress as any)
+    const _createNonce = caver.utils.bytesToHex(createNonce() as any)
+    const result = await contractNFTBridge__factory.methods
+      .transferNFT(tokenAddress, tokenId, recipientChain, _recipientAddress, _createNonce)
+      .send({ from: signerAddressKaikas, gas: GAS_DEFAULT_KLAYTN })
+    return result;
+  } catch (error) {
+    console.error(error)
+  }
+}
+
+export function getEmitterAddressKlaytn(
+  contractAddress: number | BytesLike | Hexable
+) {
+  return Buffer.from(zeroPad(arrayify(contractAddress), 32)).toString("hex");
+}
+
+// c96616e1 c6adb9658d8e6f589ac3b5a5490a90593e7e5accda2002e0d1d68f6b
+
+// success
+// 0xc96616e1
+// 00000000000000000000000092556981a25918d141468a19462223d36cf1f70d 000000000000000000000000000000000000000000000000000000000000000a 0000000000000000000000000000000000000000000000000000000000001001 00000000000000000000000049114597ef077b8ddfa8c2be2dd35a1fe5c586c3 0000000000000000000000000000000000000000000000000000000000000064
+
+// failed
+// 0xc96616e1
+// 000000000000000000000000ec990c8763cc90d2b72cf2806034da5002cf2e69 0000000000000000000000000000000000000000000000000000000000000001 0000000000000000000000000000000000000000000000000000000000000002 0000000000000000000000005c52ba41e7197136e679746b44c18885ada7b116 0000000000000000000000000000000000000000000000000000000086430100
