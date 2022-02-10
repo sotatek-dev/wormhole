@@ -314,7 +314,6 @@ export async function transferNFTFromKlaytn(
   recipientAddress: Uint8Array,
 ) {
   try {
-    debugger;
     const contractERC721__factory = new provider.Contract(klaytnERC721Abi, tokenAddress);    
     const approved = await contractERC721__factory.methods
     .approve(tokenBridgeAddress, tokenId)
