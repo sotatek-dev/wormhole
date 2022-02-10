@@ -322,7 +322,6 @@ func Run(obsvC chan *gossipv1.SignedObservation, sendC chan []byte, signedInC ch
 						zap.String("from", envelope.GetFrom().String()))
 					break
 				}
-				logger.Info("gst size", zap.Any("size guardian state", len(gs.Keys)))
 				if heartbeat, err := processSignedHeartbeat(envelope.GetFrom(), s, gs, gst, disableHeartbeatVerify); err != nil {
 					p2pMessagesReceived.WithLabelValues("invalid_heartbeat").Inc()
 					logger.Debug("invalid signed heartbeat received",
