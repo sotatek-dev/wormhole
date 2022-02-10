@@ -1,6 +1,7 @@
 import {
   ChainId,
   CHAIN_ID_SOLANA,
+  CHAIN_ID_KLAYTN_BAOBAB,
   getEmitterAddressEth,
   getEmitterAddressSolana,
   hexToUint8Array,
@@ -22,6 +23,7 @@ import { useSnackbar } from "notistack";
 import { useCallback, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useEthereumProvider } from "../contexts/EthereumProviderContext";
+import { useKaikasProvider } from "../contexts/KaikasProviderContext";
 import { useSolanaWallet } from "../contexts/SolanaWalletContext";
 import {
   setIsSending,
@@ -48,6 +50,7 @@ import {
   SOL_NFT_BRIDGE_ADDRESS,
 } from "../utils/consts";
 import { getSignedVAAWithRetry } from "../utils/getSignedVAAWithRetry";
+import { parseSequenceFromLogKlaytn, transferNFTFromKlaytn } from "../utils/klaytn";
 import parseError from "../utils/parseError";
 import { signSendAndConfirm } from "../utils/solana";
 import useNFTTargetAddressHex from "./useNFTTargetAddress";
@@ -93,6 +96,64 @@ async function evm(
       emitterAddress,
       sequence.toString()
     );
+    dispatch(setSignedVAAHex(uint8ArrayToHex(vaaBytes)));
+    enqueueSnackbar(null, {
+      content: <Alert severity="success">Fetched Signed VAA</Alert>,
+    });
+  } catch (e) {
+    console.error(e);
+    enqueueSnackbar(null, {
+      content: <Alert severity="error">{parseError(e)}</Alert>,
+    });
+    dispatch(setIsSending(false));
+  }
+}
+
+async function klaytn(
+  dispatch: any,
+  enqueueSnackbar: any,
+  provider: any,
+  signerAddressKaikas: string | undefined,
+  tokenAddress: string,
+  tokenId: string,
+  recipientChain: ChainId,
+  recipientAddress: Uint8Array,
+  chainId: ChainId
+) {
+  dispatch(setIsSending(true));
+  try {
+    const receipt = await transferNFTFromKlaytn(
+      getNFTBridgeAddressForChain(chainId),
+      provider,
+      signerAddressKaikas,
+      tokenAddress,
+      tokenId,
+      recipientChain,
+      recipientAddress,
+    );
+    console.log(receipt);
+    dispatch(
+      setTransferTx({ id: receipt.transactionHash, block: receipt.blockNumber })
+    );
+    enqueueSnackbar(null, {
+      content: <Alert severity="success">Transaction confirmed</Alert>,
+    });
+    const sequence = parseSequenceFromLogKlaytn(
+      receipt,
+      getBridgeAddressForChain(chainId)
+    );
+    const emitterAddress = getEmitterAddressEth(
+      getNFTBridgeAddressForChain(chainId)
+    );
+    enqueueSnackbar(null, {
+      content: <Alert severity="info">Fetching VAA</Alert>,
+    });
+    const { vaaBytes } = await getSignedVAAWithRetry(
+      chainId,
+      emitterAddress,
+      sequence.toString()
+    );
+    console.log({vaaBytes});
     dispatch(setSignedVAAHex(uint8ArrayToHex(vaaBytes)));
     enqueueSnackbar(null, {
       content: <Alert severity="success">Fetched Signed VAA</Alert>,
@@ -191,6 +252,7 @@ export function useHandleNFTTransfer() {
   const isSending = useSelector(selectNFTIsSending);
   const isSendComplete = useSelector(selectNFTIsSendComplete);
   const { signer } = useEthereumProvider();
+  const { provider: providerKaikas, signerAddress: signerAddressKaikas } = useKaikasProvider();
   const solanaWallet = useSolanaWallet();
   const solPK = solanaWallet?.publicKey;
   const sourceParsedTokenAccount = useSelector(
@@ -238,7 +300,24 @@ export function useHandleNFTTransfer() {
         originChain,
         originTokenId
       );
-    } else {
+    } else if (
+      sourceChain === CHAIN_ID_KLAYTN_BAOBAB &&
+      !!providerKaikas &&
+      !!signerAddressKaikas &&
+      !!sourceAsset &&
+      !!sourceTokenId &&
+      !!targetAddress) {
+        klaytn(
+          dispatch,
+          enqueueSnackbar,
+          providerKaikas,
+          signerAddressKaikas,
+          sourceAsset,
+          sourceTokenId,
+          targetChain,
+          targetAddress,
+          sourceChain
+        );
     }
   }, [
     dispatch,
@@ -255,6 +334,8 @@ export function useHandleNFTTransfer() {
     originAsset,
     originChain,
     originTokenId,
+    providerKaikas,
+    signerAddressKaikas
   ]);
   return useMemo(
     () => ({
