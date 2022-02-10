@@ -131,7 +131,6 @@ async function klaytn(
       recipientChain,
       recipientAddress,
     );
-    console.log(receipt);
     dispatch(
       setTransferTx({ id: receipt.transactionHash, block: receipt.blockNumber })
     );
