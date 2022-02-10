@@ -313,23 +313,21 @@ export async function transferNFTFromKlaytn(
   recipientChain: any,
   recipientAddress: Uint8Array,
 ) {
-  const contractERC721__factory = new provider.Contract(klaytnERC721Abi, tokenAddress);
   try {
-    await contractERC721__factory.methods
-      .approve(tokenBridgeAddress, tokenId)
-      .send({ from: signerAddressKaikas, gas: GAS_DEFAULT_KLAYTN });
-  } catch (error) {
-    console.error(error)
-  }
-
-  const contractNFTBridge__factory = new provider.Contract(klaytnNFTBridgeAbi, tokenBridgeAddress)
-  try {
-    const _recipientAddress = caver.utils.bytesToHex(recipientAddress as any)
-    const _createNonce = caver.utils.bytesToHex(createNonce() as any)
-    const result = await contractNFTBridge__factory.methods
-      .transferNFT(tokenAddress, tokenId, recipientChain, _recipientAddress, _createNonce)
-      .send({ from: signerAddressKaikas, gas: GAS_DEFAULT_KLAYTN })
-    return result;
+    debugger;
+    const contractERC721__factory = new provider.Contract(klaytnERC721Abi, tokenAddress);    
+    const approved = await contractERC721__factory.methods
+    .approve(tokenBridgeAddress, tokenId)
+    .send({ from: signerAddressKaikas, gas: GAS_DEFAULT_KLAYTN });
+    if (approved) {
+      const contractNFTBridge__factory = new provider.Contract(klaytnNFTBridgeAbi, tokenBridgeAddress)
+      const _recipientAddress = caver.utils.bytesToHex(recipientAddress as any)
+      const _createNonce = caver.utils.bytesToHex(createNonce() as any)
+      const result = await contractNFTBridge__factory.methods
+        .transferNFT(tokenAddress, tokenId, recipientChain, _recipientAddress, _createNonce)
+        .send({ from: signerAddressKaikas, gas: GAS_DEFAULT_KLAYTN })
+      return result; 
+    }
   } catch (error) {
     console.error(error)
   }
