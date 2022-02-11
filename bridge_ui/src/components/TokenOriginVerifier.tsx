@@ -2,6 +2,7 @@ import {
   ChainId,
   CHAIN_ID_SOLANA,
   CHAIN_ID_TERRA,
+  CHAIN_ID_KLAYTN_BAOBAB,
   isEVMChain,
   nativeToHexString,
 } from "@certusone/wormhole-sdk";
@@ -290,7 +291,7 @@ export default function TokenOriginVerifier() {
         onChange={handlePrimaryLookupAssetChange}
       />
       <div className={classes.centered}>
-        {isEVMChain(primaryLookupChain) ? (
+        {isEVMChain(primaryLookupChain) || primaryLookupChain === CHAIN_ID_KLAYTN_BAOBAB ? (
           <KeyAndBalance chainId={primaryLookupChain} />
         ) : null}
         {primaryError ? (
