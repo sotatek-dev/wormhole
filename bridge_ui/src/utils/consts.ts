@@ -862,3 +862,7 @@ export const logoOverrides = new Map<string, string>([
     "https://orion.money/assets/ORION-LOGO-2.1-GREEN@256x256.png",
   ],
 ]);
+
+export const OPEN_SEA_URL = CLUSTER === "mainnet"
+  ? "https://opensea.io/assets"
+  : "https://testnets.opensea.io/assets/baobab";
