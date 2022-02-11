@@ -5,6 +5,7 @@ import {
   CHAIN_ID_POLYGON,
   CHAIN_ID_SOLANA,
   CHAIN_ID_OASIS,
+  CHAIN_ID_KLAYTN_BAOBAB,
   hexToNativeString,
   isEVMChain,
   uint8ArrayToHex,
@@ -30,6 +31,7 @@ import { Connection } from "@solana/web3.js";
 import { useCallback, useEffect, useState } from "react";
 import { useBetaContext } from "../contexts/BetaContext";
 import { useEthereumProvider } from "../contexts/EthereumProviderContext";
+import { useKaikasProvider } from "../contexts/KaikasProviderContext";
 import useIsWalletReady from "../hooks/useIsWalletReady";
 import { getMetaplexData } from "../hooks/useMetaplexData";
 import { COLORS } from "../muiTheme";
@@ -48,9 +50,11 @@ import {
   isNFT,
   isValidEthereumAddress,
 } from "../utils/ethereum";
+import { getKlaytnNFT, getOriginalAssetKlaytnNFT, isNFTKlaytn, klaytnNFTToNFTParsedTokenAccount } from "../utils/klaytn";
 import HeaderText from "./HeaderText";
 import KeyAndBalance from "./KeyAndBalance";
 import NFTViewer from "./TokenSelectors/NFTViewer";
+import {OPEN_SEA_URL} from "../utils/consts"
 
 const useStyles = makeStyles((theme) => ({
   mainCard: {
@@ -76,6 +80,7 @@ export default function NFTOriginVerifier() {
   const classes = useStyles();
   const isBeta = useBetaContext();
   const { provider, signerAddress } = useEthereumProvider();
+  const { provider: providerKaikas, signerAddress: signerAddressKaikas } = useKaikasProvider();
   const [lookupChain, setLookupChain] = useState(CHAIN_ID_ETH);
   const { isReady, statusMessage } = useIsWalletReady(lookupChain);
   const [lookupAsset, setLookupAsset] = useState("");
@@ -125,6 +130,57 @@ export default function NFTOriginVerifier() {
               const info = await getOriginalAssetEth(
                 getNFTBridgeAddressForChain(lookupChain),
                 provider,
+                lookupAsset,
+                lookupTokenId,
+                lookupChain
+              );
+              if (!cancelled) {
+                setIsLoading(false);
+                setParsedTokenAccount(newParsedTokenAccount);
+                setOriginInfo(info);
+              }
+            } else if (!cancelled) {
+              setIsLoading(false);
+              setLookupError(
+                "This token does not support ERC-165, ERC-721, and ERC-721 metadata"
+              );
+            }
+          } catch (e) {
+            console.error(e);
+            if (!cancelled) {
+              setIsLoading(false);
+              setLookupError(
+                "This token does not support ERC-165, ERC-721, and ERC-721 metadata"
+              );
+            }
+          }
+        })();
+      } else {
+        setLookupError("Invalid address");
+      }
+    } else if (
+      isReady &&
+      providerKaikas &&
+      signerAddressKaikas &&
+      lookupChain === CHAIN_ID_KLAYTN_BAOBAB &&
+      lookupAsset &&
+      lookupTokenId
+    ) {
+      if (isValidEthereumAddress(lookupAsset)) {
+        (async () => {
+          setIsLoading(true);
+          try {
+            const contract = await getKlaytnNFT(lookupAsset, providerKaikas);
+            const result = await isNFTKlaytn(contract);
+            if (result) {
+              const newParsedTokenAccount = await klaytnNFTToNFTParsedTokenAccount(
+                contract,
+                lookupTokenId,
+                signerAddressKaikas
+              );
+              const info = await getOriginalAssetKlaytnNFT(
+                getNFTBridgeAddressForChain(lookupChain),
+                providerKaikas,
                 lookupAsset,
                 lookupTokenId,
                 lookupChain
@@ -203,6 +259,8 @@ export default function NFTOriginVerifier() {
     lookupChain,
     lookupAsset,
     lookupTokenId,
+    providerKaikas,
+    signerAddressKaikas
   ]);
   const readableAddress =
     originInfo &&
@@ -242,7 +300,7 @@ export default function NFTOriginVerifier() {
               </MenuItem>
             ))}
           </TextField>
-          {isEVMChain(lookupChain) ? (
+          {isEVMChain(lookupChain) || lookupChain === CHAIN_ID_KLAYTN_BAOBAB ? (
             <KeyAndBalance chainId={lookupChain} />
           ) : null}
           <TextField
@@ -253,7 +311,7 @@ export default function NFTOriginVerifier() {
             value={lookupAsset}
             onChange={handleAssetChange}
           />
-          {isEVMChain(lookupChain) ? (
+          {isEVMChain(lookupChain) || lookupChain === CHAIN_ID_KLAYTN_BAOBAB ? (
             <TextField
               fullWidth
               variant="outlined"
@@ -341,7 +399,19 @@ export default function NFTOriginVerifier() {
                   >
                     View on Snowtrace
                   </Button>
-                ) : originInfo.chainId === CHAIN_ID_OASIS ? null : (
+                ) : originInfo.chainId === CHAIN_ID_OASIS ? null 
+                : originInfo.chainId === CHAIN_ID_KLAYTN_BAOBAB ? (
+                  <Button
+                    href={`${OPEN_SEA_URL}/${readableAddress}/${originInfo.tokenId}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    endIcon={<Launch />}
+                    className={classes.viewButton}
+                    variant="outlined"
+                  >
+                    View on OpenSea
+                  </Button>
+                ) : (
                   <Button
                     href={`https://opensea.io/assets/${readableAddress}/${originInfo.tokenId}`}
                     target="_blank"
