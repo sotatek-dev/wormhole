@@ -1,7 +1,9 @@
+import { useKaikasProvider } from './../contexts/KaikasProviderContext';
 import {
   ChainId,
   CHAIN_ID_SOLANA,
   CHAIN_ID_TERRA,
+  CHAIN_ID_KLAYTN_BAOBAB,
   getOriginalAssetEth,
   getOriginalAssetSol,
   getOriginalAssetTerra,
@@ -35,6 +37,7 @@ import {
   TERRA_HOST,
 } from "../utils/consts";
 import useIsWalletReady from "./useIsWalletReady";
+import { getOriginalAssetKlaytn } from "../utils/klaytn";
 
 export type OriginalAssetInfo = {
   originChain: ChainId | null;
@@ -55,6 +58,13 @@ export async function getOriginalAssetToken(
         provider,
         foreignNativeStringAddress,
         foreignChain
+      );
+    } else if (foreignChain === CHAIN_ID_KLAYTN_BAOBAB && provider) {
+      promise = await getOriginalAssetKlaytn(
+        foreignNativeStringAddress,
+        foreignChain,
+        provider,
+        getTokenBridgeAddressForChain(foreignChain),
       );
     } else if (foreignChain === CHAIN_ID_SOLANA) {
       const connection = new Connection(SOLANA_HOST, "confirmed");
@@ -138,6 +148,13 @@ export async function getOriginalAsset(
     throw new Error("Unable to find address.");
   }
   if (
+    result.chainId === CHAIN_ID_KLAYTN_BAOBAB &&
+    uint8ArrayToNative(result.assetAddress, result.chainId) ===
+      ethers.constants.AddressZero
+  ) {
+    throw new Error("Unable to find address.");
+  }
+  if (
     result.chainId === CHAIN_ID_SOLANA &&
     uint8ArrayToNative(result.assetAddress, result.chainId) ===
       SOLANA_SYSTEM_PROGRAM_ADDRESS
@@ -156,6 +173,7 @@ function useOriginalAsset(
   tokenId?: string
 ): DataWrapper<OriginalAssetInfo> {
   const { provider } = useEthereumProvider();
+  const { provider: providerKaikas } = useKaikasProvider();
   const { isReady } = useIsWalletReady(foreignChain, false);
   const [originAddress, setOriginAddress] = useState<string | null>(null);
   const [originTokenId, setOriginTokenId] = useState<string | null>(null);
@@ -183,8 +201,8 @@ function useOriginalAsset(
     () =>
       !foreignChain ||
       !foreignAddress ||
-      (isEVMChain(foreignChain) && !isReady) ||
-      (isEVMChain(foreignChain) && nft && !tokenId) ||
+      ((isEVMChain(foreignChain) || foreignChain === CHAIN_ID_KLAYTN_BAOBAB) && !isReady) ||
+      ((isEVMChain(foreignChain) || foreignChain === CHAIN_ID_KLAYTN_BAOBAB) && nft && !tokenId) ||
       argsEqual,
     [isReady, nft, tokenId, argsEqual, foreignChain, foreignAddress]
   );
@@ -203,7 +221,8 @@ function useOriginalAsset(
     let cancelled = false;
     setIsLoading(true);
 
-    getOriginalAsset(foreignChain, foreignAddress, nft, tokenId, provider)
+    if (foreignChain === CHAIN_ID_KLAYTN_BAOBAB) {
+      getOriginalAsset(foreignChain, foreignAddress, nft, tokenId, providerKaikas)
       .then((result) => {
         if (!cancelled) {
           setIsLoading(false);
@@ -224,6 +243,30 @@ function useOriginalAsset(
           setError("Unable to determine original asset.");
         }
       });
+    }
+    else {
+      getOriginalAsset(foreignChain, foreignAddress, nft, tokenId, provider)
+        .then((result) => {
+          if (!cancelled) {
+            setIsLoading(false);
+            setArgs();
+            setOriginAddress(
+              hexToNativeString(
+                uint8ArrayToHex(result.assetAddress),
+                result.chainId
+              ) || null
+            );
+            setOriginTokenId(result.tokenId || null);
+            setOriginChain(result.chainId);
+          }
+        })
+        .catch((e) => {
+          if (!cancelled) {
+            setIsLoading(false);
+            setError("Unable to determine original asset.");
+          }
+        });
+    }
   }, [
     foreignChain,
     foreignAddress,
@@ -233,6 +276,7 @@ function useOriginalAsset(
     argumentError,
     tokenId,
     argsEqual,
+    providerKaikas
   ]);
 
   const output: DataWrapper<OriginalAssetInfo> = useMemo(

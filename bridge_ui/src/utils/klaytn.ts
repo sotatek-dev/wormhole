@@ -116,19 +116,20 @@ export default async function isWrappedAsset(
 }
 
 export async function getOriginalAssetKlaytn (
-  wrappedAddress?: string,
-  lookupChainId?: ChainId,
+  wrappedAddress: string,
+  lookupChainId: ChainId,
   provider?: any,
   tokenBridgeAddress?: string,
 ) {
   const isWrapped = await isWrappedAsset(wrappedAddress, provider, tokenBridgeAddress)
   if (isWrapped) {
       const contract = new provider.Contract(klaytnTokenImplementationAbi as any, wrappedAddress)
-      const result = await contract.methods.nativeContract().call();
+    const result = await contract.methods.nativeContract().call();
+    const chainId = await contract.methods.chainId().call();
 
       return {
           isWrapped: true,
-          chainId: lookupChainId,
+          chainId: chainId,
           assetAddress: arrayify(result),
       }
   }
