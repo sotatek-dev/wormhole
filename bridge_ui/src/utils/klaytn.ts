@@ -139,6 +139,34 @@ export async function getOriginalAssetKlaytn (
   }
 }
 
+export async function getOriginalAssetKlaytnNFT (
+  tokenBridgeAddress: string,
+  provider: any,
+  wrappedAddress: string,
+  tokenId: string,
+  lookupChainId: ChainId,
+  //tokenBridgeAddress, provider, wrappedAddress, tokenId, lookupChainId
+) {
+  const isWrapped = await isWrappedAsset(wrappedAddress, provider, tokenBridgeAddress)
+  if (isWrapped) {
+      const contract = new provider.Contract(klaytnTokenImplementationAbi as any, wrappedAddress)
+      const result = await contract.methods.nativeContract().call();
+
+      return {
+          isWrapped: true,
+          chainId: lookupChainId,
+          assetAddress: arrayify(result),
+          tokenId: tokenId
+      }
+  }
+  return {
+      isWrapped: false,
+      chainId: lookupChainId,
+      assetAddress: zeroPad(arrayify(wrappedAddress as string), 32),
+      tokenId: tokenId
+  }
+}
+
 export async function redeemOnKlaytn(
   tokenBridgeAddress: string,
   provider: any,
@@ -232,6 +260,20 @@ export async function getKlaytnNFT(
 ) {
   const token = new provider.Contract(klaytnERC721Abi as any, tokenAddress)
   return token;
+}
+
+export async function isNFTKlaytn(contract: any) {
+  const erc721 = "0x80ac58cd";
+  const erc721metadata = "0x5b5e139f";
+  const _erc721 = caver.utils.bytesToHex(arrayify(erc721) as any);
+  const _erc721metadata = caver.utils.bytesToHex(arrayify(erc721metadata) as any);
+  const supportsErc721 = await contract.methods
+    .supportsInterface(_erc721)
+    .call();
+  const supportsErc721Metadata = await contract.methods
+    .supportsInterface(_erc721metadata)
+    .call();
+  return supportsErc721 && supportsErc721Metadata;
 }
 
 export async function getKlaytnToken(

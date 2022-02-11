@@ -946,3 +946,6 @@ export const POLYGON_TERRA_WRAPPED_TOKENS = [
 ];
 
 export const JUPITER_SWAP_BASE_URL = "https://jup.ag/swap";
+export const OPEN_SEA_URL = CLUSTER === "mainnet"
+  ? "https://opensea.io/assets"
+  : "https://testnets.opensea.io/assets/baobab";
