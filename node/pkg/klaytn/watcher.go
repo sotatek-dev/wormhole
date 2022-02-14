@@ -204,7 +204,7 @@ func (e *Watcher) Run(ctx context.Context) error {
 					Height:          ev.Number.Int64(),
 					ContractAddress: e.contract.Hex(),
 				})
-				//logger.Info("processed new header",
+				//  logger.Info("processed new header",
 				//	zap.Stringer("current_block", ev.Number),
 				//	zap.Stringer("current_blockhash", currentHash),
 				//	zap.Duration("took", time.Since(start)),

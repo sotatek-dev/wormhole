@@ -577,14 +577,12 @@ func runNode(cmd *cobra.Command, args []string) {
 		//	ethereum.NewEthWatcher(*avalancheRPC, avalancheContractAddr, "avalanche", common.ReadinessAvalancheSyncing, vaa.ChainIDAvalanche, lockC, nil).Run); err != nil {
 		//	return err
 		//}
-
 		//if *testnetMode {
 		//	if err := supervisor.Run(ctx, "ethropstenwatch",
 		//		ethereum.NewEthWatcher(*ethRopstenRPC, ethRopstenContractAddr, "ethropsten", common.ReadinessEthRopstenSyncing, vaa.ChainIDEthereumRopsten, lockC, setC).Run); err != nil {
 		//		return err
 		//	}
 		//}
-
 		// Start Terra watcher only if configured
 		//logger.Info("Starting Terra watcher")
 		//if err := supervisor.Run(ctx, "terrawatch",

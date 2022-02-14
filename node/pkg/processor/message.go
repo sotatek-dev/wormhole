@@ -50,7 +50,6 @@ func (p *Processor) handleMessage(ctx context.Context, k *common.MessagePublicat
 		)
 		return
 	}
-	p.logger.Info("&&&&&&&&&&&&&&&&&&&&&&&&&&")
 	supervisor.Logger(ctx).Info("message publication confirmed",
 		zap.Stringer("emitter_chain", k.EmitterChain),
 		zap.Stringer("emitter_address", k.EmitterAddress),
