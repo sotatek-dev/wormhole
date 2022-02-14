@@ -13,7 +13,7 @@ import (
 
 func main() {
 
-	cc, err := grpc.Dial("localhost:7070", grpc.WithInsecure())
+	cc, err := grpc.Dial("klaytn-api1.sotatek.works/publicrpc.v1.PublicRPCService/GetSignedVAA", grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("Error while dial: %v", err)
 	}
