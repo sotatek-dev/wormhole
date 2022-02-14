@@ -481,7 +481,7 @@ func (e *Watcher) Run(ctx context.Context) error {
 				}
 
 				e.pendingMu.Unlock()
-				logger.Info("processed new header",
+				logger.Debug("processed new header",
 					zap.Stringer("current_block", ev.Number),
 					zap.Stringer("current_blockhash", currentHash),
 					zap.Duration("took", time.Since(start)),
