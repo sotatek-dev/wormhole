@@ -81,7 +81,7 @@ function useFetchForeignAsset(
       !originAssetHex ||
       foreignChain === originChain ||
       ((isEVMChain(foreignChain) || foreignChain === CHAIN_ID_KLAYTN_BAOBAB) && !isReady) ||
-      ((isEVMChain(foreignChain) || foreignChain === CHAIN_ID_KLAYTN_BAOBAB) && !hasCorrectEvmNetwork) ||
+      (isEVMChain(foreignChain) && !hasCorrectEvmNetwork) ||
       argsEqual,
     [
       isReady,
