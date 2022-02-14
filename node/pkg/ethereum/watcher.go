@@ -368,7 +368,7 @@ func (e *Watcher) Run(ctx context.Context) error {
 			case ev := <-headSink:
 				start := time.Now()
 				currentHash := ev.Hash()
-				logger.Info("processing new header",
+				logger.Debug("processing new header",
 					zap.Stringer("current_block", ev.Number),
 					zap.Stringer("current_blockhash", currentHash),
 					zap.String("eth_network", e.networkName))
@@ -504,7 +504,7 @@ func (e *Watcher) fetchAndUpdateGuardianSet(
 	caller *abi.AbiCaller,
 ) error {
 	msm := time.Now()
-	logger.Info("fetching guardian set")
+	logger.Debug("fetching guardian set")
 	timeout, cancel := context.WithTimeout(ctx, 15*time.Second)
 	defer cancel()
 	idx, gs, err := fetchCurrentGuardianSet(timeout, caller)
@@ -520,7 +520,7 @@ func (e *Watcher) fetchAndUpdateGuardianSet(
 		return nil
 	}
 
-	logger.Info("updated guardian set found",
+	logger.Debug("updated guardian set found",
 		zap.Any("value", gs), zap.Uint32("index", idx),
 		zap.String("eth_network", e.networkName))
 

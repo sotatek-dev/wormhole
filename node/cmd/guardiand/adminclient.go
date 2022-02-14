@@ -88,7 +88,7 @@ var SendObservationRequest = &cobra.Command{
 }
 
 func getAdminClient(ctx context.Context, addr string) (*grpc.ClientConn, error, nodev1.NodePrivilegedServiceClient) {
-	conn, err := grpc.DialContext(ctx, fmt.Sprintf("unix:///%s", addr), grpc.WithInsecure())
+	conn, err := grpc.DialContext(ctx, fmt.Sprintf("unix://%s", addr), grpc.WithInsecure())
 
 	if err != nil {
 		log.Fatalf("failed to connect to %s: %v", addr, err)
