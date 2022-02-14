@@ -91,6 +91,9 @@ async function evm(
     enqueueSnackbar(null, {
       content: <Alert severity="info">Fetching VAA</Alert>,
     });
+    console.log('chainId: ', chainId);
+    console.log('sequence: ', sequence);
+    console.log('emiter: ', emitterAddress);
     const { vaaBytes } = await getSignedVAAWithRetry(
       chainId,
       emitterAddress,
@@ -147,6 +150,9 @@ async function klaytn(
     enqueueSnackbar(null, {
       content: <Alert severity="info">Fetching VAA</Alert>,
     });
+    console.log('chainId: ', chainId);
+    console.log('sequence: ', sequence);
+    console.log('emiter: ', emitterAddress);
     const { vaaBytes } = await getSignedVAAWithRetry(
       chainId,
       emitterAddress,
