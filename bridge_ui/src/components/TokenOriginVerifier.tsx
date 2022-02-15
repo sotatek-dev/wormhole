@@ -243,7 +243,7 @@ export default function TokenOriginVerifier() {
   );
 
   const primaryWalletError =
-    isEVMChain(primaryLookupChain) &&
+    (isEVMChain(primaryLookupChain) || primaryLookupChain === CHAIN_ID_KLAYTN_BAOBAB) &&
     primaryLookupAsset &&
     !originInfo.data &&
     !originInfo.error &&
@@ -252,7 +252,7 @@ export default function TokenOriginVerifier() {
   const primaryError = primaryWalletError || originError;
 
   const secondaryWalletError =
-    isEVMChain(secondaryLookupChain) &&
+    (isEVMChain(secondaryLookupChain) || secondaryLookupChain === CHAIN_ID_KLAYTN_BAOBAB) &&
     originInfo.data?.originAddress &&
     originInfo.data?.originChain &&
     !foreignAssetInfo.data &&
@@ -336,7 +336,7 @@ export default function TokenOriginVerifier() {
         ))}
       </TextField>
       <div className={classes.centered}>
-        {isEVMChain(secondaryLookupChain) ? (
+        {isEVMChain(secondaryLookupChain) || secondaryLookupChain === CHAIN_ID_KLAYTN_BAOBAB ? (
           <KeyAndBalance chainId={secondaryLookupChain} />
         ) : null}
         {secondaryError ? (
