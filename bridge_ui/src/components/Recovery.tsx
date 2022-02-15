@@ -2,6 +2,7 @@ import {
   ChainId,
   CHAIN_ID_SOLANA,
   CHAIN_ID_TERRA,
+  CHAIN_ID_KLAYTN_BAOBAB,
   getEmitterAddressEth,
   getEmitterAddressSolana,
   getEmitterAddressTerra,
@@ -38,6 +39,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useHistory, useLocation } from "react-router";
 import { useEthereumProvider } from "../contexts/EthereumProviderContext";
+import { useKaikasProvider } from "../contexts/KaikasProviderContext";
 import useIsWalletReady from "../hooks/useIsWalletReady";
 import { COLORS } from "../muiTheme";
 import { setRecoveryVaa as setRecoveryNFTVaa } from "../store/nftSlice";
@@ -71,6 +73,40 @@ const useStyles = makeStyles((theme) => ({
     padding: theme.spacing(2, 0),
   },
 }));
+
+async function klaytn(
+  provider: any,
+  tx: string,
+  enqueueSnackbar: any,
+  chainId: ChainId,
+  nft: boolean
+) {
+  try {
+    const receipt = await provider.getTransactionReceipt(tx);
+    const sequence = parseSequenceFromLogEth(
+      receipt,
+      getBridgeAddressForChain(chainId)
+    );
+    const emitterAddress = getEmitterAddressEth(
+      nft
+        ? getNFTBridgeAddressForChain(chainId)
+        : getTokenBridgeAddressForChain(chainId)
+    );
+    const { vaaBytes } = await getSignedVAAWithRetry(
+      chainId,
+      emitterAddress,
+      sequence.toString(),
+      WORMHOLE_RPC_HOSTS.length
+    );
+    return { vaa: uint8ArrayToHex(vaaBytes), error: null };
+  } catch (e) {
+    console.error(e);
+    enqueueSnackbar(null, {
+      content: <Alert severity="error">{parseError(e)}</Alert>,
+    });
+    return { vaa: null, error: parseError(e) };
+  }
+}
 
 async function evm(
   provider: ethers.providers.Web3Provider,
@@ -166,6 +202,7 @@ export default function Recovery() {
   const { enqueueSnackbar } = useSnackbar();
   const dispatch = useDispatch();
   const { provider } = useEthereumProvider();
+  const { provider: providerKaikas } = useKaikasProvider();
   const [type, setType] = useState("Token");
   const isNFT = type === "NFT";
   const [recoverySourceChain, setRecoverySourceChain] =
@@ -246,6 +283,27 @@ export default function Recovery() {
             }
           }
         })();
+      } else if (recoverySourceChain === CHAIN_ID_KLAYTN_BAOBAB && providerKaikas) {
+        setRecoverySourceTxError("");
+        setRecoverySourceTxIsLoading(true);
+        (async () => {
+          const { vaa, error } = await klaytn(
+            providerKaikas,
+            recoverySourceTx,
+            enqueueSnackbar,
+            recoverySourceChain,
+            isNFT
+          );
+          if (!cancelled) {
+            setRecoverySourceTxIsLoading(false);
+            if (vaa) {
+              setRecoverySignedVAA(vaa);
+            }
+            if (error) {
+              setRecoverySourceTxError(error);
+            }
+          }
+        })();
       } else if (recoverySourceChain === CHAIN_ID_SOLANA) {
         setRecoverySourceTxError("");
         setRecoverySourceTxIsLoading(true);
@@ -289,6 +347,7 @@ export default function Recovery() {
     recoverySourceChain,
     recoverySourceTx,
     provider,
+    providerKaikas,
     enqueueSnackbar,
     isNFT,
     isReady,
@@ -413,7 +472,7 @@ export default function Recovery() {
           margin="normal"
           chains={isNFT ? CHAINS_WITH_NFT_SUPPORT : CHAINS}
         />
-        {isEVMChain(recoverySourceChain) ? (
+        {isEVMChain(recoverySourceChain) || recoverySourceChain === CHAIN_ID_KLAYTN_BAOBAB? (
           <KeyAndBalance chainId={recoverySourceChain} />
         ) : null}
         <TextField
