@@ -151,7 +151,7 @@ const (
 	// ChainIDPolygon is the ChainID of Polygon
 	ChainIDPolygon ChainID = 5
 	// ChainIDAvalanche is the ChainID of Avalanche
-	ChainIDAvalanche ChainID = 6
+	ChainIDAvalanche ChainID = 10001
 	// ChainIDOasis is the ChainID of Oasis
 	ChainIDOasis ChainID = 7
 	// ChainIDAlgorand is the ChainID of Algorand
@@ -160,7 +160,7 @@ const (
 	ChainIDKlaytn ChainID = 9
 
 	// ChainIDEthereumRopsten is the ChainID of Ethereum Ropsten
-	ChainIDEthereumRopsten ChainID = 10001
+	ChainIDEthereumRopsten ChainID = 6
 
 	minVAALength        = 1 + 4 + 52 + 4 + 1 + 1
 	SupportedVAAVersion = 0x01
