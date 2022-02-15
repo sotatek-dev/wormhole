@@ -420,7 +420,7 @@ func (e *Watcher) Run(ctx context.Context) error {
 						// Check multiple possible error cases - the node seems to return a
 						// "not found" error most of the time, but it could conceivably also
 						// return a nil tx or rpc.ErrNoResult.
-						if tx == nil || err == rpc.ErrNoResult || (err != nil && err.Error() == "not found") {
+						if (tx == nil && err == nil) || err == rpc.ErrNoResult || (err != nil && err.Error() == "not found") {
 							logger.Warn("tx was orphaned",
 								zap.Stringer("tx", pLock.message.TxHash),
 								zap.Stringer("blockhash", key.BlockHash),
