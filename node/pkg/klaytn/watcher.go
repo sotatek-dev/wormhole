@@ -131,61 +131,61 @@ func (e *Watcher) Run(ctx context.Context) error {
 	errC := make(chan error)
 	var currentBlockNumber uint64
 
-	//go func() {
-	//	for {
-	//		select {
-	//		case <-ctx.Done():
-	//			return
-	//		case r := <-e.obsvReqC:
-	//			// This can't happen unless there is a programming error - the caller
-	//			// is expected to send us only requests for our chainID.
-	//			if vaa.ChainID(r.ChainId) != e.chainID {
-	//				panic("invalid chain ID")
-	//			}
-	//
-	//			tx := klay_common.BytesToHash(r.TxHash)
-	//			logger.Info("received observation request",
-	//				zap.String("eth_network", e.networkName),
-	//				zap.String("tx_hash", tx.Hex()))
-	//
-	//			// SECURITY: Load the block number before requesting the transaction to avoid a
-	//			// race condition where requesting the tx succeeds and is then dropped due to a fork,
-	//			// but blockNumberU had already advanced beyond the required threshold.
-	//			//
-	//			// In the primary watcher flow, this is of no concern since we assume the node
-	//			// always sends the head before it sends the logs (implicit synchronization
-	//			// by relying on the same websocket connection).
-	//			blockNumberU := atomic.LoadUint64(&currentBlockNumber)
-	//			if blockNumberU == 0 {
-	//				logger.Error("no block number available, ignoring observation request",
-	//					zap.String("eth_network", e.networkName))
-	//				continue
-	//			}
-	//
-	//			timeout, cancel := context.WithTimeout(ctx, 5*time.Second)
-	//			blockNumber, msgs, err := MessageEventsForTransaction(timeout, c, e.contract, e.chainID, tx)
-	//			cancel()
-	//
-	//			if err != nil {
-	//				logger.Error("failed to process observation request",
-	//					zap.Error(err), zap.String("eth_network", e.networkName))
-	//				continue
-	//			}
-	//
-	//			for _, msg := range msgs {
-	//				logger.Info("re-observed message publication transaction",
-	//					zap.Stringer("tx", msg.TxHash),
-	//					zap.Stringer("emitter_address", msg.EmitterAddress),
-	//					zap.Uint64("sequence", msg.Sequence),
-	//					zap.Uint64("current_block", blockNumberU),
-	//					zap.Uint64("observed_block", blockNumber),
-	//					zap.String("eth_network", e.networkName),
-	//				)
-	//				e.msgChan <- msg
-	//			}
-	//		}
-	//	}
-	//}()
+	go func() {
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case r := <-e.obsvReqC:
+				// This can't happen unless there is a programming error - the caller
+				// is expected to send us only requests for our chainID.
+				if vaa.ChainID(r.ChainId) != e.chainID {
+					panic("invalid chain ID")
+				}
+
+				tx := klay_common.BytesToHash(r.TxHash)
+				logger.Info("received observation request",
+					zap.String("eth_network", e.networkName),
+					zap.String("tx_hash", tx.Hex()))
+
+				// SECURITY: Load the block number before requesting the transaction to avoid a
+				// race condition where requesting the tx succeeds and is then dropped due to a fork,
+				// but blockNumberU had already advanced beyond the required threshold.
+				//
+				// In the primary watcher flow, this is of no concern since we assume the node
+				// always sends the head before it sends the logs (implicit synchronization
+				// by relying on the same websocket connection).
+				blockNumberU := atomic.LoadUint64(&currentBlockNumber)
+				if blockNumberU == 0 {
+					logger.Error("no block number available, ignoring observation request",
+						zap.String("eth_network", e.networkName))
+					continue
+				}
+
+				timeout, cancel := context.WithTimeout(ctx, 5*time.Second)
+				msgs, err := MessageEventsForTransaction(timeout, c, e.contract, e.chainID, tx)
+				cancel()
+
+				if err != nil {
+					logger.Error("failed to process observation request",
+						zap.Error(err), zap.String("eth_network", e.networkName))
+					continue
+				}
+
+				for _, msg := range msgs {
+					logger.Info("re-observed message publication transaction",
+						zap.Stringer("tx", msg.TxHash),
+						zap.Stringer("emitter_address", msg.EmitterAddress),
+						zap.Uint64("sequence", msg.Sequence),
+						zap.Uint64("current_block", blockNumberU),
+						zap.Uint64("observed_block", 0),
+						zap.String("eth_network", e.networkName),
+					)
+					e.msgChan <- msg
+				}
+			}
+		}
+	}()
 
 	go func() {
 		for {
