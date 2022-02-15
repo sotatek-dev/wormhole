@@ -6,7 +6,6 @@ import {
   isEVMChain,
   parseNFTPayload,
   postVaaSolanaWithRetry,
-  postVaaSolana,
   CHAIN_ID_KLAYTN_BAOBAB,
 } from "@certusone/wormhole-sdk";
 import {

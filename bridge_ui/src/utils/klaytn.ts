@@ -214,8 +214,9 @@ export async function transferFromKlaytn(
 ) {
   const contract = new provider.Contract(klaytnBridgeImplementationAbi as any, tokenBridgeAddress)
   const fee = 0;
+  const encodeVM = caver.utils.bytesToHex(recipientAddress as any)
   const result = await contract.methods
-  .transferTokens(tokenAddress, amount, recipientChain, recipientAddress, fee, createNonce())
+  .transferTokens(tokenAddress, amount, recipientChain, encodeVM, fee, createNonce())
   .send({ from: signerAddress, gas: GAS_DEFAULT_KLAYTN })
   return result;
 }
@@ -320,7 +321,7 @@ export async function klaytnTokenToParsedTokenAccountNFT(
   const name = await token.methods.name().call();
   return createParsedTokenAccount(
     signerAddress,
-    token.address,
+    token?._address,
     balance.toString(),
     decimals,
     Number(formatUnits(balance, decimals)),
