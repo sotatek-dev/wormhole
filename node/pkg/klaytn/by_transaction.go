@@ -38,7 +38,7 @@ func MessageEventsForTransaction(
 		return nil, fmt.Errorf("failed to get transaction receipt: %w", err)
 	}
 
-	// Get block
+	//Get block
 	//block, err := c.BlockByHash(ctx, receipt)
 	//if err != nil {
 	//	return nil, fmt.Errorf("failed to get block: %w", err)
