@@ -8,6 +8,7 @@ import {
   CHAIN_ID_SOLANA,
   CHAIN_ID_TERRA,
   CHAIN_ID_OASIS,
+  CHAIN_ID_KLAYTN_BAOBAB,
   isNativeDenom,
 } from "@certusone/wormhole-sdk";
 import { Button, makeStyles, Tooltip, Typography } from "@material-ui/core";
@@ -136,6 +137,11 @@ export default function SmartAddress({
           ? "bombay-12"
           : "columbus-5"
       }/address/${useableAddress}`
+    : chainId === CHAIN_ID_KLAYTN_BAOBAB
+    ? `https://${
+        CLUSTER === "testnet"
+          ? "baobab." 
+          : ""}scope.klaytn.com/account/${useableAddress}`
     : undefined;
   const explorerName = getExplorerName(chainId);
 
