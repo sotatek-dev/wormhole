@@ -158,7 +158,7 @@ func (e *Watcher) Run(ctx context.Context) error {
 				blockNumberU := atomic.LoadUint64(&currentBlockNumber)
 				if blockNumberU == 0 {
 					logger.Error("no block number available, ignoring observation request",
-						zap.String("eth_network", e.networkName))
+						zap.String("kalytn_network", e.networkName))
 					continue
 				}
 

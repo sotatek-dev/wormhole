@@ -39,10 +39,13 @@ func MessageEventsForTransaction(
 	}
 
 	//Get block
-	//block, err := c.BlockByHash(ctx, receipt)
-	//if err != nil {
-	//	return nil, fmt.Errorf("failed to get block: %w", err)
-	//}
+	if len(receipt.Logs) == 0 {
+		return nil, fmt.Errorf("receipt contain no log: %w", err)
+	}
+	block, err := c.BlockByHash(ctx, receipt.Logs[0].BlockHash)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get block: %w", err)
+	}
 
 	msgs := make([]*common.MessagePublication, 0, len(receipt.Logs))
 
@@ -71,7 +74,7 @@ func MessageEventsForTransaction(
 		}
 		message := &common.MessagePublication{
 			TxHash:           hash,
-			Timestamp:        time.Unix(0, 0),
+			Timestamp:        time.Unix(block.Time().Int64(), 0),
 			Nonce:            ev.Nonce,
 			Sequence:         ev.Sequence,
 			EmitterChain:     chainId,
