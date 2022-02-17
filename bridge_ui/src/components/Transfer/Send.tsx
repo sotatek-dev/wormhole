@@ -1,6 +1,7 @@
 import {
   CHAIN_ID_SOLANA,
   CHAIN_ID_TERRA,
+  CHAIN_ID_KLAYTN_BAOBAB,
   isEVMChain,
 } from "@certusone/wormhole-sdk";
 import { Checkbox, FormControlLabel } from "@material-ui/core";
@@ -95,7 +96,7 @@ function Send() {
     sourceIsNative
   );
 
-  const approveButtonNeeded = isEVMChain(sourceChain) && !sufficientAllowance;
+  const approveButtonNeeded = (isEVMChain(sourceChain) || sourceChain === CHAIN_ID_KLAYTN_BAOBAB) && !sufficientAllowance;
   const notOne = shouldApproveUnlimited || sourceAmountParsed !== oneParsed;
   const isDisabled =
     !isReady ||
@@ -114,7 +115,7 @@ function Send() {
         () => {
           setAllowanceError("");
         },
-        (error) => setAllowanceError("Failed to approve the token transfer.")
+        (error: any) => setAllowanceError("Failed to approve the token transfer.")
       );
     };
   }, [approveAmount, sourceAmountParsed]);
@@ -125,7 +126,7 @@ function Send() {
         () => {
           setAllowanceError("");
         },
-        (error) => setAllowanceError("Failed to approve the token transfer.")
+        (error: any) => setAllowanceError("Failed to approve the token transfer.")
       );
     };
   }, [approveAmount]);

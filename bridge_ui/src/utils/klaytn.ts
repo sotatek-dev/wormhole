@@ -202,6 +202,40 @@ export async function redeemOnKlaytnNative(
   return result;
 }
 
+export async function getAllowanceKlaytn(
+  tokenBridgeAddress: string,
+  tokenAddress: string,
+  provider: any, 
+  signerAddress: string,
+){
+  const contract = new provider.Contract(klaytnTokenImplementationAbi as any, tokenAddress);
+  try {
+    const result = await contract.methods.allowance(signerAddress, tokenBridgeAddress).call();
+    return result;
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+}
+
+export async function approveKlaytn(
+  tokenBridgeAddress: string,
+  tokenAddress: string,
+  provider: any, 
+  amount: any,
+  signerAddress: string | undefined,
+){
+  const contract = new provider.Contract(klaytnTokenImplementationAbi as any, tokenAddress);
+  try {
+    const result = await contract.methods
+      .approve(tokenBridgeAddress, amount)
+      .send({ from: signerAddress, gas: GAS_DEFAULT_KLAYTN });
+    return result;
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+}
 
 export async function transferFromKlaytn(
   tokenBridgeAddress: string,
@@ -223,7 +257,7 @@ export async function transferFromKlaytn(
       recipientChain,
       _recipientAddress,
       fee,
-      _createNonce)
+      createNonce())
     .send({ from: signerAddress, gas: GAS_DEFAULT_KLAYTN })
   //address,uint256,uint16,bytes32,uint256,uint32
   return result;
