@@ -51,7 +51,7 @@ import {
   TERRA_HOST,
   TERRA_TOKEN_BRIDGE_ADDRESS,
 } from "../utils/consts";
-import { getForeignAssetKlaytn } from "../utils/klaytn";
+import { getForeignAssetKlaytn, getForeignAssetKlaytnNFT } from "../utils/klaytn";
 
 function useFetchTargetAsset(nft?: boolean) {
   const dispatch = useDispatch();
@@ -142,11 +142,19 @@ function useFetchTargetAsset(nft?: boolean) {
         signerAddressKaikas) {
         dispatch(setTargetAsset(fetchDataWrapper()));
         try {
-          const asset = await getForeignAssetKlaytn(
-            getTokenBridgeAddressForChain(targetChain),
-            providerKaikas,
-            originChain,
-            hexToUint8Array(originAsset)
+          const asset = await (
+            nft ? getForeignAssetKlaytnNFT(
+              getNFTBridgeAddressForChain(targetChain),
+              providerKaikas,
+              originChain,
+              hexToUint8Array(originAsset)
+            )
+            : getForeignAssetKlaytn(
+              getTokenBridgeAddressForChain(targetChain),
+              providerKaikas,
+              originChain,
+              hexToUint8Array(originAsset)
+            )
           )
           if (!cancelled) {
             dispatch(

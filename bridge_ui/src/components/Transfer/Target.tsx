@@ -3,6 +3,7 @@ import {
   CHAIN_ID_TERRA,
   hexToNativeString,
   isEVMChain,
+  CHAIN_ID_KLAYTN_BAOBAB
 } from "@certusone/wormhole-sdk";
 import { makeStyles, Typography } from "@material-ui/core";
 import { Alert } from "@material-ui/lab";
@@ -174,7 +175,7 @@ function Target() {
           You will have to pay transaction fees on{" "}
           {CHAINS_BY_ID[targetChain].name} to redeem your tokens.
         </Typography>
-        {(isEVMChain(targetChain) || targetChain === CHAIN_ID_TERRA) && (
+        {(isEVMChain(targetChain) || targetChain === CHAIN_ID_TERRA || targetChain === CHAIN_ID_KLAYTN_BAOBAB) && (
           <GasEstimateSummary methodType="transfer" chainId={targetChain} />
         )}
       </Alert>

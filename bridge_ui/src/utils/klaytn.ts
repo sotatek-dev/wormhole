@@ -53,7 +53,21 @@ export async function getForeignAssetKlaytn(
     throw new Error(error.message)
   }
 }
-
+export async function getForeignAssetKlaytnNFT(
+  tokenBridgeAddress: string,
+  provider: any,
+  originChain: ChainId,
+  originAsset: Uint8Array
+) {
+  try {
+    const contract = new provider.Contract(klaytnNFTBridgeAbi as any, tokenBridgeAddress);
+    const _originAsset = caver.utils.bytesToHex(originAsset as any)
+    const result = await contract.methods.wrappedAsset(originChain, _originAsset).call();
+    return result;
+  } catch (error: any) {
+    throw new Error(error.message)
+  }
+}
 export async function attestFromKlaytn (
   tokenBridgeAddress: string,
   provider: any,
