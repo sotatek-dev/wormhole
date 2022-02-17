@@ -125,11 +125,11 @@ export async function getOriginalAssetKlaytn (
   if (isWrapped) {
       const contract = new provider.Contract(klaytnTokenImplementationAbi as any, wrappedAddress)
     const result = await contract.methods.nativeContract().call();
-    const chainId = await contract.methods.chainId().call();
+    const chainId = parseInt(await contract.methods.chainId().call());
 
       return {
           isWrapped: true,
-          chainId: chainId,
+          chainId: chainId as ChainId,
           assetAddress: arrayify(result),
       }
   }
@@ -214,10 +214,18 @@ export async function transferFromKlaytn(
 ) {
   const contract = new provider.Contract(klaytnBridgeImplementationAbi as any, tokenBridgeAddress)
   const fee = 0;
-  const encodeVM = caver.utils.bytesToHex(recipientAddress as any)
+  const _recipientAddress = caver.utils.bytesToHex(recipientAddress as any)
+  const _createNonce = caver.utils.bytesToHex(createNonce() as any)
   const result = await contract.methods
-  .transferTokens(tokenAddress, amount, recipientChain, encodeVM, fee, createNonce())
-  .send({ from: signerAddress, gas: GAS_DEFAULT_KLAYTN })
+    .transferTokens(
+      tokenAddress,
+      amount,
+      recipientChain,
+      _recipientAddress,
+      fee,
+      _createNonce)
+    .send({ from: signerAddress, gas: GAS_DEFAULT_KLAYTN })
+  //address,uint256,uint16,bytes32,uint256,uint32
   return result;
 }
 
