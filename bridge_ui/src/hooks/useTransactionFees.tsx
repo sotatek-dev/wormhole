@@ -3,6 +3,7 @@ import {
   CHAIN_ID_SOLANA,
   CHAIN_ID_TERRA,
   isEVMChain,
+  CHAIN_ID_KLAYTN_BAOBAB
 } from "@certusone/wormhole-sdk";
 import { Provider } from "@ethersproject/abstract-provider";
 import { formatUnits } from "@ethersproject/units";
@@ -20,6 +21,7 @@ import { getMultipleAccountsRPC } from "../utils/solana";
 import { NATIVE_TERRA_DECIMALS } from "../utils/terra";
 import useIsWalletReady from "./useIsWalletReady";
 import { LCDClient } from "@terra-money/terra.js";
+import { useKaikasProvider } from "../contexts/KaikasProviderContext";
 
 export type GasEstimate = {
   currentGasPrice: string;
@@ -249,7 +251,28 @@ export function useEthereumGasPrice(contract: MethodType, chainId: ChainId) {
   const results = useMemo(() => estimateResults, [estimateResults]);
   return results;
 }
+export function useKlaytnGasPrice(contract: MethodType, chainId: ChainId) {
+  const { provider: providerKaikas } = useKaikasProvider();
+  const { isReady } = useIsWalletReady(chainId);
+  const [estimateResults, setEstimateResults] = useState<GasEstimate | null>(
+    null
+  );
+  useEffect(() => {
+    if (providerKaikas && isReady && !estimateResults) {
+      getGasEstimates(providerKaikas, contract).then(
+        (results) => {
+          setEstimateResults(results);
+        },
+        (error) => {
+          console.log(error);
+        }
+      );
+    }
+  }, [providerKaikas, isReady, estimateResults, contract]);
 
+  const results = useMemo(() => estimateResults, [estimateResults]);
+  return results;
+}
 function EthGasEstimateSummary({
   methodType,
   chainId,
@@ -284,7 +307,39 @@ function EthGasEstimateSummary({
     </Typography>
   );
 }
-
+function KlaytnGasEstimateSummary({
+  methodType,
+  chainId,
+}: {
+  methodType: MethodType;
+  chainId: ChainId;
+}) {
+  const estimate = useEthereumGasPrice(methodType, chainId);
+  if (!estimate) {
+    return null;
+  }
+  return (
+    <Typography
+      component="div"
+      style={{
+        display: "flex",
+        alignItems: "center",
+        marginTop: 8,
+        flexWrap: "wrap",
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "center" }}>
+        <LocalGasStation fontSize="inherit" />
+        &nbsp;{estimate.currentGasPrice}
+      </div>
+      <div>&nbsp;&nbsp;&nbsp;</div>
+      <div>
+        Est. Fees: {estimate.lowEstimate} - {estimate.highEstimate}{" "}
+        {getDefaultNativeCurrencySymbol(chainId)}
+      </div>
+    </Typography>
+  );
+}
 const terraEstimatesByContract = {
   transfer: {
     lowGasEstimate: BigInt(50000),
@@ -320,6 +375,7 @@ export async function getGasEstimates(
   let currentGasPrice;
   if (provider) {
     const priceInWei = await provider.getGasPrice();
+    
     if (priceInWei) {
       lowEstimate = parseFloat(
         formatUnits(lowEstimateGasAmount * priceInWei.toBigInt(), "ether")
@@ -387,7 +443,9 @@ export function GasEstimateSummary({
   methodType: MethodType;
   chainId: ChainId;
 }) {
-  if (isEVMChain(chainId)) {
+  if (chainId === CHAIN_ID_KLAYTN_BAOBAB) {
+    return <KlaytnGasEstimateSummary chainId={chainId} methodType={methodType} />
+  } else if (isEVMChain(chainId)) {
     return <EthGasEstimateSummary chainId={chainId} methodType={methodType} />;
   } else if (chainId === CHAIN_ID_TERRA) {
     return (

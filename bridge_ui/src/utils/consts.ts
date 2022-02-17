@@ -183,6 +183,8 @@ export const getDefaultNativeCurrencySymbol = (chainId: ChainId) =>
     ? "AVAX"
     : chainId === CHAIN_ID_OASIS
     ? "ROSE"
+    : chainId === CHAIN_ID_KLAYTN_BAOBAB
+    ? "KLAY"
     : "";
 export const getExplorerName = (chainId: ChainId) =>
   chainId === CHAIN_ID_ETH || chainId === CHAIN_ID_ETHEREUM_ROPSTEN

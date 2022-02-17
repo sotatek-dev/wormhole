@@ -134,7 +134,7 @@ function Target() {
           You will have to pay transaction fees on{" "}
           {CHAINS_BY_ID[targetChain].name} to redeem your NFT.
         </Typography>
-        {isEVMChain(targetChain) && (
+        {(isEVMChain(targetChain) || targetChain === CHAIN_ID_KLAYTN_BAOBAB) && (
           <GasEstimateSummary methodType="nft" chainId={targetChain} />
         )}
       </Alert>
