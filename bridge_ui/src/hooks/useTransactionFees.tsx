@@ -53,7 +53,7 @@ const isSufficientBalance = (
   if (CHAIN_ID_SOLANA === chainId) {
     return balance > SOLANA_THRESHOLD_LAMPORTS;
   }
-  if (isEVMChain(chainId)) {
+  if (isEVMChain(chainId) || chainId === CHAIN_ID_KLAYTN_BAOBAB) {
     return balance > ETHEREUM_THRESHOLD_WEI;
   }
   if (terraFeeDenom === "uluna") {
@@ -104,6 +104,11 @@ const getBalanceEvm = async (walletAddress: string, provider: Provider) => {
   return provider.getBalance(walletAddress).then((result) => result.toBigInt());
 };
 
+const getBalanceKlaytn = async (walletAddress: string, provider: any) => {
+  const balance = await provider.getBalance(walletAddress);
+  return BigInt(balance);
+}
+
 const getBalancesTerra = async (walletAddress: string) => {
   const TARGET_DENOMS = ["uluna", "uusd"];
 
@@ -136,7 +141,7 @@ const toBalanceString = (balance: bigint | undefined, chainId: ChainId) => {
   if (!chainId || balance === undefined) {
     return "";
   }
-  if (isEVMChain(chainId)) {
+  if (isEVMChain(chainId) || chainId === CHAIN_ID_KLAYTN_BAOBAB) {
     return formatUnits(balance, 18); //wei decimals
   } else if (chainId === CHAIN_ID_SOLANA) {
     return formatUnits(balance, 9); //lamports to sol decmals
@@ -148,6 +153,7 @@ const toBalanceString = (balance: bigint | undefined, chainId: ChainId) => {
 export default function useTransactionFees(chainId: ChainId) {
   const { walletAddress, isReady } = useIsWalletReady(chainId);
   const { provider } = useEthereumProvider();
+  const {provider: providerKaikas} = useKaikasProvider();
   const [balance, setBalance] = useState<bigint | undefined>(undefined);
   const [terraBalances, setTerraBalances] = useState<TerraBalance[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -160,7 +166,21 @@ export default function useTransactionFees(chainId: ChainId) {
   }, []);
 
   useEffect(() => {
-    if (chainId === CHAIN_ID_SOLANA && isReady && walletAddress) {
+    if (chainId === CHAIN_ID_KLAYTN_BAOBAB && isReady && walletAddress) {
+      loadStart();
+      getBalanceKlaytn(walletAddress, providerKaikas).then(
+        (result) => {
+          const adjustedresult =
+            result === undefined || result === null ? BigInt(0) : result;
+          setIsLoading(false);
+          setBalance(adjustedresult);
+        },
+        (error) => {
+          setIsLoading(false);
+          setError("Cannot load wallet balance");
+        }
+      )
+    } else if (chainId === CHAIN_ID_SOLANA && isReady && walletAddress) {
       loadStart();
       getBalanceSolana(walletAddress).then(
         (result) => {
@@ -210,7 +230,7 @@ export default function useTransactionFees(chainId: ChainId) {
         }
       );
     }
-  }, [provider, walletAddress, isReady, chainId, loadStart]);
+  }, [provider, walletAddress, isReady, chainId, loadStart,providerKaikas]);
 
   const results = useMemo(() => {
     return {
