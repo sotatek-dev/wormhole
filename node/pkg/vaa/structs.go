@@ -162,7 +162,7 @@ const (
 	ChainIDAlgorand ChainID = 8
 	// ChainIDKlaytn is the ChainID of Klaytn
 	ChainIDKlaytn      ChainID = 9
-	ChainIDKlaytnDebug         = 11
+	ChainIDKlaytnDebug         = 13
 	// ChainIDEthereumRopsten is the ChainID of Ethereum Ropsten
 	ChainIDEthereumRopsten ChainID = 6
 
