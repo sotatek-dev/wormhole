@@ -569,7 +569,7 @@ func runNode(cmd *cobra.Command, args []string) {
 	if *testnetMode {
 		chainObsvReqC[vaa.ChainIDEthereumRopsten] = make(chan *gossipv1.ObservationRequest)
 		chainObsvReqC[vaa.ChainIDKlaytn] = make(chan *gossipv1.ObservationRequest)
-		chainObsvReqC[vaa.ChainIDKlaytnDebug] = make(chan *gossipv1.ObservationRequest)
+		//chainObsvReqC[vaa.ChainIDKlaytnDebug] = make(chan *gossipv1.ObservationRequest)
 	}
 
 	// Multiplex observation requests to the appropriate chain
