@@ -3,6 +3,7 @@ import {
   CHAIN_ID_BSC,
   CHAIN_ID_ETH,
   CHAIN_ID_ETHEREUM_ROPSTEN,
+  CHAIN_ID_KLAYTN_BAOBAB,
   CHAIN_ID_OASIS,
   CHAIN_ID_POLYGON,
   CHAIN_ID_SOLANA,
@@ -31,6 +32,7 @@ import { reset } from "../../store/transferSlice";
 import {
   getHowToAddTokensToWalletUrl,
   ROPSTEN_WETH_ADDRESS,
+  WKLAY_ADDRESS,
   WAVAX_ADDRESS,
   WBNB_ADDRESS,
   WETH_ADDRESS,
@@ -70,6 +72,10 @@ function Redeem() {
     targetChain === CHAIN_ID_ETH &&
     targetAsset &&
     targetAsset.toLowerCase() === WETH_ADDRESS.toLowerCase();
+  const isKlaytnNative =
+    targetChain === CHAIN_ID_KLAYTN_BAOBAB &&
+    targetAsset &&
+    targetAsset.toLowerCase() === WKLAY_ADDRESS.toLowerCase();
   const isEthRopstenNative =
     targetChain === CHAIN_ID_ETHEREUM_ROPSTEN &&
     targetAsset &&
@@ -96,6 +102,7 @@ function Redeem() {
     targetAsset === WSOL_ADDRESS;
   const isNativeEligible =
     isEthNative ||
+    isKlaytnNative || 
     isEthRopstenNative ||
     isBscNative ||
     isPolygonNative ||
