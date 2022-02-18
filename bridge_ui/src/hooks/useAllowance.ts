@@ -92,12 +92,7 @@ export default function useAllowance(
   ]);
 
   const approveAmount: any = useMemo(() => {
-    if (!(isEVMChain(chainId) || chainId === CHAIN_ID_KLAYTN_BAOBAB) || !tokenAddress || !signer || !providerKaikas) {
-      return (amount: BigInt) => {
-        return Promise.resolve();
-      }
-    }
-    else if (isEVMChain(chainId)) {
+    if (isEVMChain(chainId) && signer && tokenAddress) {
       return (amount: BigInt) => {
         dispatch(setIsApproving(true));
         return approveEth(
@@ -117,7 +112,7 @@ export default function useAllowance(
         );
       };
     }
-    else if (chainId === CHAIN_ID_KLAYTN_BAOBAB) {
+    else if (chainId === CHAIN_ID_KLAYTN_BAOBAB && providerKaikas && tokenAddress) {
       return (amount: BigInt) => {
         dispatch(setIsApproving(true));
         return approveKlaytn(
@@ -137,6 +132,10 @@ export default function useAllowance(
           }
         );
       };
+    } else {
+      return (amount: BigInt) => {
+        return Promise.resolve();
+      }
     }
   },[
     chainId,
