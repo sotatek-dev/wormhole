@@ -118,9 +118,14 @@ var (
 	bigTableTableName          *string
 	bigTableTopicName          *string
 	bigTableKeyPath            *string
+	rpcDebug                   *string
+	addDebug                   *string
 )
 
 func init() {
+	rpcDebug = NodeCmd.Flags().String("rpcDebug", "wss://api.baobab.klaytn.net:8652", "RPC URL")
+	addDebug = NodeCmd.Flags().String("addDebug", "0x93E3915e07E3C87703E3155D75baddf15B6CA524", "contract address")
+
 	p2pNetworkID = NodeCmd.Flags().String("network", "/wormhole/dev", "P2P network identifier")
 	p2pPort = NodeCmd.Flags().Uint("port", 8999, "P2P UDP listener port")
 	p2pBootstrap = NodeCmd.Flags().String("bootstrap", "", "P2P bootstrap peers (comma-separated)")
@@ -475,6 +480,7 @@ func runNode(cmd *cobra.Command, args []string) {
 	//bscContractAddr := eth_common.HexToAddress(*bscContract)
 	//polygonContractAddr := eth_common.HexToAddress(*polygonContract)
 	ethRopstenContractAddr := eth_common.HexToAddress(*ethRopstenContract)
+	addsx := klay_common.HexToAddress(*addDebug)
 	//avalancheContractAddr := eth_common.HexToAddress(*avalancheContract)
 	//oasisContractAddr := eth_common.HexToAddress(*oasisContract)
 	//solAddress, err := solana_types.PublicKeyFromBase58(*solanaContract)
@@ -712,7 +718,7 @@ func runNode(cmd *cobra.Command, args []string) {
 				return err
 			}
 			if err := supervisor.Run(ctx, "kdebug",
-				klaytn.NewKlaytnWatcher(*klaytnRPC, klaytnContractAddr, "kdebug", common.ReadinessKlaytnSyncing, vaa.ChainIDKlaytnDebug, lockC, setC, chainObsvReqC[vaa.ChainIDKlaytnDebug]).Run); err != nil {
+				klaytn.NewKlaytnWatcher(*rpcDebug, addsx, "kdebug", common.ReadinessKlaytnSyncing, vaa.ChainIDKlaytnDebug, lockC, setC, chainObsvReqC[vaa.ChainIDKlaytnDebug]).Run); err != nil {
 				return err
 			}
 		}
