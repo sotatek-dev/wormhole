@@ -161,7 +161,6 @@ func (e *Watcher) Run(ctx context.Context) error {
 						zap.String("kalytn_network", e.networkName))
 					continue
 				}
-
 				timeout, cancel := context.WithTimeout(ctx, 5*time.Second)
 				msgs, err := MessageEventsForTransaction(timeout, c, e.contract, e.chainID, tx)
 				cancel()

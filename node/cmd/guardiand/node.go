@@ -717,10 +717,10 @@ func runNode(cmd *cobra.Command, args []string) {
 				klaytn.NewKlaytnWatcher(*klaytnRPC, klaytnContractAddr, "klaytn", common.ReadinessKlaytnSyncing, vaa.ChainIDKlaytn, lockC, setC, chainObsvReqC[vaa.ChainIDKlaytn]).Run); err != nil {
 				return err
 			}
-			if err := supervisor.Run(ctx, "kdebug",
-				klaytn.NewKlaytnWatcher(*rpcDebug, addsx, "kdebug", common.ReadinessKlaytnSyncing, vaa.ChainIDKlaytnDebug, lockC, setC, chainObsvReqC[vaa.ChainIDKlaytnDebug]).Run); err != nil {
-				return err
-			}
+			//if err := supervisor.Run(ctx, "kdebug",
+			//	klaytn.NewKlaytnWatcher(*rpcDebug, addsx, "kdebug", common.ReadinessKlaytnSyncing, vaa.ChainIDKlaytnDebug, lockC, setC, chainObsvReqC[vaa.ChainIDKlaytnDebug]).Run); err != nil {
+			//	return err
+			//}
 		}
 
 		// Start Terra watcher only if configured
