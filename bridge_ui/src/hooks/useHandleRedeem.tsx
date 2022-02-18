@@ -256,7 +256,23 @@ export function useHandleRedeem() {
   const handleRedeemNativeClick = useCallback(() => {
     if (isEVMChain(targetChain) && !!signer && signedVAA) {
       evm(dispatch, enqueueSnackbar, signer, signedVAA, true, targetChain);
-    } else if (
+    }
+    else if (
+      targetChain === CHAIN_ID_KLAYTN_BAOBAB &&
+      !!providerKaikas &&
+      signerAddressKaikas &&
+      signedVAA
+    ) {
+      klaytn(
+        dispatch,
+        enqueueSnackbar,
+        providerKaikas,
+        signerAddressKaikas,
+        signedVAA,
+        true
+      );
+    }
+    else if (
       targetChain === CHAIN_ID_SOLANA &&
       !!solanaWallet &&
       !!solPK &&
@@ -284,6 +300,8 @@ export function useHandleRedeem() {
     solPK,
     terraWallet,
     terraFeeDenom,
+    providerKaikas,
+    signerAddressKaikas
   ]);
 
   return useMemo(

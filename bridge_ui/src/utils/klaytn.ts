@@ -207,7 +207,7 @@ export async function redeemOnKlaytnNative(
 ) {
   const contract = new provider.Contract(klaytnBridgeImplementationAbi as any, tokenBridgeAddress);
   const encodeVM = caver.utils.bytesToHex(signedVAA as any)
-  const result = await contract.methods.completeTransferAndUnwrap(
+  const result = await contract.methods.completeTransferAndUnwrapETH(
     encodeVM
   ).send({
     from: signerAddress,
