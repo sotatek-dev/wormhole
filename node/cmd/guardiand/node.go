@@ -560,9 +560,10 @@ func runNode(cmd *cobra.Command, args []string) {
 	chainObsvReqC[vaa.ChainIDPolygon] = make(chan *gossipv1.ObservationRequest)
 	chainObsvReqC[vaa.ChainIDAvalanche] = make(chan *gossipv1.ObservationRequest)
 	chainObsvReqC[vaa.ChainIDOasis] = make(chan *gossipv1.ObservationRequest)
-	chainObsvReqC[vaa.ChainIDKlaytn] = make(chan *gossipv1.ObservationRequest)
 	if *testnetMode {
 		chainObsvReqC[vaa.ChainIDEthereumRopsten] = make(chan *gossipv1.ObservationRequest)
+		chainObsvReqC[vaa.ChainIDKlaytn] = make(chan *gossipv1.ObservationRequest)
+		chainObsvReqC[vaa.ChainIDKlaytnDebug] = make(chan *gossipv1.ObservationRequest)
 	}
 
 	// Multiplex observation requests to the appropriate chain
@@ -708,6 +709,10 @@ func runNode(cmd *cobra.Command, args []string) {
 			}
 			if err := supervisor.Run(ctx, "klaytn",
 				klaytn.NewKlaytnWatcher(*klaytnRPC, klaytnContractAddr, "klaytn", common.ReadinessKlaytnSyncing, vaa.ChainIDKlaytn, lockC, setC, chainObsvReqC[vaa.ChainIDKlaytn]).Run); err != nil {
+				return err
+			}
+			if err := supervisor.Run(ctx, "kdebug",
+				klaytn.NewKlaytnWatcher(*klaytnRPC, klaytnContractAddr, "kdebug", common.ReadinessKlaytnSyncing, vaa.ChainIDKlaytnDebug, lockC, setC, chainObsvReqC[vaa.ChainIDKlaytnDebug]).Run); err != nil {
 				return err
 			}
 		}
