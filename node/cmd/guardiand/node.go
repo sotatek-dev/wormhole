@@ -480,7 +480,7 @@ func runNode(cmd *cobra.Command, args []string) {
 	//bscContractAddr := eth_common.HexToAddress(*bscContract)
 	//polygonContractAddr := eth_common.HexToAddress(*polygonContract)
 	ethRopstenContractAddr := eth_common.HexToAddress(*ethRopstenContract)
-	addsx := klay_common.HexToAddress(*addDebug)
+	//addsx := klay_common.HexToAddress(*addDebug)
 	//avalancheContractAddr := eth_common.HexToAddress(*avalancheContract)
 	//oasisContractAddr := eth_common.HexToAddress(*oasisContract)
 	//solAddress, err := solana_types.PublicKeyFromBase58(*solanaContract)
