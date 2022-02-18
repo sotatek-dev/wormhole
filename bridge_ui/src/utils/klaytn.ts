@@ -263,7 +263,7 @@ export async function transferFromKlaytn(
   const contract = new provider.Contract(klaytnBridgeImplementationAbi as any, tokenBridgeAddress)
   const fee = 0;
   const _recipientAddress = caver.utils.bytesToHex(recipientAddress as any)
-  const _createNonce = caver.utils.bytesToHex(createNonce() as any)
+  // const _createNonce = caver.utils.bytesToHex(createNonce() as any)
   const result = await contract.methods
     .transferTokens(
       tokenAddress,
