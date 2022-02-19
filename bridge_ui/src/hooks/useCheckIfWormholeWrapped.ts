@@ -39,7 +39,7 @@ import {
   SOL_TOKEN_BRIDGE_ADDRESS,
   TERRA_HOST,
 } from "../utils/consts";
-import { getOriginalAssetKlaytn } from "../utils/klaytn";
+import { getOriginalAssetKlaytn, getOriginalAssetKlaytnNFT } from "../utils/klaytn";
 
 export interface StateSafeWormholeWrappedInfo {
   isWrapped: boolean;
@@ -74,7 +74,7 @@ function useCheckIfWormholeWrapped(nft?: boolean) {
     ? setNFTSourceWormholeWrappedInfo
     : setTransferSourceWormholeWrappedInfo;
   const { provider } = useEthereumProvider();
-  const { provider: providerKaikas } = useKaikasProvider(); 
+  const { provider: providerKaikas } = useKaikasProvider();
   const isRecovery = useSelector(
     nft ? selectNFTIsRecovery : selectTransferIsRecovery
   );
@@ -84,10 +84,24 @@ function useCheckIfWormholeWrapped(nft?: boolean) {
     }
     // TODO: loading state, error state
     let cancelled = false;
-    
+
     (async () => {
       if (sourceChain === CHAIN_ID_KLAYTN_BAOBAB && providerKaikas && sourceAsset) {
-        const wrappedAddress = await getOriginalAssetKlaytn(sourceAsset, sourceChain, providerKaikas, getTokenBridgeAddressForChain(sourceChain));
+        const wrappedAddress = await (nft
+          ? getOriginalAssetKlaytnNFT(
+            getNFTBridgeAddressForChain(sourceChain),
+            providerKaikas,
+            sourceAsset,
+            tokenId,
+            sourceChain
+          )
+          : getOriginalAssetKlaytn(
+            sourceAsset,
+            sourceChain,
+            providerKaikas,
+            getTokenBridgeAddressForChain(sourceChain)
+          )
+        );
         const wrappedInfo = await makeStateSafe(wrappedAddress as any);
         if (!cancelled) {
           dispatch(setSourceWormholeWrappedInfo(wrappedInfo as any));
