@@ -64,7 +64,11 @@ export const nativeToHexString = (
 
   if (isEVMChain(chain)) {
     return uint8ArrayToHex(zeroPad(arrayify(address), 32));
-  } else if (chain === CHAIN_ID_SOLANA) {
+  }
+  else if (chain === CHAIN_ID_KLAYTN_BAOBAB) {
+    return uint8ArrayToHex(zeroPad(arrayify(address), 32));
+  }
+  else if (chain === CHAIN_ID_SOLANA) {
     return uint8ArrayToHex(zeroPad(new PublicKey(address).toBytes(), 32));
   } else if (chain === CHAIN_ID_TERRA) {
     if (isNativeDenom(address)) {
