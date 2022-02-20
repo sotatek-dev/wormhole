@@ -102,7 +102,9 @@ export const KaikasProviderProvider = ({
   
   useEffect(() => {
     if (chainId !== KLAYTN_NETWORK_CHAIN_ID) {
-      signerAddress && setProviderError(`Wrong network! Please select chain ${KLAYTN_NETWORK_CHAIN_ID}!`)
+      signerAddress && setProviderError(
+        `Wallet is not connected to ${process.env.REACT_APP_CLUSTER}! Expected Chain ID: ${KLAYTN_NETWORK_CHAIN_ID}!`
+      )
     }
     else {
       setProviderError(null);
