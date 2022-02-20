@@ -271,7 +271,7 @@ export default function NFTOriginVerifier() {
       originInfo.chainId
     );
   const displayError =
-    (isEVMChain(lookupChain) && statusMessage) || lookupError;
+    ((isEVMChain(lookupChain) || lookupChain === CHAIN_ID_KLAYTN_BAOBAB)  && statusMessage) || lookupError;
   return (
     <div>
       <Container maxWidth="md">
