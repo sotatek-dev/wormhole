@@ -222,11 +222,11 @@ export function useHandleCreateWrapped(shouldUpdate: boolean) {
   const signedVAA = useAttestSignedVAA();
   const isCreating = useSelector(selectAttestIsCreating);
   const { signer } = useEthereumProvider();
-  const { signer: signerKaikas, provider: providerKaikas, signerAddress} = useKaikasProvider();
+  const { provider: providerKaikas, signerAddress} = useKaikasProvider();
   const terraWallet = useConnectedWallet();
   const terraFeeDenom = useSelector(selectTerraFeeDenom);
   const handleCreateClick = useCallback(() => {
-    console.log({ signerKaikas, signedVAA, providerKaikas });
+    console.log({ signedVAA, providerKaikas });
     
     if (targetChain === CHAIN_ID_KLAYTN_BAOBAB && !!signedVAA) {
       console.log('xxx');
@@ -295,7 +295,6 @@ export function useHandleCreateWrapped(shouldUpdate: boolean) {
     signer,
     shouldUpdate,
     terraFeeDenom,
-    signerKaikas,
     providerKaikas,
     signerAddress
   ]);
