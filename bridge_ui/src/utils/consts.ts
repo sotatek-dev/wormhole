@@ -537,8 +537,8 @@ export const COVALENT_GET_TOKENS_URL = (
       : chainId === CHAIN_ID_OASIS
       ? COVALENT_OASIS
       : chainId === CHAIN_ID_KLAYTN_BAOBAB
-      ? CHAIN_ID_KLAYTN_BAOBAB
-      : COVALENT_KLAYTN;
+      ? COVALENT_KLAYTN
+      : "";
   // https://www.covalenthq.com/docs/api/#get-/v1/{chain_id}/address/{address}/balances_v2/
   return `https://api.covalenthq.com/v1/${chainNum}/address/${walletAddress}/balances_v2/?key=${COVALENT_API_KEY}${
     nft ? "&nft=true" : ""
