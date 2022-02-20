@@ -1,4 +1,4 @@
-import { CHAIN_ID_SOLANA, isEVMChain } from "@certusone/wormhole-sdk";
+import { CHAIN_ID_SOLANA, isEVMChain, CHAIN_ID_KLAYTN_BAOBAB } from "@certusone/wormhole-sdk";
 import { Button, makeStyles } from "@material-ui/core";
 import { VerifiedUser } from "@material-ui/icons";
 import { Alert } from "@material-ui/lab";
@@ -75,7 +75,7 @@ function Source() {
         disabled={shouldLockFields}
         chains={CHAINS_WITH_NFT_SUPPORT}
       />
-      {isEVMChain(sourceChain) ? (
+      {isEVMChain(sourceChain) || sourceChain === CHAIN_ID_KLAYTN_BAOBAB ? (
         <Alert severity="info" variant="outlined">
           Only NFTs which implement ERC-721 are supported.
         </Alert>

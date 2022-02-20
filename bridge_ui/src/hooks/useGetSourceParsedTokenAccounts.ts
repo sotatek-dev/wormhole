@@ -467,6 +467,41 @@ const getEthereumAccountsCovalent = async (
   }
 };
 
+const getKlaytnAccountsCovalent = async (
+  walletAddress: string,
+  nft: boolean,
+  chainId: ChainId
+): Promise<CovalentData[]> => {
+  const url = COVALENT_GET_TOKENS_URL(chainId, walletAddress, nft);
+
+  try {
+    const output = [] as CovalentData[];
+    const response = await axios.get(url);
+    const tokens = response.data.data.items;
+
+    if (tokens instanceof Array && tokens.length) {
+      for (const item of tokens) {
+        // TODO: filter?
+        if (
+          item.contract_decimals !== undefined &&
+          item.contract_address &&
+          item.balance &&
+          item.balance !== "0" &&
+          (nft
+            ? item.supports_erc?.includes("kip17")
+            : item.supports_erc?.includes("kip7"))
+        ) {
+          output.push({ ...item } as CovalentData);
+        }
+      }
+    }
+
+    return output;
+  } catch (error) {
+    return Promise.reject("Unable to retrieve your Klaytn Tokens.");
+  }
+};
+
 const getSolanaParsedTokenAccounts = async (
   walletAddress: string,
   dispatch: Dispatch,
@@ -998,6 +1033,73 @@ function useGetAvailableTokens(nft: boolean = false) {
       };
     }
   }, [lookupChain, provider, signerAddress, dispatch, nft, covalent]);
+
+  //Klaytn covalent accounts load
+  useEffect(() => {
+    let cancelled = false;
+    const walletAddress = signerAddressKaikas;
+    if (walletAddress && lookupChain === CHAIN_ID_KLAYTN_BAOBAB && !covalent) {
+      //TODO less cancel
+      !cancelled && setCovalentLoading(true);
+      !cancelled &&
+        dispatch(
+          nft
+            ? fetchSourceParsedTokenAccountsNFT()
+            : fetchSourceParsedTokenAccounts()
+        );
+        getKlaytnAccountsCovalent(walletAddress, nft, lookupChain).then(
+        (accounts) => {
+          !cancelled && setCovalentLoading(false);
+          !cancelled && setCovalentError(undefined);
+          !cancelled && setCovalent(accounts);
+          !cancelled &&
+            dispatch(
+              nft
+                ? receiveSourceParsedTokenAccountsNFT(
+                    accounts.reduce((arr, current) => {
+                      if (current.nft_data) {
+                        current.nft_data.forEach((x) =>
+                          arr.push(
+                            createNFTParsedTokenAccountFromCovalent(
+                              walletAddress,
+                              current,
+                              x
+                            )
+                          )
+                        );
+                      }
+                      return arr;
+                    }, [] as NFTParsedTokenAccount[])
+                  )
+                : receiveSourceParsedTokenAccounts(
+                    accounts.map((x) =>
+                      createParsedTokenAccountFromCovalent(walletAddress, x)
+                    )
+                  )
+            );
+        },
+        () => {
+          !cancelled &&
+            dispatch(
+              nft
+                ? errorSourceParsedTokenAccountsNFT(
+                    "Cannot load your Klaytn NFTs at the moment."
+                  )
+                : errorSourceParsedTokenAccounts(
+                    "Cannot load your Klaytn tokens at the moment."
+                  )
+            );
+          !cancelled &&
+            setCovalentError("Cannot load your Klaytn tokens at the moment.");
+          !cancelled && setCovalentLoading(false);
+        }
+      );
+
+      return () => {
+        cancelled = true;
+      };
+    }
+  }, [lookupChain, providerKaikas, signerAddressKaikas, dispatch, nft, covalent]);
 
   //Terra accounts load
   //At present, we don't have any mechanism for doing this.
