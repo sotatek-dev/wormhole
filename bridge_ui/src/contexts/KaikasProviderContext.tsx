@@ -8,6 +8,7 @@ import {
   useState,
 } from "react";
 import Caver from "caver-js";
+import { KLAYTN_NETWORK_CHAIN_ID } from "../utils/consts";
 declare global {
   interface Window {
     klaytn: any;
@@ -48,14 +49,20 @@ export const KaikasProviderProvider = ({
   const connect = useCallback(async () => {
     const { klaytn } = window;
     const caver = new Caver(klaytn);
-    setProviderError(null);
+    setProviderError("Waiting for unlocking kaikas wallet...");
     setProvider(caver.klay);
 
     if (klaytn) {
       setKlaytnApi(klaytn);
       try {
-        const {result: accounts} = await klaytn.send("klay_requestAccounts", []);
-        setSignerAddress(accounts[0]);
+        const { result: accounts } = await klaytn.send("klay_requestAccounts", []);
+        if (accounts) {
+          setSignerAddress(accounts[0]);
+          setProviderError(null);
+        }
+        else {
+          setProviderError("An error occurred while getting the signer address");
+        }
         setChainId(klaytn.networkVersion);
       } catch (error) {
         console.log("User denied account access");
@@ -92,6 +99,15 @@ export const KaikasProviderProvider = ({
       klaytnApi?.on("accountsChanged", mutatorAccountsChanged);
     }
   },[provider, klaytnApi])
+  
+  useEffect(() => {
+    if (chainId !== KLAYTN_NETWORK_CHAIN_ID) {
+      signerAddress && setProviderError(`Wrong network! Please select chain ${KLAYTN_NETWORK_CHAIN_ID}!`)
+    }
+    else {
+      setProviderError(null);
+    }
+  }, [chainId, signerAddress])
 
   const disconnect = useCallback(() => {
     setProviderError(null);
