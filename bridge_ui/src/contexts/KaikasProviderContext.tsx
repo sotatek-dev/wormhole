@@ -19,7 +19,6 @@ interface IKaikasProviderContext {
   disconnect(): void;
   provider: any;
   chainId: number | undefined;
-  signer: any;
   signerAddress: string | undefined;
   providerError: string | null;
 }
@@ -29,7 +28,6 @@ const KaikasProviderContext = createContext<IKaikasProviderContext>({
   disconnect: () => {},
   provider: undefined,
   chainId: undefined,
-  signer: undefined,
   signerAddress: undefined,
   providerError: null,
 });
@@ -43,7 +41,6 @@ export const KaikasProviderProvider = ({
   const [providerError, setProviderError] = useState<string | null>(null);
   const [provider, setProvider] = useState<any>(undefined);
   const [chainId, setChainId] = useState<number | undefined>(undefined);
-  const [signer, setSigner] = useState<any>(undefined);
   const [signerAddress, setSignerAddress] = useState<string | undefined>(
     undefined
   );
@@ -51,7 +48,6 @@ export const KaikasProviderProvider = ({
   const connect = useCallback(async () => {
     const { klaytn } = window;
     const caver = new Caver(klaytn);
-
     setProviderError(null);
     setProvider(caver.klay);
 
@@ -62,7 +58,6 @@ export const KaikasProviderProvider = ({
         setSignerAddress(accounts[0]);
         setChainId(klaytn.networkVersion);
       } catch (error) {
-        console.error(error);
         console.log("User denied account access");
       }
     } else {
@@ -71,24 +66,30 @@ export const KaikasProviderProvider = ({
   }, []);
 
   useEffect(() => {
+    const mutatorNetworkChanged = async () => {
+      const _chainId = await provider.getChainId();
+      setChainId(_chainId);
+    };
+
+    const mutatorAccountsChanged = async () => {
+      try {
+        const _addresses = await provider.getAccounts();
+        setSignerAddress(_addresses[0]);
+      } catch (error) {
+        setProviderError(
+          "An error occurred while getting the signer address"
+        );
+      }
+    }
+    
     if (provider && klaytnApi && klaytnApi.on) {
-      klaytnApi.on("networkChanged", async () => {
-        console.log("klay_networkChanged");
-        const _chainId = await provider.getChainId();
-        setChainId(_chainId);
-      });
-      klaytnApi.on("accountsChanged", async () => {
-        try {
-          console.log("klay_accountsChanged");
-          const _addresses = await provider.getAccounts();
-          setSignerAddress(_addresses[0]);
-        } catch (error) {
-          console.error(error);
-          setProviderError(
-            "An error occurred while getting the signer address"
-          );
-        }
-      });
+      klaytnApi.on("networkChanged", mutatorNetworkChanged);
+      klaytnApi.on("accountsChanged", mutatorAccountsChanged);
+    }
+
+    return () => {
+      klaytnApi?.on("networkChanged", mutatorNetworkChanged);
+      klaytnApi?.on("accountsChanged", mutatorAccountsChanged);
     }
   },[provider, klaytnApi])
 
@@ -96,7 +97,6 @@ export const KaikasProviderProvider = ({
     setProviderError(null);
     setProvider(undefined);
     setChainId(undefined);
-    setSigner(undefined);
     setSignerAddress(undefined);
   }, []);
 
@@ -106,7 +106,6 @@ export const KaikasProviderProvider = ({
       disconnect,
       provider,
       chainId,
-      signer,
       signerAddress,
       providerError,
     }),
@@ -115,7 +114,6 @@ export const KaikasProviderProvider = ({
       disconnect,
       provider,
       chainId,
-      signer,
       signerAddress,
       providerError,
     ]
