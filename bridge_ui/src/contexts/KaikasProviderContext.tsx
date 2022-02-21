@@ -49,20 +49,19 @@ export const KaikasProviderProvider = ({
   const connect = useCallback(async () => {
     const { klaytn } = window;
     const caver = new Caver(klaytn);
-    setProviderError("Waiting for unlocking kaikas wallet...");
+    setProviderError(null);
     setProvider(caver.klay);
 
     if (klaytn) {
       setKlaytnApi(klaytn);
       try {
+        const isUnlocked = await klaytn._kaikas.isUnlocked();
+        if (!isUnlocked) {
+          setProviderError("Waiting for unlocking kaikas wallet...");
+        }
         const { result: accounts } = await klaytn.send("klay_requestAccounts", []);
-        if (accounts) {
-          setSignerAddress(accounts[0]);
-          setProviderError(null);
-        }
-        else {
-          setProviderError("An error occurred while getting the signer address");
-        }
+        setProviderError(null);
+        setSignerAddress(accounts[0]);
         setChainId(klaytn.networkVersion);
       } catch (error) {
         console.log("User denied account access");
