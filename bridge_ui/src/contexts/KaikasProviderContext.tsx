@@ -46,11 +46,10 @@ export const KaikasProviderProvider = ({
     undefined
   );
 
-  let isUnlocked;
   const connect = useCallback(async () => {
     const { klaytn } = window;
     setProviderError(null);
-    isUnlocked=await window.klaytn._kaikas.isUnlocked();
+    const isUnlocked=await window.klaytn._kaikas.isUnlocked();
     if(!isUnlocked){
       setProviderError("An error occurred while requesting accounts");
     }
