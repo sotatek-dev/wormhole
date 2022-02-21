@@ -46,9 +46,14 @@ export const KaikasProviderProvider = ({
     undefined
   );
 
+  let isUnlocked;
   const connect = useCallback(async () => {
     const { klaytn } = window;
     setProviderError(null);
+    isUnlocked=await window.klaytn._kaikas.isUnlocked();
+    if(!isUnlocked){
+      setProviderError("An error occurred while requesting accounts");
+    }
 
     if (klaytn) {
       try {
@@ -57,6 +62,7 @@ export const KaikasProviderProvider = ({
         setProvider(caver.klay);
         setSignerAddress(klaytn.selectedAddress);
         setChainId(klaytn.networkVersion);
+        setProviderError(null)
         klaytn.on("networkChanged", () => setChainId(klaytn.networkVersion));
         klaytn.on("accountsChanged", () =>
           setSignerAddress(klaytn.selectedAddress)
