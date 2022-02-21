@@ -1,8 +1,4 @@
-import {
-  ChainId,
-  CHAIN_ID_ETH,
-} from "@certusone/wormhole-sdk";
-import { WormholeAbi__factory } from "@certusone/wormhole-sdk/lib/esm/ethers-contracts/abi";
+import { ChainId } from "@certusone/wormhole-sdk";
 import { getAddress as getEthAddress } from "@ethersproject/address";
 import React, { useCallback } from "react";
 import { useSelector } from "react-redux";
@@ -14,27 +10,16 @@ import {
   selectTransferSourceParsedTokenAccount,
 } from "../../store/selectors";
 import { ParsedTokenAccount } from "../../store/transferSlice";
-import {
-  getMigrationAssetMap,
-  WORMHOLE_V1_ETH_ADDRESS,
-} from "../../utils/consts";
-import {
-  isValidEthereumAddress,
-} from "../../utils/ethereum";
+import { getMigrationAssetMap } from "../../utils/consts";
 import TokenPicker, { BasicAccountRender } from "./TokenPicker";
 import { useKaikasProvider } from "../../contexts/KaikasProviderContext";
-import { getKlaytnNFT, getKlaytnToken, klaytnNFTToNFTParsedTokenAccount, klaytnTokenToParsedTokenAccountNFT } from "../../utils/klaytn";
-const isWormholev1 = (provider: any, address: string, chainId: ChainId) => {
-  if (chainId !== CHAIN_ID_ETH) {
-    return Promise.resolve(false);
-  }
-  
-  const connection = WormholeAbi__factory.connect(
-    WORMHOLE_V1_ETH_ADDRESS,
-    provider
-  );
-  return connection.isWrappedAsset(address);
-};
+import {
+  getKlaytnNFT,
+  getKlaytnToken,
+  isValidKlaytnAddress,
+  klaytnNFTToNFTParsedTokenAccount,
+  klaytnTokenToParsedTokenAccountNFT
+} from "../../utils/klaytn";
 
 type KlaytnSourceTokenSelectorProps = {
   value: ParsedTokenAccount | null;
@@ -139,22 +124,10 @@ export default function KlaytnTokenPicker(
         onChange(null);
         return Promise.resolve();
       }
-      let v1 = false;
-      try {
-          v1 = await isWormholev1(providerKaikas, account.publicKey, chainId); 
-      } catch (e) {
-        //For now, just swallow this one.
-      }
-      const migration = isMigrationEligible(account.publicKey);
-      if (v1 === true && !migration) {
-        throw new Error(
-          "Wormhole v1 assets cannot be transferred with this bridge."
-        );
-      }
       onChange(account);
       return Promise.resolve();
     },
-    [chainId, onChange, isMigrationEligible, providerKaikas]
+    [onChange]
   );
 
   const RenderComp = useCallback(
@@ -176,7 +149,7 @@ export default function KlaytnTokenPicker(
       RenderOption={RenderComp}
       useTokenId={nft}
       onChange={onChangeWrapper}
-      isValidAddress={isValidEthereumAddress}
+      isValidAddress={isValidKlaytnAddress}
       getAddress={getAddress}
       disabled={disabled}
       resetAccounts={resetAccounts}
