@@ -94,8 +94,8 @@ export const KaikasProviderProvider = ({
     }
 
     return () => {
-      klaytnApi?.on("networkChanged", mutatorNetworkChanged);
-      klaytnApi?.on("accountsChanged", mutatorAccountsChanged);
+      klaytnApi?.removeListener("networkChanged", mutatorNetworkChanged);
+      klaytnApi?.removeListener("accountsChanged", mutatorAccountsChanged);
     }
   },[provider, klaytnApi])
   
