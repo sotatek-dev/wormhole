@@ -215,7 +215,7 @@ export default function Recovery() {
   const [recoveryParsedVAA, setRecoveryParsedVAA] = useState<any>(null);
   const { isReady, statusMessage } = useIsWalletReady(recoverySourceChain);
   const walletConnectError =
-    isEVMChain(recoverySourceChain) && !isReady ? statusMessage : "";
+    (isEVMChain(recoverySourceChain) || recoverySourceChain === CHAIN_ID_KLAYTN_BAOBAB) && !isReady ? statusMessage : "";
   const parsedPayload = useMemo(() => {
     try {
       return recoveryParsedVAA?.payload
