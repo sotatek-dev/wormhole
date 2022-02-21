@@ -96,10 +96,10 @@ function useCheckIfWormholeWrapped(nft?: boolean) {
             sourceChain
           )
           : getOriginalAssetKlaytn(
+            getTokenBridgeAddressForChain(sourceChain),
+            providerKaikas,
             sourceAsset,
             sourceChain,
-            providerKaikas,
-            getTokenBridgeAddressForChain(sourceChain)
           )
         );
         const wrappedInfo = await makeStateSafe(wrappedAddress as any);
