@@ -78,14 +78,15 @@ function useCheckIfWormholeWrapped(nft?: boolean) {
   const isRecovery = useSelector(
     nft ? selectNFTIsRecovery : selectTransferIsRecovery
   );
+
   useEffect(() => {
     if (isRecovery) {
       return;
     }
     // TODO: loading state, error state
     let cancelled = false;
-
-    (async () => {
+    
+    (async () => { 
       if (sourceChain === CHAIN_ID_KLAYTN_BAOBAB && providerKaikas && sourceAsset) {
         const wrappedAddress = await (nft
           ? getOriginalAssetKlaytnNFT(
@@ -107,7 +108,27 @@ function useCheckIfWormholeWrapped(nft?: boolean) {
           dispatch(setSourceWormholeWrappedInfo(wrappedInfo as any));
         }
       }
-      if (isEVMChain(sourceChain) && sourceChain !== CHAIN_ID_KLAYTN_BAOBAB && provider && sourceAsset) {
+    })()
+  }, [
+    dispatch,
+    isRecovery,
+    nft,
+    providerKaikas,
+    setSourceWormholeWrappedInfo,
+    sourceAsset,
+    sourceChain,
+    tokenId
+  ])
+
+  useEffect(() => {
+    if (isRecovery) {
+      return;
+    }
+    // TODO: loading state, error state
+    let cancelled = false;
+
+    (async () => {
+      if (isEVMChain(sourceChain) && provider && sourceAsset) {
         const wrappedInfo = makeStateSafe(
           await (nft
             ? getOriginalAssetEthNFT(
@@ -172,8 +193,7 @@ function useCheckIfWormholeWrapped(nft?: boolean) {
     provider,
     nft,
     setSourceWormholeWrappedInfo,
-    tokenId,
-    providerKaikas
+    tokenId
   ]);
 }
 
