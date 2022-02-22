@@ -17,6 +17,7 @@ import {
 } from "@material-ui/core";
 import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDown";
 import { useCallback, useMemo, useState } from "react";
+import { nativeToHexStringKlaytn } from "../blockchain/klaytn/utils";
 import { useBetaContext } from "../contexts/BetaContext";
 import useFetchForeignAsset, {
   ForeignAssetInfo,
@@ -144,16 +145,27 @@ function SecondaryAssetInformation({
   ) : !foreignAssetInfo ? null : foreignAssetInfo.doesExist === false ? (
     <div>
       <Typography>{`This token has not yet been registered on ${CHAINS_BY_ID[chainId].name}`}</Typography>
-      <RegisterNowButtonCore
-        originChain={originAssetInfo?.originChain || undefined}
-        originAsset={
-          nativeToHexString(
-            originAssetInfo?.originAddress || undefined,
-            originAssetInfo?.originChain || CHAIN_ID_SOLANA // this should exist
-          ) || undefined
-        }
-        targetChain={chainId}
-      />
+      {chainId !== CHAIN_ID_KLAYTN_BAOBAB ?
+        <RegisterNowButtonCore
+          originChain={originAssetInfo?.originChain || undefined}
+          originAsset={
+            nativeToHexString(
+              originAssetInfo?.originAddress || undefined,
+              originAssetInfo?.originChain || CHAIN_ID_SOLANA // this should exist
+            ) || undefined
+          }
+          targetChain={chainId}
+        /> :
+        <RegisterNowButtonCore
+          originChain={originAssetInfo?.originChain || undefined}
+          originAsset={
+            nativeToHexStringKlaytn(
+              originAssetInfo?.originAddress || undefined,
+              originAssetInfo?.originChain || CHAIN_ID_SOLANA // this should exist
+            ) || undefined
+          }
+          targetChain={chainId}
+        />}
     </div>
   ) : (
     <div>
