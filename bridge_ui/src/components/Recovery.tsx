@@ -260,7 +260,7 @@ export default function Recovery() {
   }, [pathSourceChain, pathSourceTransaction]);
 
   useEffect(() => {
-    if (recoverySourceTx && (!isEVMChain(recoverySourceChain) || isReady)) {
+    if (recoverySourceTx && (!(isEVMChain(recoverySourceChain) || recoverySourceChain === CHAIN_ID_KLAYTN_BAOBAB) || isReady)) {
       let cancelled = false;
       if (isEVMChain(recoverySourceChain) && provider) {
         setRecoverySourceTxError("");
