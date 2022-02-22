@@ -13,6 +13,8 @@ import { createNFTParsedTokenAccount, createParsedTokenAccount } from "../hooks/
 
 export const GAS_DEFAULT_KLAYTN = 3000000;
 
+export const BLOCK_HASH_DEFAULT_VALUE = "0x0000000000000000000000000000000000000000000000000000000000000000";
+
 export function parseSequenceFromLogKlaytn (
   receipt: any,
   bridgeAddress: string
@@ -415,10 +417,14 @@ export async function transferNFTFromKlaytn(
 ) {
   try {
     const contractERC721__factory = new provider.Contract(klaytnERC721Abi, tokenAddress);    
-    const approved = await contractERC721__factory.methods
+    const approve = await contractERC721__factory.methods
     .approve(tokenBridgeAddress, tokenId)
-    .send({ from: signerAddressKaikas, gas: GAS_DEFAULT_KLAYTN });
-    if (approved) {
+      .send({
+        from: signerAddressKaikas,
+        gas: GAS_DEFAULT_KLAYTN
+      });
+    const approveTx = await caver.rpc.klay.getTransactionByHash(approve.transactionHash);
+    if (approveTx && approveTx.blockHash !== BLOCK_HASH_DEFAULT_VALUE) {
       const contractNFTBridge__factory = new provider.Contract(klaytnNFTBridgeAbi, tokenBridgeAddress)
       const _recipientAddress = caver.utils.bytesToHex(recipientAddress as any)
       const _createNonce = caver.utils.bytesToHex(createNonce() as any)
