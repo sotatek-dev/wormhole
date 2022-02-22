@@ -38,6 +38,7 @@ import {
 } from "../utils/consts";
 import useIsWalletReady from "./useIsWalletReady";
 import { getOriginalAssetKlaytn } from "../utils/klaytn";
+import { DeprecatedKlayRPC } from 'caver-js';
 
 export type OriginalAssetInfo = {
   originChain: ChainId | null;
@@ -48,21 +49,21 @@ export type OriginalAssetInfo = {
 export async function getOriginalAssetToken(
   foreignChain: ChainId,
   foreignNativeStringAddress: string,
-  provider?: Web3Provider
+  provider?: Web3Provider | DeprecatedKlayRPC
 ) {
   let promise = null;
   try {
     if (isEVMChain(foreignChain) && provider) {
       promise = await getOriginalAssetEth(
         getTokenBridgeAddressForChain(foreignChain),
-        provider,
+        provider as Web3Provider,
         foreignNativeStringAddress,
         foreignChain
       );
     } else if (foreignChain === CHAIN_ID_KLAYTN_BAOBAB && provider) {
       promise = await getOriginalAssetKlaytn(
         getTokenBridgeAddressForChain(foreignChain),
-        provider,
+        provider as DeprecatedKlayRPC,
         foreignNativeStringAddress,
         foreignChain,
       );
@@ -90,14 +91,14 @@ export async function getOriginalAssetNFT(
   foreignChain: ChainId,
   foreignNativeStringAddress: string,
   tokenId?: string,
-  provider?: Provider
+  provider?: Provider | DeprecatedKlayRPC
 ) {
   let promise = null;
   try {
     if (isEVMChain(foreignChain) && provider && tokenId) {
       promise = getOriginalAssetEthNFT(
         getNFTBridgeAddressForChain(foreignChain),
-        provider,
+        provider as any,
         foreignNativeStringAddress,
         tokenId,
         foreignChain
@@ -125,7 +126,7 @@ export async function getOriginalAsset(
   foreignNativeStringAddress: string,
   nft: boolean,
   tokenId?: string,
-  provider?: Provider
+  provider?: Provider | DeprecatedKlayRPC
 ): Promise<WormholeWrappedNFTInfo> {
   const result = nft
     ? await getOriginalAssetNFT(
@@ -221,7 +222,7 @@ function useOriginalAsset(
     let cancelled = false;
     setIsLoading(true);
 
-    if (foreignChain === CHAIN_ID_KLAYTN_BAOBAB) {
+    if (foreignChain === CHAIN_ID_KLAYTN_BAOBAB && providerKaikas) {
       getOriginalAsset(foreignChain, foreignAddress, nft, tokenId, providerKaikas)
       .then((result) => {
         if (!cancelled) {

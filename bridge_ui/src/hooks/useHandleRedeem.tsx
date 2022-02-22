@@ -44,11 +44,12 @@ import { Alert } from "@material-ui/lab";
 import { postWithFees } from "../utils/terra";
 import { useKaikasProvider } from "../contexts/KaikasProviderContext";
 import { redeemOnKlaytn, redeemOnKlaytnNative } from "../utils/klaytn";
+import { DeprecatedKlayRPC } from "caver-js";
 
 async function klaytn(
   dispatch: any,
   enqueueSnackbar: any,
-  provider: Signer,
+  provider: DeprecatedKlayRPC,
   signerAddress: string,
   signedVAA: Uint8Array,
   isNative: boolean,

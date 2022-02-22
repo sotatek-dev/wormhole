@@ -88,7 +88,7 @@ import bnbIcon from "../icons/bnb.svg";
 import ethIcon from "../icons/eth.svg";
 import polygonIcon from "../icons/polygon.svg";
 import oasisIcon from "../icons/oasis-network-rose-logo.svg";
-import Caver from 'caver-js';
+import Caver, { DeprecatedKlayRPC } from 'caver-js';
 
 export function createParsedTokenAccount(
   publicKey: string,
@@ -281,7 +281,7 @@ const createNativeBscParsedTokenAccount = (
 };
 
 const createNativeKlaytnParsedTokenAccount = (
-  provider: Provider,
+  provider: DeprecatedKlayRPC,
   signerAddress: string | undefined
 ) => {
   const caver = new Caver(window.klaytn)
@@ -829,6 +829,7 @@ function useGetAvailableTokens(nft: boolean = false) {
     if (
       signerAddressKaikas &&
       lookupChain === CHAIN_ID_KLAYTN_BAOBAB &&
+      providerKaikas &&
       !ethNativeAccount &&
       !nft
     ) {
