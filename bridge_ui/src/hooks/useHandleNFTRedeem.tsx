@@ -19,6 +19,7 @@ import { arrayify } from "@ethersproject/bytes";
 import { Alert } from "@material-ui/lab";
 import { WalletContextState } from "@solana/wallet-adapter-react";
 import { Connection } from "@solana/web3.js";
+import { DeprecatedKlayRPC } from "caver-js";
 import { Signer } from "ethers";
 import { useSnackbar } from "notistack";
 import { useCallback, useMemo } from "react";
@@ -71,7 +72,7 @@ async function evm(
 async function klaytn(
   dispatch: any,
   enqueueSnackbar: any,
-  provider: Signer,
+  provider: DeprecatedKlayRPC,
   signerAddress: string,
   signedVAA: Uint8Array,
 ) {
@@ -187,7 +188,7 @@ export function useHandleNFTRedeem() {
   const signedVAA = useNFTSignedVAA();
   const isRedeeming = useSelector(selectNFTIsRedeeming);
   const handleRedeemClick = useCallback(() => {
-    if (targetChain === CHAIN_ID_KLAYTN_BAOBAB && signedVAA && signerAddressKaikas) {
+    if (targetChain === CHAIN_ID_KLAYTN_BAOBAB && signedVAA && signerAddressKaikas && providerKaikas) {
       klaytn(dispatch, enqueueSnackbar, providerKaikas, signerAddressKaikas, signedVAA)
     } else if (isEVMChain(targetChain) && !!signer && signedVAA) {
       evm(dispatch, enqueueSnackbar, signer, signedVAA, targetChain);

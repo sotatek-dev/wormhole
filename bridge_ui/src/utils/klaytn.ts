@@ -10,8 +10,11 @@ import caver from "../blockchain/klaytn/caver";
 import { ChainId } from '@certusone/wormhole-sdk';
 import { createNonce } from "../blockchain/klaytn/utils";
 import { createNFTParsedTokenAccount, createParsedTokenAccount } from "../hooks/useGetSourceParsedTokenAccounts";
+import { AbiItem, DeprecatedKlayRPC } from "caver-js";
 
 export const GAS_DEFAULT_KLAYTN = 3000000;
+
+export const BLOCK_HASH_DEFAULT_VALUE = "0x0000000000000000000000000000000000000000000000000000000000000000";
 
 export function parseSequenceFromLogKlaytn (
   receipt: any,
@@ -39,7 +42,7 @@ export function parseSequenceFromLogKlaytn (
 
 export async function getForeignAssetKlaytn(
   tokenBridgeAddress: string,
-  provider: any,
+  provider: DeprecatedKlayRPC,
   originChain: ChainId,
   originAsset: Uint8Array
 ) {
@@ -55,7 +58,7 @@ export async function getForeignAssetKlaytn(
 }
 export async function getForeignAssetKlaytnNFT(
   tokenBridgeAddress: string,
-  provider: any,
+  provider: DeprecatedKlayRPC,
   originChain: ChainId,
   originAsset: Uint8Array
 ) {
@@ -70,7 +73,7 @@ export async function getForeignAssetKlaytnNFT(
 }
 export async function attestFromKlaytn (
   tokenBridgeAddress: string,
-  provider: any,
+  provider: DeprecatedKlayRPC,
   tokenAddress: string,
   signerAddress: any,
 ) {
@@ -84,7 +87,7 @@ export async function attestFromKlaytn (
 
 export async function createWrappedOnKlaytn(
   tokenBridgeAddress: string,
-  provider: any,
+  provider: DeprecatedKlayRPC,
   signerAddress: string | undefined,
   signedVAA: Uint8Array
 ) {
@@ -101,7 +104,7 @@ export async function createWrappedOnKlaytn(
 
 export async function updateWrappedOnKlaytn(
   tokenBridgeAddress: string,
-  provider: any,
+  provider: DeprecatedKlayRPC,
   signerAddress: string | undefined,
   signedVAA: Uint8Array
 ) {
@@ -118,7 +121,7 @@ export async function updateWrappedOnKlaytn(
 
 export default async function isWrappedAsset(
     address: string, 
-    provider: any,
+    provider: DeprecatedKlayRPC,
     tokenBridgeAddress: string
 ) {
 
@@ -131,7 +134,7 @@ export default async function isWrappedAsset(
 
 export async function getOriginalAssetKlaytn (
   tokenBridgeAddress: string,
-  provider: any,
+  provider: DeprecatedKlayRPC,
   wrappedAddress: string,
   lookupChainId: ChainId,
 ) {
@@ -156,7 +159,7 @@ export async function getOriginalAssetKlaytn (
 
 export async function getOriginalAssetKlaytnNFT (
   tokenBridgeAddress: string,
-  provider: any,
+  provider: DeprecatedKlayRPC,
   wrappedAddress: string,
   tokenId: string,
   lookupChainId: ChainId,
@@ -184,7 +187,7 @@ export async function getOriginalAssetKlaytnNFT (
 
 export async function redeemOnKlaytn(
   tokenBridgeAddress: string,
-  provider: any,
+  provider: DeprecatedKlayRPC,
   signerAddress: string | undefined,
   signedVAA: Uint8Array
 ) {
@@ -201,7 +204,7 @@ export async function redeemOnKlaytn(
 
 export async function redeemOnKlaytnNative(
   tokenBridgeAddress: string,
-  provider: any,
+  provider: DeprecatedKlayRPC,
   signerAddress: string | undefined,
   signedVAA: Uint8Array
 ) {
@@ -219,7 +222,7 @@ export async function redeemOnKlaytnNative(
 export async function getAllowanceKlaytn(
   tokenBridgeAddress: string,
   tokenAddress: string,
-  provider: any, 
+  provider: DeprecatedKlayRPC, 
   signerAddress: string,
 ){
   const contract = new provider.Contract(klaytnTokenImplementationAbi as any, tokenAddress);
@@ -235,7 +238,7 @@ export async function getAllowanceKlaytn(
 export async function approveKlaytn(
   tokenBridgeAddress: string,
   tokenAddress: string,
-  provider: any, 
+  provider: DeprecatedKlayRPC, 
   amount: any,
   signerAddress: string | undefined,
 ){
@@ -253,7 +256,7 @@ export async function approveKlaytn(
 
 export async function transferFromKlaytn(
   tokenBridgeAddress: string,
-  provider: any,
+  provider: DeprecatedKlayRPC,
   tokenAddress: string,
   amount: any,
   recipientChain: any,
@@ -279,7 +282,7 @@ export async function transferFromKlaytn(
 
 export async function transferFromKlaytnNative(
   tokenBridgeAddress: string,
-  provider: any,
+  provider: DeprecatedKlayRPC,
   amount: any,
   recipientChain: any,
   recipientAddress: Uint8Array,
@@ -294,7 +297,7 @@ export async function transferFromKlaytnNative(
 }
 export async function klaytnTokenToParsedTokenAccount(
   tokenAddress: string,
-  provider: any,
+  provider: DeprecatedKlayRPC,
   signerAddress: string,
 ) {
   const contract = new provider.Contract(klaytnTokenImplementationAbi as any, tokenAddress)
@@ -314,7 +317,7 @@ export async function klaytnTokenToParsedTokenAccount(
 
 export async function getKlaytnNFT(
   tokenAddress: string,
-  provider: any
+  provider: DeprecatedKlayRPC
 ) {
   const token = new provider.Contract(klaytnERC721Abi as any, tokenAddress)
   return token;
@@ -336,7 +339,7 @@ export async function isNFTKlaytn(contract: any) {
 
 export async function getKlaytnToken(
   tokenAddress: string,
-  provider: any
+  provider: DeprecatedKlayRPC
 ) {
   const token = new provider.Contract(klaytnTokenImplementationAbi as any, tokenAddress)
   return token;
@@ -389,7 +392,7 @@ export async function klaytnTokenToParsedTokenAccountNFT(
 
 export async function redeemNftOnKlaytn (
   tokenBridgeAddress: string,
-  provider: any,
+  provider: DeprecatedKlayRPC,
   signerAddress: string,
   signedVAA: Uint8Array
 ) {
@@ -406,7 +409,7 @@ export async function redeemNftOnKlaytn (
 
 export async function transferNFTFromKlaytn(
   tokenBridgeAddress: string,
-  provider: any,
+  provider: DeprecatedKlayRPC,
   signerAddressKaikas: string | undefined,
   tokenAddress: string,
   tokenId: string,
@@ -414,12 +417,16 @@ export async function transferNFTFromKlaytn(
   recipientAddress: Uint8Array,
 ) {
   try {
-    const contractERC721__factory = new provider.Contract(klaytnERC721Abi, tokenAddress);    
-    const approved = await contractERC721__factory.methods
+    const contractERC721__factory = new provider.Contract(klaytnERC721Abi as AbiItem[], tokenAddress);    
+    const approve = await contractERC721__factory.methods
     .approve(tokenBridgeAddress, tokenId)
-    .send({ from: signerAddressKaikas, gas: GAS_DEFAULT_KLAYTN });
-    if (approved) {
-      const contractNFTBridge__factory = new provider.Contract(klaytnNFTBridgeAbi, tokenBridgeAddress)
+      .send({
+        from: signerAddressKaikas,
+        gas: GAS_DEFAULT_KLAYTN
+      });
+    const approveTx = await caver.rpc.klay.getTransactionByHash(approve.transactionHash);
+    if (approveTx && approveTx.blockHash !== BLOCK_HASH_DEFAULT_VALUE) {
+      const contractNFTBridge__factory = new provider.Contract(klaytnNFTBridgeAbi as AbiItem[], tokenBridgeAddress)
       const _recipientAddress = caver.utils.bytesToHex(recipientAddress as any)
       const _createNonce = caver.utils.bytesToHex(createNonce() as any)
       const result = await contractNFTBridge__factory.methods

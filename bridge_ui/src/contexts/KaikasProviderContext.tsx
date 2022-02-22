@@ -7,7 +7,7 @@ import {
   useMemo,
   useState,
 } from "react";
-import Caver from "caver-js";
+import Caver, { DeprecatedKlayRPC } from "caver-js";
 import { KLAYTN_NETWORK_CHAIN_ID } from "../utils/consts";
 declare global {
   interface Window {
@@ -18,7 +18,7 @@ declare global {
 interface IKaikasProviderContext {
   connect(): void;
   disconnect(): void;
-  provider: any;
+  provider: DeprecatedKlayRPC | undefined;
   chainId: number | undefined;
   signerAddress: string | undefined;
   providerError: string | null;

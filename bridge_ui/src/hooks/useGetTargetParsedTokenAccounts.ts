@@ -23,6 +23,7 @@ import { getEvmChainId, SOLANA_HOST, TERRA_HOST } from "../utils/consts";
 import { createParsedTokenAccount } from "./useGetSourceParsedTokenAccounts";
 import useMetadata from "./useMetadata";
 import TokenImplementation from "../blockchain/abi/TokenImplementation.json";
+import { AbiItem } from "caver-js";
 
 
 function useGetTargetParsedTokenAccounts() {
@@ -69,7 +70,7 @@ function useGetTargetParsedTokenAccounts() {
       signerAddressKaikas
     ) {
       const loadDataFromSmartContract = async () => {
-        const contract = new providerKaikas.Contract(TokenImplementation, targetAsset);
+        const contract = new providerKaikas.Contract(TokenImplementation as AbiItem[], targetAsset);
         const decimals = await contract.methods.decimals().call();
         const balance = await contract.methods.balanceOf(signerAddressKaikas).call();
         // const balance = await contract.methods.balanceOf(signerAddressKaikas).call();
@@ -78,7 +79,7 @@ function useGetTargetParsedTokenAccounts() {
             // TODO: verify accuracy
             createParsedTokenAccount(
               signerAddressKaikas,
-              contract.address,
+              contract._address,
               balance.toString(),
               decimals,
               Number(formatUnits(balance, decimals)),

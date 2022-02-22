@@ -22,6 +22,8 @@ import { NATIVE_TERRA_DECIMALS } from "../utils/terra";
 import useIsWalletReady from "./useIsWalletReady";
 import { LCDClient } from "@terra-money/terra.js";
 import { useKaikasProvider } from "../contexts/KaikasProviderContext";
+import { DeprecatedKlayRPC } from "caver-js";
+import { BigNumber } from "ethers";
 
 export type GasEstimate = {
   currentGasPrice: string;
@@ -383,7 +385,7 @@ const evmEstimatesByContract = {
 };
 
 export async function getGasEstimates(
-  provider: Provider,
+  provider: Provider | DeprecatedKlayRPC,
   contract: MethodType
 ): Promise<GasEstimate | null> {
   const lowEstimateGasAmount = evmEstimatesByContract[contract].lowGasEstimate;
@@ -394,7 +396,7 @@ export async function getGasEstimates(
   let highEstimate;
   let currentGasPrice;
   if (provider) {
-    const priceInWei = await provider.getGasPrice();
+    const priceInWei = await provider.getGasPrice() as BigNumber;
     
     if (priceInWei) {
       lowEstimate = parseFloat(

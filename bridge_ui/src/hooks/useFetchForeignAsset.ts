@@ -11,6 +11,7 @@ import {
 } from "@certusone/wormhole-sdk";
 import { Connection } from "@solana/web3.js";
 import { LCDClient } from "@terra-money/terra.js";
+import { DeprecatedKlayRPC } from "caver-js";
 import { ethers } from "ethers";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { nativeToHexStringKlaytn } from "../blockchain/klaytn/utils";
@@ -111,7 +112,7 @@ function useFetchForeignAsset(
       const getterFunc: () => Promise<string | null> = foreignChain === CHAIN_ID_KLAYTN_BAOBAB
       ? () => getForeignAssetKlaytn(
         getTokenBridgeAddressForChain(foreignChain),
-        providerKaikas,
+        providerKaikas as DeprecatedKlayRPC,
         originChain,
         hexToUint8Array(originAssetHex)
       )
