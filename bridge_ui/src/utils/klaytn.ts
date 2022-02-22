@@ -117,9 +117,9 @@ export async function updateWrappedOnKlaytn(
 }
 
 export default async function isWrappedAsset(
-    address?: string, 
-    provider?: any,
-    tokenBridgeAddress?: string
+    address: string, 
+    provider: any,
+    tokenBridgeAddress: string
 ) {
 
     const contract = new provider.Contract(klaytnBridgeImplementationAbi as any, tokenBridgeAddress)
@@ -130,14 +130,14 @@ export default async function isWrappedAsset(
 }
 
 export async function getOriginalAssetKlaytn (
+  tokenBridgeAddress: string,
+  provider: any,
   wrappedAddress: string,
   lookupChainId: ChainId,
-  provider?: any,
-  tokenBridgeAddress?: string,
 ) {
   const isWrapped = await isWrappedAsset(wrappedAddress, provider, tokenBridgeAddress)
   if (isWrapped) {
-      const contract = new provider.Contract(klaytnTokenImplementationAbi as any, wrappedAddress)
+    const contract = new provider.Contract(klaytnTokenImplementationAbi as any, wrappedAddress)
     const result = await contract.methods.nativeContract().call();
     const chainId = parseInt(await contract.methods.chainId().call());
 
@@ -438,12 +438,6 @@ export function getEmitterAddressKlaytn(
   return Buffer.from(zeroPad(arrayify(contractAddress), 32)).toString("hex");
 }
 
-// c96616e1 c6adb9658d8e6f589ac3b5a5490a90593e7e5accda2002e0d1d68f6b
-
-// success
-// 0xc96616e1
-// 00000000000000000000000092556981a25918d141468a19462223d36cf1f70d 000000000000000000000000000000000000000000000000000000000000000a 0000000000000000000000000000000000000000000000000000000000001001 00000000000000000000000049114597ef077b8ddfa8c2be2dd35a1fe5c586c3 0000000000000000000000000000000000000000000000000000000000000064
-
-// failed
-// 0xc96616e1
-// 000000000000000000000000ec990c8763cc90d2b72cf2806034da5002cf2e69 0000000000000000000000000000000000000000000000000000000000000001 0000000000000000000000000000000000000000000000000000000000000002 0000000000000000000000005c52ba41e7197136e679746b44c18885ada7b116 0000000000000000000000000000000000000000000000000000000086430100
+export function isValidKlaytnAddress(address: string) {
+  return caver.utils.isAddress(address);
+}

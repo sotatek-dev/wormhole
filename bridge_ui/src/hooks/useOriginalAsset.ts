@@ -61,10 +61,10 @@ export async function getOriginalAssetToken(
       );
     } else if (foreignChain === CHAIN_ID_KLAYTN_BAOBAB && provider) {
       promise = await getOriginalAssetKlaytn(
+        getTokenBridgeAddressForChain(foreignChain),
+        provider,
         foreignNativeStringAddress,
         foreignChain,
-        provider,
-        getTokenBridgeAddressForChain(foreignChain),
       );
     } else if (foreignChain === CHAIN_ID_SOLANA) {
       const connection = new Connection(SOLANA_HOST, "confirmed");
