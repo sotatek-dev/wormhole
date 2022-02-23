@@ -33,6 +33,7 @@ import { ExpandMore } from "@material-ui/icons";
 import { Alert } from "@material-ui/lab";
 import { Connection } from "@solana/web3.js";
 import { LCDClient } from "@terra-money/terra.js";
+import { DeprecatedKlayRPC } from "caver-js";
 import { ethers } from "ethers";
 import { useSnackbar } from "notistack";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -75,7 +76,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 async function klaytn(
-  provider: any,
+  provider: DeprecatedKlayRPC,
   tx: string,
   enqueueSnackbar: any,
   chainId: ChainId,
@@ -84,7 +85,7 @@ async function klaytn(
   try {
     const receipt = await provider.getTransactionReceipt(tx);
     const sequence = parseSequenceFromLogEth(
-      receipt,
+      receipt as any,
       getBridgeAddressForChain(chainId)
     );
     const emitterAddress = getEmitterAddressEth(

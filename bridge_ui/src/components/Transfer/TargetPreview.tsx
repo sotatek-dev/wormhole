@@ -37,7 +37,7 @@ export default function TargetPreview() {
         ) : null}
         <span>to</span>
         <SmartAddress chainId={targetChain} address={readableTargetAddress} />
-        <span>on {CHAINS_BY_ID[targetChain].name}</span>
+        <span>on {CHAINS_BY_ID[targetChain]?.name}</span>
       </>
     ) : (
       ""
