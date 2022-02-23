@@ -606,6 +606,8 @@ function useGetAvailableTokens(nft: boolean = false) {
   );
   const currentSourceWalletAddress: string | undefined = isEVMChain(lookupChain)
     ? signerAddress
+    : lookupChain === CHAIN_ID_KLAYTN_BAOBAB
+    ? signerAddressKaikas
     : lookupChain === CHAIN_ID_SOLANA
     ? solPK?.toString()
     : undefined;
