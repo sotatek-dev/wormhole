@@ -107,10 +107,12 @@ function SecondaryAssetInformation({
   chainId,
   foreignAssetInfo,
   originAssetInfo,
+  primaryLookupChain
 }: {
   chainId: ChainId;
   foreignAssetInfo?: ForeignAssetInfo;
   originAssetInfo?: OriginalAssetInfo;
+  primaryLookupChain: ChainId
 }) {
   const classes = useStyles();
   const tokenArray: string[] = useMemo(() => {
@@ -145,7 +147,7 @@ function SecondaryAssetInformation({
   ) : !foreignAssetInfo ? null : foreignAssetInfo.doesExist === false ? (
     <div>
       <Typography>{`This token has not yet been registered on ${CHAINS_BY_ID[chainId].name}`}</Typography>
-      {chainId !== CHAIN_ID_KLAYTN_BAOBAB ?
+      {primaryLookupChain !== CHAIN_ID_KLAYTN_BAOBAB ?
         <RegisterNowButtonCore
           originChain={originAssetInfo?.originChain || undefined}
           originAsset={
@@ -362,6 +364,7 @@ export default function TokenOriginVerifier() {
             foreignAssetInfo={foreignAssetInfo.data || undefined}
             originAssetInfo={originInfo.data || undefined}
             chainId={secondaryLookupChain}
+            primaryLookupChain={primaryLookupChain}
           />
         ) : null}
       </div>
