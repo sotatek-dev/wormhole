@@ -147,9 +147,9 @@ function Send() {
         complete the transfer.
       </Alert>
       {sourceChain === CHAIN_ID_SOLANA && <SolanaTPSWarning />}
-      {approveButtonNeeded ? (
+      { approveButtonNeeded ? (
         <>
-          <FormControlLabel
+          {!isAllowanceFetching && <FormControlLabel
             control={
               <Checkbox
                 checked={shouldApproveUnlimited}
@@ -158,7 +158,7 @@ function Send() {
               />
             }
             label="Approve Unlimited Tokens"
-          />
+          />}
           <ButtonWithLoader
             disabled={isDisabled}
             onClick={

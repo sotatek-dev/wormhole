@@ -25,14 +25,12 @@ export default function useAllowance(
   const [allowance, setAllowance] = useState<BigInt | null>(null);
   const [isAllowanceFetching, setIsAllowanceFetching] = useState(false);
   const isApproveProcessing = useSelector(selectTransferIsApproving);
-  const { signer } = useEthereumProvider();
+  const { signer, chainId: realTimeChain } = useEthereumProvider();
   const { provider: providerKaikas, signerAddress: signerAddressKaikas } = useKaikasProvider();
   const sufficientAllowance =
     !(isEVMChain(chainId) || chainId === CHAIN_ID_KLAYTN_BAOBAB) ||
     sourceIsNative ||
     (allowance && transferAmount && allowance >= transferAmount);
-  
-  console.log({sufficientAllowance});
 
   useEffect(() => {
     let cancelled = false;
@@ -84,6 +82,7 @@ export default function useAllowance(
     };
   }, [
     chainId,
+    realTimeChain, // re-render when switch chain on metamask
     tokenAddress,
     signer,
     isApproveProcessing,
