@@ -227,7 +227,7 @@ export function useHandleCreateWrapped(shouldUpdate: boolean) {
   const terraFeeDenom = useSelector(selectTerraFeeDenom);
   const handleCreateClick = useCallback(() => {
     console.log({ signedVAA, providerKaikas });
-    
+
     if (targetChain === CHAIN_ID_KLAYTN_BAOBAB && !!signedVAA) {
       console.log('xxx');
       console.log('signerAddress baobab: ', signerAddress);

@@ -32,10 +32,7 @@ export default function AddToKaikas() {
     if (providerKaikas && targetAsset && signerAddressKaikas && hasCorrectEvmNetwork) {
       (async () => {
         try {
-            
             const result = await klaytnTokenToParsedTokenAccount(targetAsset, providerKaikas, signerAddressKaikas);
-            console.log(result);
-            
             const {decimals, symbol, address} = result;
             const {klaytn} = window;
             klaytn.sendAsync(

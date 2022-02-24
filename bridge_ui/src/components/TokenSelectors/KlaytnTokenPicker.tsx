@@ -89,7 +89,6 @@ export default function KlaytnTokenPicker(
           const tokenAccount = await (nft
             ? getKlaytnNFT(address, providerKaikas)
             : getKlaytnToken(address, providerKaikas));
-          console.log({tokenAccount});
           if (!tokenAccount) {
             return Promise.reject("Could not find the specified token.");
           }
