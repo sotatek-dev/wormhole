@@ -161,7 +161,7 @@ const (
 	// ChainIDAlgorand is the ChainID of Algorand
 	ChainIDAlgorand ChainID = 8
 	// ChainIDKlaytn is the ChainID of Klaytn
-	ChainIDKlaytn ChainID = 9
+	ChainIDKlaytn ChainID = 19
 	// ChainIDFantom is the ChainID of Fantom
 	ChainIDFantom ChainID = 10
 

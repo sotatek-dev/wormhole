@@ -85,5 +85,5 @@ func MessageEventsForTransaction(
 
 		msgs = append(msgs, message)
 	}
-	return receipt.Logs[0].BlockNumber, msgs, nil
+	return block.NumberU64(), msgs, nil
 }
