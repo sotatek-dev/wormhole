@@ -25,26 +25,26 @@ func MessageEventsForTransaction(
 	c *klayClient.Client,
 	contract klay_common.Address,
 	chainId vaa.ChainID,
-	tx klay_common.Hash) ([]*common.MessagePublication, error) {
+	tx klay_common.Hash) (uint64, []*common.MessagePublication, error) {
 
 	f, err := kabi.NewKabiFilterer(contract, c)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create ABI filterer: %w", err)
+		return 0, nil, fmt.Errorf("failed to create ABI filterer: %w", err)
 	}
 
 	// Get transactions logs from transaction
 	receipt, err := c.TransactionReceipt(ctx, tx)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get transaction receipt: %w", err)
+		return 0, nil, fmt.Errorf("failed to get transaction receipt: %w", err)
 	}
 
 	//Get block
 	if len(receipt.Logs) == 0 {
-		return nil, fmt.Errorf("receipt contain no log: %w", err)
+		return 0, nil, fmt.Errorf("receipt contain no log: %w", err)
 	}
 	block, err := c.BlockByHash(ctx, receipt.Logs[0].BlockHash)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get block: %w", err)
+		return 0, nil, fmt.Errorf("failed to get block: %w", err)
 	}
 
 	msgs := make([]*common.MessagePublication, 0, len(receipt.Logs))
@@ -66,7 +66,7 @@ func MessageEventsForTransaction(
 
 		ev, err := f.ParseLogMessagePublished(*l)
 		if err != nil {
-			return nil, fmt.Errorf("failed to parse log: %w", err)
+			return 0, nil, fmt.Errorf("failed to parse log: %w", err)
 		}
 		hash, err := KlayHashToEthHash(ev.Raw.TxHash)
 		if err != nil {
@@ -85,5 +85,5 @@ func MessageEventsForTransaction(
 
 		msgs = append(msgs, message)
 	}
-	return msgs, nil
+	return receipt.Logs[0].BlockNumber, msgs, nil
 }

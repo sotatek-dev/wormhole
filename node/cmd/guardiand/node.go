@@ -40,6 +40,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/certusone/wormhole/node/pkg/algorand"
+
 	ipfslog "github.com/ipfs/go-log/v2"
 )
 
@@ -282,7 +283,6 @@ func runNode(cmd *cobra.Command, args []string) {
 	readiness.RegisterComponent(common.ReadinessAvalancheSyncing)
 	readiness.RegisterComponent(common.ReadinessOasisSyncing)
 	if *testnetMode {
-		readiness.RegisterComponent(common.ReadinessKlaytnSyncing)
 		readiness.RegisterComponent(common.ReadinessEthRopstenSyncing)
 	}
 
@@ -374,24 +374,12 @@ func runNode(cmd *cobra.Command, args []string) {
 		if *ethRopstenContract == "" {
 			logger.Fatal("Please specify --ethRopstenContract")
 		}
-		if *klaytnContract == "" {
-			logger.Fatal("Please specify --klaytnContract")
-		}
-		if *klaytnRPC == "" {
-			logger.Fatal("Please specify --klaytnRPC")
-		}
 	} else {
 		if *ethRopstenRPC != "" {
 			logger.Fatal("Please do not specify --ethRopstenRPC in non-testnet mode")
 		}
 		if *ethRopstenContract != "" {
 			logger.Fatal("Please do not specify --ethRopstenContract in non-testnet mode")
-		}
-		if *klaytnContract != "" {
-			logger.Fatal("Please do not specify --klaytnContract")
-		}
-		if *klaytnRPC != "" {
-			logger.Fatal("Please do not specify --klaytnRPC")
 		}
 	}
 	if *nodeName == "" {
@@ -674,7 +662,7 @@ func runNode(cmd *cobra.Command, args []string) {
 		}
 
 		if err := supervisor.Run(ctx, "ethwatch",
-			ethereum.NewEthWatcher(*ethRPC, ethContractAddr, "goerli", common.ReadinessEthSyncing, vaa.ChainIDEthereum, lockC, setC, 1, chainObsvReqC[vaa.ChainIDEthereum]).Run); err != nil {
+			ethereum.NewEthWatcher(*ethRPC, ethContractAddr, "eth", common.ReadinessEthSyncing, vaa.ChainIDEthereum, lockC, setC, 1, chainObsvReqC[vaa.ChainIDEthereum]).Run); err != nil {
 			return err
 		}
 

@@ -163,7 +163,7 @@ func (e *Watcher) Run(ctx context.Context) error {
 				}
 
 				timeout, cancel := context.WithTimeout(ctx, 5*time.Second)
-				msgs, err := MessageEventsForTransaction(timeout, c, e.contract, e.chainID, tx)
+				blockNumber, msgs, err := MessageEventsForTransaction(timeout, c, e.contract, e.chainID, tx)
 				cancel()
 
 				if err != nil {
@@ -178,7 +178,7 @@ func (e *Watcher) Run(ctx context.Context) error {
 						zap.Stringer("emitter_address", msg.EmitterAddress),
 						zap.Uint64("sequence", msg.Sequence),
 						zap.Uint64("current_block", blockNumberU),
-						zap.Uint64("observed_block", 0),
+						zap.Uint64("observed_block", blockNumber),
 						zap.String("eth_network", e.networkName),
 					)
 					e.msgChan <- msg
