@@ -145,19 +145,13 @@ func (e *Watcher) Run(ctx context.Context) error {
 
 				tx := klay_common.BytesToHash(r.TxHash)
 				logger.Info("received observation request",
-					zap.String("eth_network", e.networkName),
+					zap.String("klaytn_network", e.networkName),
 					zap.String("tx_hash", tx.Hex()))
 
-				// SECURITY: Load the block number before requesting the transaction to avoid a
-				// race condition where requesting the tx succeeds and is then dropped due to a fork,
-				// but blockNumberU had already advanced beyond the required threshold.
-				//
-				// In the primary watcher flow, this is of no concern since we assume the node
-				// always sends the head before it sends the logs (implicit synchronization
-				// by relying on the same websocket connection).
 				blockNumberU := atomic.LoadUint64(&currentBlockNumber)
+				logger.Info("Block", zap.Uint64("number", blockNumberU))
 				if blockNumberU == 0 {
-					logger.Error("no block number available, ignoring observation request",
+					logger.Info("no block number available, ignoring observation request",
 						zap.String("kalytn_network", e.networkName))
 					continue
 				}
@@ -167,8 +161,8 @@ func (e *Watcher) Run(ctx context.Context) error {
 				cancel()
 
 				if err != nil {
-					logger.Error("failed to process observation request",
-						zap.Error(err), zap.String("eth_network", e.networkName))
+					logger.Info("failed to process observation request",
+						zap.Error(err), zap.String("klaytn_network", e.networkName))
 					continue
 				}
 
@@ -179,7 +173,7 @@ func (e *Watcher) Run(ctx context.Context) error {
 						zap.Uint64("sequence", msg.Sequence),
 						zap.Uint64("current_block", blockNumberU),
 						zap.Uint64("observed_block", blockNumber),
-						zap.String("eth_network", e.networkName),
+						zap.String("klaytn_network", e.networkName),
 					)
 					e.msgChan <- msg
 				}
@@ -212,7 +206,6 @@ func (e *Watcher) Run(ctx context.Context) error {
 					errC <- fmt.Errorf("failed to request timestamp for block %d: %w", ev.Raw.BlockNumber, err)
 					return
 				}
-				logger.Info("Hashhhhhhhhhhhhhh", zap.String("Klaytn", ev.Raw.TxHash.String()))
 				hash, err := KlayHashToEthHash(ev.Raw.TxHash)
 				if err != nil {
 					logger.Info("Conversion from klay hash to eth hash failed", zap.Error(err))
@@ -257,7 +250,7 @@ func (e *Watcher) Run(ctx context.Context) error {
 				p2p.DefaultRegistry.AddErrorCount(e.chainID, 1)
 				return
 			case ev := <-headSink:
-				//start := time.Now()
+				start := time.Now()
 				blockNumberU := ev.Number.Uint64()
 				atomic.StoreUint64(&currentBlockNumber, blockNumberU)
 				currentHash := ev.Hash()
@@ -271,11 +264,11 @@ func (e *Watcher) Run(ctx context.Context) error {
 					Height:          ev.Number.Int64(),
 					ContractAddress: e.contract.Hex(),
 				})
-				//logger.Info("processed new header",
-				//	zap.Stringer("current_block", ev.Number),
-				//	zap.Stringer("current_blockhash", currentHash),
-				//	zap.Duration("took", time.Since(start)),
-				//	zap.String("klay_network", e.networkName))
+				logger.Info("processed new header",
+					zap.Stringer("current_block", ev.Number),
+					zap.Stringer("current_blockhash", currentHash),
+					zap.Duration("took", time.Since(start)),
+					zap.String("klay_network", e.networkName))
 			}
 		}
 	}()
