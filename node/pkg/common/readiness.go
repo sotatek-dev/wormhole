@@ -12,4 +12,5 @@ const (
 	ReadinessEthRopstenSyncing readiness.Component = "ethRopstenSyncing"
 	ReadinessAvalancheSyncing  readiness.Component = "avalancheSyncing"
 	ReadinessOasisSyncing      readiness.Component = "oasisSyncing"
+	ReadinessKlaytnSyncing     readiness.Component = "klaytnSyncing"
 )

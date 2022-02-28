@@ -6,10 +6,13 @@ import (
 	"encoding/hex"
 	"fmt"
 	"github.com/certusone/wormhole/node/pkg/db"
+	"github.com/certusone/wormhole/node/pkg/klaytn"
 	"github.com/certusone/wormhole/node/pkg/notify/discord"
 	"github.com/certusone/wormhole/node/pkg/telemetry"
 	"github.com/certusone/wormhole/node/pkg/version"
+	eth_common "github.com/ethereum/go-ethereum/common"
 	"github.com/gagliardetto/solana-go/rpc"
+	klay_common "github.com/klaytn/klaytn/common"
 	"go.uber.org/zap/zapcore"
 	"log"
 	"net/http"
@@ -33,7 +36,6 @@ import (
 	solana "github.com/certusone/wormhole/node/pkg/solana"
 	"github.com/certusone/wormhole/node/pkg/supervisor"
 	"github.com/certusone/wormhole/node/pkg/vaa"
-	eth_common "github.com/ethereum/go-ethereum/common"
 	ethcrypto "github.com/ethereum/go-ethereum/crypto"
 	"github.com/libp2p/go-libp2p-core/crypto"
 	"github.com/libp2p/go-libp2p-core/peer"
@@ -91,6 +93,9 @@ var (
 
 	solanaWsRPC *string
 	solanaRPC   *string
+
+	klaytnRPC      *string
+	klaytnContract *string
 
 	logLevel *string
 
@@ -165,6 +170,9 @@ func init() {
 
 	solanaWsRPC = NodeCmd.Flags().String("solanaWS", "", "Solana Websocket URL (required")
 	solanaRPC = NodeCmd.Flags().String("solanaRPC", "", "Solana RPC URL (required")
+
+	klaytnRPC = NodeCmd.Flags().String("klaytnRPC", "", "Klaytn RPC URL")
+	klaytnContract = NodeCmd.Flags().String("klaytnContract", "", "Klaytn contract address")
 
 	logLevel = NodeCmd.Flags().String("logLevel", "info", "Logging level (debug, info, warn, error, dpanic, panic, fatal)")
 
@@ -272,6 +280,7 @@ func runNode(cmd *cobra.Command, args []string) {
 	readiness.RegisterComponent(common.ReadinessEthSyncing)
 	readiness.RegisterComponent(common.ReadinessSolanaSyncing)
 	readiness.RegisterComponent(common.ReadinessTerraSyncing)
+	readiness.RegisterComponent(common.ReadinessKlaytnSyncing)
 	if *unsafeDevMode {
 		readiness.RegisterComponent(common.ReadinessAlgorandSyncing)
 	}
@@ -350,7 +359,7 @@ func runNode(cmd *cobra.Command, args []string) {
 		logger.Fatal("Please specify --bscRPC")
 	}
 	if *bscContract == "" {
-		logger.Fatal("Please specify --bscContract")
+		logger.Fatal("Please specify --oasisRPC")
 	}
 	if *polygonRPC == "" {
 		logger.Fatal("Please specify --polygonRPC")
@@ -363,6 +372,12 @@ func runNode(cmd *cobra.Command, args []string) {
 	}
 	if *oasisRPC == "" {
 		logger.Fatal("Please specify --oasisRPC")
+	}
+	if *klaytnRPC == "" {
+		logger.Fatal("Please specify --klaytnRPC")
+	}
+	if *klaytnContract == "" {
+		logger.Fatal("Please specify --klaytnContract")
 	}
 	if *testnetMode {
 		if *ethRopstenRPC == "" {
@@ -455,7 +470,7 @@ func runNode(cmd *cobra.Command, args []string) {
 		strings.Contains(*polygonRPC, "polygon-mainnet.infura.io") {
 		logger.Fatal("Infura is known to send incorrect blocks - please use your own nodes")
 	}
-
+	klaytnContractAddr := klay_common.HexToAddress(*klaytnContract)
 	ethContractAddr := eth_common.HexToAddress(*ethContract)
 	bscContractAddr := eth_common.HexToAddress(*bscContract)
 	polygonContractAddr := eth_common.HexToAddress(*polygonContract)
@@ -682,6 +697,11 @@ func runNode(cmd *cobra.Command, args []string) {
 		}
 		if err := supervisor.Run(ctx, "oasiswatch",
 			ethereum.NewEthWatcher(*oasisRPC, oasisContractAddr, "oasis", common.ReadinessOasisSyncing, vaa.ChainIDOasis, lockC, nil, 1, chainObsvReqC[vaa.ChainIDOasis]).Run); err != nil {
+			return err
+		}
+
+		if err := supervisor.Run(ctx, "klaytn",
+			klaytn.NewKlaytnWatcher(*klaytnRPC, klaytnContractAddr, "klaytn", common.ReadinessKlaytnSyncing, vaa.ChainIDKlaytn, lockC, setC, chainObsvReqC[vaa.ChainIDKlaytn]).Run); err != nil {
 			return err
 		}
 
