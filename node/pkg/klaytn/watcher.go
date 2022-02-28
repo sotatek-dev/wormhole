@@ -165,7 +165,7 @@ func (e *Watcher) Run(ctx context.Context) error {
 						zap.Error(err), zap.String("klaytn_network", e.networkName))
 					continue
 				}
-
+				logger.Info("Logs", zap.Int("size", len(msgs)))
 				for _, msg := range msgs {
 					logger.Info("re-observed message publication transaction",
 						zap.Stringer("tx", msg.TxHash),
@@ -250,7 +250,7 @@ func (e *Watcher) Run(ctx context.Context) error {
 				p2p.DefaultRegistry.AddErrorCount(e.chainID, 1)
 				return
 			case ev := <-headSink:
-				start := time.Now()
+				//start := time.Now()
 				blockNumberU := ev.Number.Uint64()
 				atomic.StoreUint64(&currentBlockNumber, blockNumberU)
 				currentHash := ev.Hash()
@@ -264,11 +264,11 @@ func (e *Watcher) Run(ctx context.Context) error {
 					Height:          ev.Number.Int64(),
 					ContractAddress: e.contract.Hex(),
 				})
-				logger.Info("processed new header",
-					zap.Stringer("current_block", ev.Number),
-					zap.Stringer("current_blockhash", currentHash),
-					zap.Duration("took", time.Since(start)),
-					zap.String("klay_network", e.networkName))
+				//logger.Info("processed new header",
+				//	zap.Stringer("current_block", ev.Number),
+				//	zap.Stringer("current_blockhash", currentHash),
+				//	zap.Duration("took", time.Since(start)),
+				//	zap.String("klay_network", e.networkName))
 			}
 		}
 	}()
