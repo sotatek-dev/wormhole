@@ -145,7 +145,7 @@ func (e *Watcher) Run(ctx context.Context) error {
 
 				tx := klay_common.BytesToHash(r.TxHash)
 				logger.Info("received observation request",
-					zap.String("eth_network", e.networkName),
+					zap.String("klaytn_network", e.networkName),
 					zap.String("tx_hash", tx.Hex()))
 
 				blockNumberU := atomic.LoadUint64(&currentBlockNumber)
@@ -161,7 +161,7 @@ func (e *Watcher) Run(ctx context.Context) error {
 
 				if err != nil {
 					logger.Error("failed to process observation request",
-						zap.Error(err), zap.String("eth_network", e.networkName))
+						zap.Error(err), zap.String("klaytn_network", e.networkName))
 					continue
 				}
 
@@ -172,7 +172,7 @@ func (e *Watcher) Run(ctx context.Context) error {
 						zap.Uint64("sequence", msg.Sequence),
 						zap.Uint64("current_block", blockNumberU),
 						zap.Uint64("observed_block", blockNumber),
-						zap.String("eth_network", e.networkName),
+						zap.String("klaytn_network", e.networkName),
 					)
 					e.msgChan <- msg
 				}
