@@ -132,6 +132,18 @@ module.exports = {
       gas: 70000000,
       gasPrice: 8000000000,
     },
+    fantom: {
+      provider: () => {
+        return new HDWalletProvider(
+          process.env.MNEMONIC,
+          "https://rpc.ftm.tools/"
+        )
+      },
+      network_id: 250,
+      gas: 8000000,
+      gasPrice: 3000000000000,
+      timeoutBlocks: 15000,
+    },
     fantom_testnet: {
       provider: () => {
         return new HDWalletProvider(
@@ -142,6 +154,30 @@ module.exports = {
       network_id: 0xfa2,
       gas: 4465030,
       gasPrice: 300000000000,
+    },
+    karura_testnet: {
+      provider: () => {
+        return new HDWalletProvider(
+          process.env.MNEMONIC,
+          "http://103.253.145.222:8545"
+        );
+      },
+      network_id: 686,
+      gasPrice: 202184721385,
+      gasLimit: 117096000,
+      gas: 117096000,
+    },
+    acala_testnet: {
+      provider: () => {
+        return new HDWalletProvider(
+          process.env.MNEMONIC,
+          "http://157.245.252.103:8545"
+        );
+      },
+      network_id: 787,
+      gasPrice: 202184721385,
+      gasLimit: 213192000,
+      gas: 213192000,
     },
   },
 

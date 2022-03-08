@@ -38,6 +38,10 @@ func MessageEventsForTransaction(
 		return 0, nil, fmt.Errorf("failed to get transaction receipt: %w", err)
 	}
 
+	if receipt.Status != 1 {
+		return 0, nil, fmt.Errorf("non-success transaction status: %d", receipt.Status)
+	}
+
 	//Get block
 	if len(receipt.Logs) == 0 {
 		return 0, nil, fmt.Errorf("receipt contain no log: %w", err)
